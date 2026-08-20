@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import LandingPage from "../pages/LandingPage";
 import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Rigester";
+import Register from "../pages/auth/Register";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 
@@ -17,7 +17,7 @@ import Laboratory from "../pages/admin/Laboratory";
 import Billing from "../pages/admin/Billing";
 
 import PatientDashboard from "../pages/patient/PatientDashboard";
-import AddDoctor from "../components/admin/AddDoctor";
+import AddDoctor from "../components/admin/addDoctor";
 
 function AppRoutes() {
   return (
