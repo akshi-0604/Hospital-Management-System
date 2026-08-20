@@ -74,7 +74,7 @@ function Doctors() {
             setLoading(true);
 
             const response = await axios.get(
-                "http://localhost:5000/api/doctors"
+                "http://https://hospital-management-system-nvjt.onrender.com/api/doctors"
             );
 
             console.log("Doctors API response:", response.data);
@@ -432,8 +432,9 @@ function Doctors() {
             setSavingDoctor(true);
 
             const response = await axios.post(
-                "http://localhost:5000/api/doctors",
+                "http://https://hospital-management-system-nvjt.onrender.com/api/doctors",
                 {
+
                     ...doctorForm,
                     experience: Number(
                         doctorForm.experience
@@ -581,7 +582,7 @@ function Doctors() {
             }
 
             const response = await axios.put(
-                `http://localhost:5000/api/doctors/${editingDoctor._id}`,
+                `http://https://hospital-management-system-nvjt.onrender.com/api/doctors/${editingDoctor._id}`,
                 updateData
             );
 
@@ -641,7 +642,7 @@ function Doctors() {
             setDeleting(true);
 
             await axios.delete(
-                `http://localhost:5000/api/doctors/${deletingDoctor._id}`
+                `http://https://hospital-management-system-nvjt.onrender.com/api/doctors/${deletingDoctor._id}`
             );
 
             await fetchDoctors();

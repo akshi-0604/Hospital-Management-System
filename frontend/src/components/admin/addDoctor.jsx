@@ -49,7 +49,7 @@ function AddDoctor({ onDoctorAdded, onCancel }) {
             setLoading(true);
 
             const response = await axios.post(
-                "http://localhost:5000/api/doctors",
+                "http://https://hospital-management-system-nvjt.onrender.com/api/doctors",
                 formData
             );
 

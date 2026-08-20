@@ -19,7 +19,7 @@ function Patients() {
       setError("");
 
       const response = await axios.get(
-        "http://localhost:5000/api/patients"
+        "http://https://hospital-management-system-nvjt.onrender.com/api/patients"
       );
 
       setPatients(
