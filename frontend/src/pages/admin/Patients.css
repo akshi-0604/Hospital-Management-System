@@ -1,0 +1,135 @@
+.patients-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+
+.patients-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+
+.patients-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 25px;
+}
+
+
+.patients-header p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+
+.patient-count {
+  padding: 10px 15px;
+  border-radius: 8px;
+  background: #ccfbf1;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+.patients-card {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+
+.patients-table {
+  width: 100%;
+}
+
+
+.patients-table-header,
+.patients-table-row {
+  display: grid;
+  grid-template-columns:
+    1.3fr
+    1.8fr
+    1.2fr
+    1fr;
+
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 16px 20px;
+}
+
+
+.patients-table-header {
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+
+  color: #6b7280;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.patients-table-row {
+  border-bottom: 1px solid #f1f5f9;
+
+  color: #374151;
+
+  font-size: 14px;
+}
+
+
+.patients-table-row:last-child {
+  border-bottom: none;
+}
+
+
+.patients-message {
+  padding: 50px 20px;
+
+  color: #6b7280;
+
+  text-align: center;
+
+  font-size: 14px;
+}
+
+
+.patients-error {
+  padding: 20px;
+
+  color: #dc2626;
+
+  text-align: center;
+
+  font-size: 14px;
+}
+
+
+@media (max-width: 800px) {
+
+  .patients-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+
+  .patients-table {
+    overflow-x: auto;
+  }
+
+
+  .patients-table-header,
+  .patients-table-row {
+    min-width: 750px;
+  }
+
+}

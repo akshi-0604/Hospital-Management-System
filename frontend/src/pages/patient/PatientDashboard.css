@@ -1,0 +1,40 @@
+.patient-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.patient-dashboard-header {
+  margin-bottom: 25px;
+}
+
+.patient-dashboard-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 26px;
+}
+
+.patient-dashboard-header p {
+  margin: 7px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.patient-dashboard-card {
+  padding: 25px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.patient-dashboard-card h3 {
+  margin: 0 0 10px;
+  color: #1f2937;
+  font-size: 19px;
+}
+
+.patient-dashboard-card p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.7;
+  font-size: 14px;
+}

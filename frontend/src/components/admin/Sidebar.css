@@ -1,0 +1,279 @@
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 250px;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #0f766e;
+
+  z-index: 1000;
+
+  box-shadow: 4px 0 15px rgba(15, 118, 110, 0.12);
+}
+
+
+/* Hospital branding */
+
+.sidebar-brand {
+  height: 75px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 20px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-right: 10px;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #0f766e;
+
+  font-size: 27px;
+  font-weight: 700;
+}
+
+
+.sidebar-brand-text h2 {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: 19px;
+}
+
+
+.sidebar-brand-text span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: rgba(255, 255, 255, 0.7);
+
+  font-size: 10px;
+}
+
+
+/* Navigation */
+
+.sidebar-navigation {
+  flex: 1;
+
+  padding: 25px 15px;
+
+  overflow-y: auto;
+}
+
+
+.navigation-title {
+  margin: 0 10px 12px;
+
+  color: rgba(255, 255, 255, 0.55);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+
+.second-title {
+  margin-top: 25px;
+}
+
+
+/* Navigation links */
+
+.sidebar-link {
+  width: 100%;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 11px 12px;
+
+  margin-bottom: 5px;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+
+  color: #ffffff;
+}
+
+
+.sidebar-link.active {
+  background: #ffffff;
+
+  color: #0f766e;
+
+  font-weight: 600;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+
+.sidebar-link-icon {
+  width: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: inherit;
+
+  font-size: 16px;
+}
+
+
+/* Bottom section */
+
+.sidebar-bottom {
+  padding: 15px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+.logout-button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 11px 12px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+
+  color: #ffffff;
+}
+
+
+/* Sidebar scrollbar */
+
+.sidebar-navigation::-webkit-scrollbar {
+  width: 5px;
+}
+
+
+.sidebar-navigation::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+
+  border-radius: 10px;
+}
+
+
+/* Responsive */
+
+@media (max-width: 800px) {
+
+  .admin-sidebar {
+    width: 220px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+
+    position: relative;
+
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+
+  .sidebar-navigation {
+    max-height: 400px;
+  }
+
+}
+.sidebar-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 20px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+}
+
+.sidebar-logout:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-icon {
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+}
