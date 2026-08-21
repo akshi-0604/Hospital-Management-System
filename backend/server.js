@@ -17,6 +17,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://hospital-management-system-five-theta.vercel.app",
+      "https://hospital-management-system-aajinsz6r-akshitha-1747s-projects.vercel.app",
     ],
     methods: [
       "GET",

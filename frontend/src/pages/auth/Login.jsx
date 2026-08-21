@@ -27,7 +27,7 @@ function Login() {
       setLoading(true);
 
       const response = await axios.post(
-        "http://https://hospital-management-system-nvjt.onrender.com/api/auth/login",
+        "https://hospital-management-system-nvjt.onrender.com/api/auth/login",
         {
           email,
           password,
