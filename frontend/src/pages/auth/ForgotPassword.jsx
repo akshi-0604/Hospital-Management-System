@@ -32,15 +32,16 @@ function ForgotPassword() {
 
       setMessage(response.data.message);
     } catch (error) {
+      console.error("Forgot password error:", error);
+
       setError(
         error.response?.data?.message ||
-          "Something went wrong. Please try again."
+        "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
     }
   }
-
   return (
     <div className="forgot-password-page">
       <div className="forgot-password-card">
