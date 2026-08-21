@@ -17,7 +17,7 @@ import Laboratory from "../pages/admin/Laboratory";
 import Billing from "../pages/admin/Billing";
 
 import PatientDashboard from "../pages/patient/PatientDashboard";
-import AddDoctor from "../components/admin/addDoctor";
+import AddDoctor from "../components/admin/AddDoctor";
 
 function AppRoutes() {
   return (
