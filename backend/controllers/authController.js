@@ -6,7 +6,9 @@ const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 
 
-// Register User
+// ======================================================
+// REGISTER USER
+// ======================================================
 
 async function registerUser(req, res) {
   try {
@@ -24,8 +26,10 @@ async function registerUser(req, res) {
       });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     const existingUser = await User.findOne({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
     });
 
     if (existingUser) {
@@ -41,7 +45,7 @@ async function registerUser(req, res) {
 
     const newUser = new User({
       fullName,
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       phone,
       password: hashedPassword,
       role: role || "patient",
@@ -49,20 +53,24 @@ async function registerUser(req, res) {
 
     await newUser.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Registration successful",
     });
+
   } catch (error) {
     console.error("Registration error:", error);
 
-    res.status(500).json({
-      message: "Something went wrong during registration",
+    return res.status(500).json({
+      message:
+        "Something went wrong during registration",
     });
   }
 }
 
-// Login User
 
+// ======================================================
+// LOGIN USER
+// ======================================================
 
 async function loginUser(req, res) {
   try {
@@ -73,17 +81,21 @@ async function loginUser(req, res) {
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "Please enter your email and password",
+        message:
+          "Please enter your email and password",
       });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     const user = await User.findOne({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
     });
 
     if (!user) {
       return res.status(404).json({
-        message: "No account found with this email address",
+        message:
+          "No account found with this email address",
       });
     }
 
@@ -109,7 +121,7 @@ async function loginUser(req, res) {
       }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
 
       token,
@@ -122,16 +134,21 @@ async function loginUser(req, res) {
         role: user.role,
       },
     });
+
   } catch (error) {
     console.error("Login error:", error);
 
-    res.status(500).json({
-      message: "Something went wrong while logging in",
+    return res.status(500).json({
+      message:
+        "Something went wrong while logging in",
     });
   }
 }
 
-// Forgot Password
+
+// ======================================================
+// FORGOT PASSWORD
+// ======================================================
 
 async function forgotPassword(req, res) {
   try {
@@ -139,34 +156,54 @@ async function forgotPassword(req, res) {
 
     if (!email) {
       return res.status(400).json({
-        message: "Please enter your email address",
+        message:
+          "Please enter your email address",
       });
     }
 
+    const normalizedEmail =
+      email.trim().toLowerCase();
+
     const user = await User.findOne({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
     });
 
     if (!user) {
       return res.status(404).json({
-        message: "No account found with this email address",
+        message:
+          "No account found with this email address",
       });
     }
 
+    // Generate secure reset token
     const resetToken = crypto
       .randomBytes(32)
       .toString("hex");
 
+    // Save token
     user.resetPasswordToken = resetToken;
 
+    // Token expires after 15 minutes
     user.resetPasswordExpires =
       Date.now() + 15 * 60 * 1000;
 
     await user.save();
 
-    const resetLink =
-      `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    // IMPORTANT:
+    // This must be your deployed Vercel URL.
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      "https://hospital-management-system-five-theta.vercel.app";
 
+    const resetLink =
+      `${frontendUrl}/reset-password/${resetToken}`;
+
+    console.log(
+      "Generated reset link:",
+      resetLink
+    );
+
+    // Send through Brevo
     await sendEmail({
       to: user.email,
 
@@ -181,7 +218,7 @@ Click the link below to create a new password:
 
 ${resetLink}
 
-This link will expire in 15 minutes.
+This password reset link will expire in 15 minutes.
 
 If you did not request a password reset, you can safely ignore this email.
 
@@ -189,35 +226,44 @@ Regards,
 Hospital Management System`,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message:
         "Password reset link has been sent to your email",
     });
+
   } catch (error) {
     console.error(
       "Forgot password error:",
       error
     );
 
-    res.status(500).json({
+    return res.status(500).json({
       message:
-        "Something went wrong while sending the reset link",
+        "Unable to send password reset email. Please try again later.",
     });
   }
 }
 
 
-// Reset Password
-
+// ======================================================
+// RESET PASSWORD
+// ======================================================
 
 async function resetPassword(req, res) {
   try {
     const { token } = req.params;
     const { password } = req.body;
 
+    if (!token) {
+      return res.status(400).json({
+        message: "Reset token is required",
+      });
+    }
+
     if (!password) {
       return res.status(400).json({
-        message: "Please enter a new password",
+        message:
+          "Please enter a new password",
       });
     }
 
@@ -249,29 +295,32 @@ async function resetPassword(req, res) {
     user.password = hashedPassword;
 
     user.resetPasswordToken = null;
-
     user.resetPasswordExpires = null;
 
     await user.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       message:
         "Password has been reset successfully",
     });
+
   } catch (error) {
     console.error(
       "Reset password error:",
       error
     );
 
-    res.status(500).json({
+    return res.status(500).json({
       message:
         "Something went wrong while resetting the password",
     });
   }
 }
-// Export all authentication functions
 
+
+// ======================================================
+// EXPORT
+// ======================================================
 
 module.exports = {
   registerUser,

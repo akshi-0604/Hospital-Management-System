@@ -7,7 +7,6 @@ const {
   resetPassword,
 } = require("../controllers/authController");
 
-
 const router = express.Router();
 
 
@@ -25,14 +24,14 @@ router.post(
 );
 
 
-// Forgot password
+// Forgot Password
 router.post(
   "/forgot-password",
   forgotPassword
 );
 
 
-// Reset password
+// Reset Password
 router.post(
   "/reset-password/:token",
   resetPassword

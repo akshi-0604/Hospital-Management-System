@@ -15,7 +15,9 @@ function ForgotPassword() {
     setMessage("");
     setError("");
 
-    if (!email) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
       setError("Please enter your email address");
       return;
     }
@@ -26,16 +28,36 @@ function ForgotPassword() {
       const response = await axios.post(
         "https://hospital-management-system-nvjt.onrender.com/api/auth/forgot-password",
         {
-          email,
+          email: trimmedEmail,
         }
       );
 
-      setMessage(response.data.message);
-    } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
+      setMessage(
+        response.data?.message ||
+          "Password reset link has been sent to your email."
       );
+
+    } catch (error) {
+      console.error(
+        "Forgot password error:",
+        error
+      );
+
+      if (error.response) {
+        setError(
+          error.response.data?.message ||
+            `Server error (${error.response.status})`
+        );
+      } else if (error.request) {
+        setError(
+          "Unable to connect to the server. Please try again."
+        );
+      } else {
+        setError(
+          "Something went wrong. Please try again."
+        );
+      }
+
     } finally {
       setLoading(false);
     }
@@ -68,7 +90,11 @@ function ForgotPassword() {
               type="email"
               value={email}
               placeholder="Enter your email"
-              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              onChange={(event) =>
+                setEmail(event.target.value)
+              }
+              disabled={loading}
             />
           </div>
 
@@ -88,12 +114,17 @@ function ForgotPassword() {
             type="submit"
             disabled={loading}
           >
-            {loading ? "Sending..." : "Send Reset Link"}
+            {loading
+              ? "Sending..."
+              : "Send Reset Link"}
           </button>
 
         </form>
 
-        <Link to="/login" className="back-to-login">
+        <Link
+          to="/login"
+          className="back-to-login"
+        >
           ← Back to Login
         </Link>
 
