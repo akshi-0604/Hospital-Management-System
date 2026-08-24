@@ -116,7 +116,7 @@ function ResetPassword() {
       setLoading(true);
 
       const response = await axios.post(
-        `http://https://hospital-management-system-nvjt.onrender.com/api/auth/reset-password/${token}`,
+        `https://hospital-management-system-nvjt.onrender.com/api/auth/reset-password/${token}`,
         {
           password,
         }
@@ -131,7 +131,7 @@ function ResetPassword() {
     } catch (error) {
       setError(
         error.response?.data?.message ||
-          "Unable to reset your password"
+        "Unable to reset your password"
       );
 
     } finally {
