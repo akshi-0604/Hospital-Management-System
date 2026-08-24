@@ -642,7 +642,7 @@ function Doctors() {
             setDeleting(true);
 
             await axios.delete(
-                `http://https://hospital-management-system-nvjt.onrender.com/api/doctors/${deletingDoctor._id}`
+                `https://hospital-management-system-nvjt.onrender.com/api/doctors/${deletingDoctor._id}`
             );
 
             await fetchDoctors();

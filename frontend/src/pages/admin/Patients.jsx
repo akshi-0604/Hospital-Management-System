@@ -3,33 +3,23 @@ import axios from "axios";
 
 import "./Patients.css";
 
-
 function Patients() {
   const [patients, setPatients] = useState([]);
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
-
 
   async function loadPatients() {
     try {
       setLoading(true);
-
       setError("");
 
       const response = await axios.get(
-        "http://https://hospital-management-system-nvjt.onrender.com/api/patients"
+        "https://hospital-management-system-nvjt.onrender.com/api/patients"
       );
 
-      setPatients(
-        response.data.patients
-      );
+      setPatients(response.data.patients || []);
     } catch (error) {
-      console.error(
-        "Unable to load patients:",
-        error
-      );
+      console.error("Unable to load patients:", error);
 
       setError(
         error.response?.data?.message ||
@@ -40,22 +30,18 @@ function Patients() {
     }
   }
 
-
   useEffect(() => {
     loadPatients();
   }, []);
 
-
   return (
     <div className="patients-page">
-
       <div className="patients-header">
         <div>
           <h2>Patients</h2>
 
           <p>
-            Manage registered patient
-            information.
+            Manage registered patient information.
           </p>
         </div>
 
@@ -64,22 +50,18 @@ function Patients() {
         </div>
       </div>
 
-
       <div className="patients-card">
-
         {loading && (
           <div className="patients-message">
             Loading patient records...
           </div>
         )}
 
-
         {error && (
           <div className="patients-error">
             {error}
           </div>
         )}
-
 
         {!loading &&
           !error &&
@@ -89,13 +71,10 @@ function Patients() {
             </div>
           )}
 
-
         {!loading &&
           !error &&
           patients.length > 0 && (
-
             <div className="patients-table">
-
               <div className="patients-table-header">
                 <span>Patient Name</span>
                 <span>Email</span>
@@ -103,14 +82,11 @@ function Patients() {
                 <span>Registered</span>
               </div>
 
-
               {patients.map((patient) => (
-
                 <div
                   className="patients-table-row"
                   key={patient._id}
                 >
-
                   <span>
                     {patient.fullName}
                   </span>
@@ -124,24 +100,19 @@ function Patients() {
                   </span>
 
                   <span>
-                    {new Date(
-                      patient.createdAt
-                    ).toLocaleDateString()}
+                    {patient.createdAt
+                      ? new Date(
+                          patient.createdAt
+                        ).toLocaleDateString()
+                      : "N/A"}
                   </span>
-
                 </div>
-
               ))}
-
             </div>
-
           )}
-
       </div>
-
     </div>
   );
 }
-
 
 export default Patients;
