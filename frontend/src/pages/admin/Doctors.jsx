@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import "./Doctors.css";
 
+const API_URL =
+    "https://hospital-management-system-nvjt.onrender.com/api/doctors";
+
 function Doctors() {
     const [doctors, setDoctors] = useState([]);
 
@@ -17,20 +20,20 @@ function Doctors() {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    // Add Doctor Modal
+    // Add Doctor
     const [showAddDoctor, setShowAddDoctor] = useState(false);
     const [savingDoctor, setSavingDoctor] = useState(false);
 
-    // View Doctor Modal
+    // View Doctor
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [showViewModal, setShowViewModal] = useState(false);
 
-    // Edit Doctor Modal
+    // Edit Doctor
     const [editingDoctor, setEditingDoctor] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [updatingDoctor, setUpdatingDoctor] = useState(false);
 
-    // Delete Modal
+    // Delete Doctor
     const [deletingDoctor, setDeletingDoctor] = useState(null);
     const [deleting, setDeleting] = useState(false);
 
@@ -39,7 +42,7 @@ function Doctors() {
     const [formError, setFormError] = useState("");
 
     // --------------------------------------------------
-    // ADD DOCTOR FORM
+    // EMPTY FORM
     // --------------------------------------------------
 
     const emptyDoctorForm = {
@@ -73,30 +76,26 @@ function Doctors() {
         try {
             setLoading(true);
 
-            const response = await axios.get(
-                "http://https://hospital-management-system-nvjt.onrender.com/api/doctors"
-            );
+            const response = await axios.get(API_URL);
 
             console.log("Doctors API response:", response.data);
 
-            if (Array.isArray(response.data)) {
-                setDoctors(response.data);
-            } else if (Array.isArray(response.data.doctors)) {
+            if (Array.isArray(response.data.doctors)) {
                 setDoctors(response.data.doctors);
+            } else if (Array.isArray(response.data)) {
+                setDoctors(response.data);
             } else if (Array.isArray(response.data.data)) {
                 setDoctors(response.data.data);
             } else {
                 setDoctors([]);
+
                 console.error(
                     "Doctors data is not an array:",
                     response.data
                 );
             }
         } catch (error) {
-            console.error(
-                "Error while getting doctors:",
-                error
-            );
+            console.error("Error while getting doctors:", error);
 
             setDoctors([]);
         } finally {
@@ -148,18 +147,10 @@ function Doctors() {
         const filtered = doctors.filter((doctor) => {
             const matchesSearch =
                 !searchText ||
-                doctor.fullName
-                    ?.toLowerCase()
-                    .includes(searchText) ||
-                doctor.doctorId
-                    ?.toLowerCase()
-                    .includes(searchText) ||
-                doctor.email
-                    ?.toLowerCase()
-                    .includes(searchText) ||
-                doctor.phone
-                    ?.toLowerCase()
-                    .includes(searchText) ||
+                doctor.fullName?.toLowerCase().includes(searchText) ||
+                doctor.doctorId?.toLowerCase().includes(searchText) ||
+                doctor.email?.toLowerCase().includes(searchText) ||
+                doctor.phone?.toLowerCase().includes(searchText) ||
                 doctor.specialization
                     ?.toLowerCase()
                     .includes(searchText) ||
@@ -173,22 +164,22 @@ function Doctors() {
             const matchesDepartment =
                 department === "all" ||
                 doctor.department?.toLowerCase() ===
-                department.toLowerCase();
+                    department.toLowerCase();
 
             const matchesSpecialization =
                 specialization === "all" ||
                 doctor.specialization?.toLowerCase() ===
-                specialization.toLowerCase();
+                    specialization.toLowerCase();
 
             const matchesStatus =
                 status === "all" ||
                 doctor.status?.toLowerCase() ===
-                status.toLowerCase();
+                    status.toLowerCase();
 
             const matchesJoiningDate =
                 !joiningDate ||
                 formatDateForInput(doctor.joiningDate) ===
-                joiningDate;
+                    joiningDate;
 
             return (
                 matchesSearch &&
@@ -201,17 +192,10 @@ function Doctors() {
 
         if (searchText) {
             filtered.sort((a, b) => {
-                const aScore = getSearchScore(
-                    a,
-                    searchText
+                return (
+                    getSearchScore(b, searchText) -
+                    getSearchScore(a, searchText)
                 );
-
-                const bScore = getSearchScore(
-                    b,
-                    searchText
-                );
-
-                return bScore - aScore;
             });
         }
 
@@ -244,11 +228,10 @@ function Doctors() {
         totalDoctors
     );
 
-    const paginatedDoctors =
-        filteredDoctors.slice(
-            startIndex,
-            endIndex
-        );
+    const paginatedDoctors = filteredDoctors.slice(
+        startIndex,
+        endIndex
+    );
 
     useEffect(() => {
         setCurrentPage(1);
@@ -397,7 +380,6 @@ function Doctors() {
         setFormMessage("");
         setFormError("");
 
-        // Basic frontend validation
         const requiredFields = [
             "fullName",
             "doctorId",
@@ -432,13 +414,18 @@ function Doctors() {
             setSavingDoctor(true);
 
             const response = await axios.post(
-                "https://hospital-management-system-nvjt.onrender.com/api/doctors",
+                API_URL,
                 {
                     ...doctorForm,
-                    experience: Number(doctorForm.experience),
-                    consultationFee: Number(doctorForm.consultationFee),
+                    experience: Number(
+                        doctorForm.experience
+                    ),
+                    consultationFee: Number(
+                        doctorForm.consultationFee
+                    ),
                 }
             );
+
             console.log(
                 "Add doctor response:",
                 response.data
@@ -448,10 +435,8 @@ function Doctors() {
                 "Doctor added successfully."
             );
 
-            // Refresh table from MongoDB
             await fetchDoctors();
 
-            // Close after successful save
             setTimeout(() => {
                 setShowAddDoctor(false);
                 setDoctorForm(emptyDoctorForm);
@@ -465,7 +450,7 @@ function Doctors() {
 
             setFormError(
                 error.response?.data?.message ||
-                "Unable to add doctor. Please try again."
+                    "Unable to add doctor. Please try again."
             );
         } finally {
             setSavingDoctor(false);
@@ -496,15 +481,13 @@ function Doctors() {
 
         setEditingDoctor({
             ...doctor,
-            experience:
-                doctor.experience ?? "",
+            experience: doctor.experience ?? "",
             consultationFee:
                 doctor.consultationFee ?? "",
             dob: formatDateForInput(doctor.dob),
-            joiningDate:
-                formatDateForInput(
-                    doctor.joiningDate
-                ),
+            joiningDate: formatDateForInput(
+                doctor.joiningDate
+            ),
             password: "",
         });
 
@@ -552,14 +535,14 @@ function Doctors() {
                     editingDoctor.specialization,
                 department:
                     editingDoctor.department,
-                experience:
-                    Number(editingDoctor.experience),
+                experience: Number(
+                    editingDoctor.experience
+                ),
                 qualification:
                     editingDoctor.qualification,
-                consultationFee:
-                    Number(
-                        editingDoctor.consultationFee
-                    ),
+                consultationFee: Number(
+                    editingDoctor.consultationFee
+                ),
                 gender: editingDoctor.gender,
                 dob: editingDoctor.dob,
                 joiningDate:
@@ -576,9 +559,9 @@ function Doctors() {
             }
 
             const response = await axios.put(
-                `https://hospital-management-system-nvjt.onrender.com/api/doctors/${editingDoctor._id}`,
+                `${API_URL}/${editingDoctor._id}`,
                 updateData
-            ); 
+            );
 
             console.log(
                 "Update doctor response:",
@@ -604,7 +587,7 @@ function Doctors() {
 
             setFormError(
                 error.response?.data?.message ||
-                "Unable to update doctor."
+                    "Unable to update doctor."
             );
         } finally {
             setUpdatingDoctor(false);
@@ -636,7 +619,7 @@ function Doctors() {
             setDeleting(true);
 
             await axios.delete(
-                `https://hospital-management-system-nvjt.onrender.com/api/doctors/${deletingDoctor._id}`
+                `${API_URL}/${deletingDoctor._id}`
             );
 
             await fetchDoctors();
@@ -650,7 +633,7 @@ function Doctors() {
 
             setFormError(
                 error.response?.data?.message ||
-                "Unable to delete doctor."
+                    "Unable to delete doctor."
             );
 
             setDeletingDoctor(null);
@@ -712,7 +695,7 @@ function Doctors() {
     }
 
     // --------------------------------------------------
-    // RENDER
+    // RETURN
     // --------------------------------------------------
 
     return (
@@ -721,13 +704,12 @@ function Doctors() {
             {/* HEADER */}
 
             <div className="doctors-header">
-
                 <div>
                     <h2>Doctors</h2>
 
                     <p>
-                        Manage doctors and their professional
-                        information.
+                        Manage doctors and their
+                        professional information.
                     </p>
                 </div>
 
@@ -738,7 +720,6 @@ function Doctors() {
                 >
                     + Add Doctor
                 </button>
-
             </div>
 
             {/* SEARCH + FILTERS */}
@@ -756,7 +737,6 @@ function Doctors() {
                             )
                         }
                     />
-
                 </div>
 
                 <select
@@ -942,11 +922,12 @@ function Doctors() {
                                 <button
                                     type="button"
                                     key={page}
-                                    className={`pagination-page ${currentPage ===
+                                    className={`pagination-page ${
+                                        currentPage ===
                                         page
-                                        ? "active"
-                                        : ""
-                                        }`}
+                                            ? "active"
+                                            : ""
+                                    }`}
                                     onClick={() =>
                                         setCurrentPage(
                                             page
@@ -992,7 +973,6 @@ function Doctors() {
                         <thead>
 
                             <tr>
-
                                 <th>Full Name</th>
                                 <th>Doctor ID</th>
                                 <th>Email</th>
@@ -1007,7 +987,6 @@ function Doctors() {
                                 <th>Joining Date</th>
                                 <th>Status</th>
                                 <th>Action</th>
-
                             </tr>
 
                         </thead>
@@ -1028,7 +1007,7 @@ function Doctors() {
                                 </tr>
 
                             ) : paginatedDoctors.length ===
-                                0 ? (
+                              0 ? (
 
                                 <tr>
 
@@ -1113,7 +1092,7 @@ function Doctors() {
 
                                             <td>
                                                 {doctor.experience !==
-                                                    undefined
+                                                undefined
                                                     ? `${doctor.experience} years`
                                                     : "-"}
                                             </td>
@@ -1161,7 +1140,8 @@ function Doctors() {
                                                         )}`}
                                                 >
                                                     {
-                                                        doctor.status
+                                                        doctor.status ||
+                                                        "-"
                                                     }
                                                 </span>
 
@@ -1456,7 +1436,8 @@ function Doctors() {
                                             />
 
                                             <small>
-                                                This password will be sent to the doctor's email.
+                                                This password will be
+                                                sent to the doctor's email.
                                             </small>
                                         </div>
 
@@ -1684,7 +1665,8 @@ function Doctors() {
                                     </h3>
 
                                     <p>
-                                        Complete professional information.
+                                        Complete professional
+                                        information.
                                     </p>
                                 </div>
 
@@ -1706,13 +1688,12 @@ function Doctors() {
 
                                     <div className="large-doctor-avatar">
                                         {selectedDoctor.fullName
-                                            ?.charAt(
-                                                0
-                                            )
+                                            ?.charAt(0)
                                             .toUpperCase()}
                                     </div>
 
                                     <div>
+
                                         <h3>
                                             {
                                                 selectedDoctor.fullName
@@ -1737,6 +1718,7 @@ function Doctors() {
                                                 selectedDoctor.status
                                             }
                                         </span>
+
                                     </div>
 
                                 </div>
@@ -1869,7 +1851,6 @@ function Doctors() {
                                         <span>
                                             Status
                                         </span>
-
                                         <strong>
                                             {
                                                 selectedDoctor.status
@@ -1911,6 +1892,7 @@ function Doctors() {
                         </div>
 
                     </div>
+
                 )}
 
             {/* ==================================================
@@ -2141,7 +2123,9 @@ function Doctors() {
                                                 />
 
                                                 <small>
-                                                    Leave blank if you do not want to change the password.
+                                                    Leave blank if you
+                                                    do not want to change
+                                                    the password.
                                                 </small>
                                             </div>
 
@@ -2339,6 +2323,7 @@ function Doctors() {
                         </div>
 
                     </div>
+
                 )}
 
             {/* ==================================================
@@ -2370,7 +2355,8 @@ function Doctors() {
                         </h3>
 
                         <p>
-                            Are you sure you want to delete{" "}
+                            Are you sure you want to
+                            delete{" "}
                             <strong>
                                 {
                                     deletingDoctor.fullName
@@ -2414,6 +2400,7 @@ function Doctors() {
                     </div>
 
                 </div>
+
             )}
 
         </div>
