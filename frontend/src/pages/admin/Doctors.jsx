@@ -173,22 +173,22 @@ function Doctors() {
             const matchesDepartment =
                 department === "all" ||
                 doctor.department?.toLowerCase() ===
-                    department.toLowerCase();
+                department.toLowerCase();
 
             const matchesSpecialization =
                 specialization === "all" ||
                 doctor.specialization?.toLowerCase() ===
-                    specialization.toLowerCase();
+                specialization.toLowerCase();
 
             const matchesStatus =
                 status === "all" ||
                 doctor.status?.toLowerCase() ===
-                    status.toLowerCase();
+                status.toLowerCase();
 
             const matchesJoiningDate =
                 !joiningDate ||
                 formatDateForInput(doctor.joiningDate) ===
-                    joiningDate;
+                joiningDate;
 
             return (
                 matchesSearch &&
@@ -432,19 +432,13 @@ function Doctors() {
             setSavingDoctor(true);
 
             const response = await axios.post(
-                "http://https://hospital-management-system-nvjt.onrender.com/api/doctors",
+                "https://hospital-management-system-nvjt.onrender.com/api/doctors",
                 {
-
                     ...doctorForm,
-                    experience: Number(
-                        doctorForm.experience
-                    ),
-                    consultationFee: Number(
-                        doctorForm.consultationFee
-                    ),
+                    experience: Number(doctorForm.experience),
+                    consultationFee: Number(doctorForm.consultationFee),
                 }
             );
-
             console.log(
                 "Add doctor response:",
                 response.data
@@ -471,7 +465,7 @@ function Doctors() {
 
             setFormError(
                 error.response?.data?.message ||
-                    "Unable to add doctor. Please try again."
+                "Unable to add doctor. Please try again."
             );
         } finally {
             setSavingDoctor(false);
@@ -582,9 +576,9 @@ function Doctors() {
             }
 
             const response = await axios.put(
-                `http://https://hospital-management-system-nvjt.onrender.com/api/doctors/${editingDoctor._id}`,
+                `https://hospital-management-system-nvjt.onrender.com/api/doctors/${editingDoctor._id}`,
                 updateData
-            );
+            ); 
 
             console.log(
                 "Update doctor response:",
@@ -610,7 +604,7 @@ function Doctors() {
 
             setFormError(
                 error.response?.data?.message ||
-                    "Unable to update doctor."
+                "Unable to update doctor."
             );
         } finally {
             setUpdatingDoctor(false);
@@ -656,7 +650,7 @@ function Doctors() {
 
             setFormError(
                 error.response?.data?.message ||
-                    "Unable to delete doctor."
+                "Unable to delete doctor."
             );
 
             setDeletingDoctor(null);
@@ -948,12 +942,11 @@ function Doctors() {
                                 <button
                                     type="button"
                                     key={page}
-                                    className={`pagination-page ${
-                                        currentPage ===
+                                    className={`pagination-page ${currentPage ===
                                         page
-                                            ? "active"
-                                            : ""
-                                    }`}
+                                        ? "active"
+                                        : ""
+                                        }`}
                                     onClick={() =>
                                         setCurrentPage(
                                             page
@@ -1035,7 +1028,7 @@ function Doctors() {
                                 </tr>
 
                             ) : paginatedDoctors.length ===
-                              0 ? (
+                                0 ? (
 
                                 <tr>
 
@@ -1120,7 +1113,7 @@ function Doctors() {
 
                                             <td>
                                                 {doctor.experience !==
-                                                undefined
+                                                    undefined
                                                     ? `${doctor.experience} years`
                                                     : "-"}
                                             </td>
