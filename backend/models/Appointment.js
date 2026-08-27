@@ -54,6 +54,8 @@ const appointmentSchema = new mongoose.Schema(
   }
 );
 
-module.exports =
+const Appointment =
   mongoose.models.Appointment ||
   mongoose.model("Appointment", appointmentSchema);
+
+module.exports = Appointment;
