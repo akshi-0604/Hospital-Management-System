@@ -39,13 +39,14 @@ const appointmentSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        "Pending",
-        "Confirmed",
-        "Completed",
-        "Cancelled",
-      ],
+      enum: ["Pending", "Confirmed", "Completed", "Cancelled"],
       default: "Pending",
+    },
+
+    notes: {
+      type: String,
+      trim: true,
+      default: "",
     },
   },
   {
@@ -53,7 +54,7 @@ const appointmentSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model(
-  "Appointment",
-  appointmentSchema
-);
+// Prevent Mongoose OverwriteModelError
+module.exports =
+  mongoose.models.Appointment ||
+  mongoose.model("Appointment", appointmentSchema);
