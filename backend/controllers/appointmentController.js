@@ -11,6 +11,7 @@ const createAppointment = async (req, res) => {
       appointmentTime,
       reason,
       notes,
+      status,
     } = req.body;
 
     if (
@@ -33,6 +34,7 @@ const createAppointment = async (req, res) => {
       appointmentTime,
       reason,
       notes,
+      status: status || "Pending",
     });
 
     const populatedAppointment = await Appointment.findById(
