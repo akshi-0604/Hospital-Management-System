@@ -1,52 +1,45 @@
 const mongoose = require("mongoose");
 
-const appointmentSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
-    patient: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    doctor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    department: {
+    fullName: {
       type: String,
       required: true,
       trim: true,
     },
 
-    appointmentDate: {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      trim: true,
+    },
+
+    password: {
+      type: String,
+      required: true,
+    },
+
+    role: {
+      type: String,
+      enum: ["patient", "doctor", "receptionist", "admin"],
+      default: "patient",
+    },
+
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+
+    resetPasswordExpires: {
       type: Date,
-      required: true,
-    },
-
-    appointmentTime: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    reason: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    status: {
-      type: String,
-      enum: ["Pending", "Confirmed", "Completed", "Cancelled"],
-      default: "Pending",
-    },
-
-    notes: {
-      type: String,
-      trim: true,
-      default: "",
+      default: null,
     },
   },
   {
@@ -54,4 +47,4 @@ const appointmentSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Appointment", appointmentSchema);
+module.exports = mongoose.model("User", userSchema);
