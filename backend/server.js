@@ -7,6 +7,7 @@ const connectDatabase = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const patientRoutes = require("./routes/patientRoutes");
 const doctorRoutes = require("./routes/doctorRoutes");
+const appointmentRoutes = require("./routes/appointmentRoutes");
 
 const app = express();
 
@@ -76,6 +77,7 @@ app.use("/api/patients", patientRoutes);
 
 app.use("/api/doctors", doctorRoutes);
 
+app.use("/api/appointments", appointmentRoutes);
 
 const PORT = process.env.PORT || 5000;
 
