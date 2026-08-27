@@ -27,8 +27,6 @@ function Sidebar() {
 
             </div>
 
-
-            {/* Main Navigation */}
             <nav className="sidebar-navigation">
 
                 <p className="navigation-title">
@@ -162,9 +160,6 @@ function Sidebar() {
                 </NavLink>
 
             </nav>
-
-
-            {/* Sidebar Bottom */}
             <div className="sidebar-bottom">
 
                 <NavLink

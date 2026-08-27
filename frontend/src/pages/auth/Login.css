@@ -17,9 +17,6 @@
   overflow: hidden;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
 }
-
-/* Left side */
-
 .login-brand {
   display: flex;
   flex-direction: column;
@@ -57,8 +54,6 @@
   opacity: 0.9;
 }
 
-/* Login card */
-
 .login-card {
   padding: 60px;
 }
@@ -74,9 +69,6 @@
   color: #6b7280;
   font-size: 15px;
 }
-
-/* Form */
-
 .form-group {
   margin-bottom: 22px;
 }
@@ -102,9 +94,6 @@
 .form-group input:focus {
   border-color: #0f766e;
 }
-
-/* Login options */
-
 .login-options {
   display: flex;
   align-items: center;
@@ -132,8 +121,6 @@
   font-size: 13px;
 }
 
-/* Login button */
-
 .login-button {
   width: 100%;
   padding: 14px;
@@ -150,9 +137,6 @@
 .login-button:hover {
   background: #115e59;
 }
-
-/* Register */
-
 .register-section {
   display: flex;
   justify-content: center;
@@ -169,8 +153,6 @@
   cursor: pointer;
   font-weight: 600;
 }
-
-/* Responsive design */
 
 @media (max-width: 768px) {
   .login-container {

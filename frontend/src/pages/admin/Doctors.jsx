@@ -41,10 +41,6 @@ function Doctors() {
     const [formMessage, setFormMessage] = useState("");
     const [formError, setFormError] = useState("");
 
-    // --------------------------------------------------
-    // EMPTY FORM
-    // --------------------------------------------------
-
     const emptyDoctorForm = {
         fullName: "",
         doctorId: "",
@@ -63,10 +59,6 @@ function Doctors() {
     };
 
     const [doctorForm, setDoctorForm] = useState(emptyDoctorForm);
-
-    // --------------------------------------------------
-    // GET DOCTORS
-    // --------------------------------------------------
 
     useEffect(() => {
         fetchDoctors();
@@ -102,11 +94,6 @@ function Doctors() {
             setLoading(false);
         }
     }
-
-    // --------------------------------------------------
-    // UNIQUE FILTER VALUES
-    // --------------------------------------------------
-
     const departments = useMemo(() => {
         return [
             ...new Set(
@@ -136,10 +123,6 @@ function Doctors() {
             ),
         ].sort();
     }, [doctors]);
-
-    // --------------------------------------------------
-    // SEARCH + FILTER
-    // --------------------------------------------------
 
     const filteredDoctors = useMemo(() => {
         const searchText = search.trim().toLowerCase();
@@ -209,10 +192,6 @@ function Doctors() {
         joiningDate,
     ]);
 
-    // --------------------------------------------------
-    // PAGINATION
-    // --------------------------------------------------
-
     const totalDoctors = filteredDoctors.length;
 
     const totalPages = Math.max(
@@ -243,11 +222,6 @@ function Doctors() {
         joiningDate,
         rowsPerPage,
     ]);
-
-    // --------------------------------------------------
-    // DATE FORMAT
-    // --------------------------------------------------
-
     function formatDate(date) {
         if (!date) {
             return "-";
@@ -286,10 +260,6 @@ function Doctors() {
         return `${year}-${month}-${day}`;
     }
 
-    // --------------------------------------------------
-    // FEE
-    // --------------------------------------------------
-
     function formatFee(fee) {
         if (
             fee === undefined ||
@@ -301,11 +271,6 @@ function Doctors() {
 
         return `₹${fee}`;
     }
-
-    // --------------------------------------------------
-    // SEARCH SCORE
-    // --------------------------------------------------
-
     function getSearchScore(doctor, searchText) {
         const name =
             doctor.fullName?.toLowerCase() || "";
@@ -342,11 +307,6 @@ function Doctors() {
 
         return score;
     }
-
-    // --------------------------------------------------
-    // ADD DOCTOR
-    // --------------------------------------------------
-
     function openAddDoctor() {
         setDoctorForm(emptyDoctorForm);
         setFormMessage("");
@@ -456,11 +416,6 @@ function Doctors() {
             setSavingDoctor(false);
         }
     }
-
-    // --------------------------------------------------
-    // VIEW DOCTOR
-    // --------------------------------------------------
-
     function handleView(doctor) {
         setSelectedDoctor(doctor);
         setShowViewModal(true);
@@ -470,11 +425,6 @@ function Doctors() {
         setSelectedDoctor(null);
         setShowViewModal(false);
     }
-
-    // --------------------------------------------------
-    // EDIT DOCTOR
-    // --------------------------------------------------
-
     function openEditDoctor(doctor) {
         setFormMessage("");
         setFormError("");
@@ -594,10 +544,6 @@ function Doctors() {
         }
     }
 
-    // --------------------------------------------------
-    // DELETE DOCTOR
-    // --------------------------------------------------
-
     function openDeleteDoctor(doctor) {
         setDeletingDoctor(doctor);
     }
@@ -642,10 +588,6 @@ function Doctors() {
         }
     }
 
-    // --------------------------------------------------
-    // CLEAR FILTERS
-    // --------------------------------------------------
-
     function clearFilters() {
         setSearch("");
         setDepartment("all");
@@ -654,10 +596,6 @@ function Doctors() {
         setJoiningDate("");
         setCurrentPage(1);
     }
-
-    // --------------------------------------------------
-    // PAGINATION NUMBERS
-    // --------------------------------------------------
 
     function getPageNumbers() {
         const pages = [];
@@ -694,10 +632,6 @@ function Doctors() {
         return pages;
     }
 
-    // --------------------------------------------------
-    // RETURN
-    // --------------------------------------------------
-
     return (
         <div className="doctors-page">
 
@@ -721,9 +655,6 @@ function Doctors() {
                     + Add Doctor
                 </button>
             </div>
-
-            {/* SEARCH + FILTERS */}
-
             <div className="doctor-filters">
 
                 <div className="search-box">
@@ -827,9 +758,6 @@ function Doctors() {
                 </button>
 
             </div>
-
-            {/* PAGINATION */}
-
             <div className="doctors-pagination">
 
                 <div className="pagination-left">
@@ -1205,11 +1133,6 @@ function Doctors() {
                 </div>
 
             </div>
-
-            {/* ==================================================
-                ADD DOCTOR MODAL
-            ================================================== */}
-
             {showAddDoctor && (
 
                 <div
@@ -1636,10 +1559,6 @@ function Doctors() {
 
             )}
 
-            {/* ==================================================
-                VIEW DOCTOR MODAL
-            ================================================== */}
-
             {showViewModal &&
                 selectedDoctor && (
 
@@ -1894,11 +1813,6 @@ function Doctors() {
                     </div>
 
                 )}
-
-            {/* ==================================================
-                EDIT DOCTOR MODAL
-            ================================================== */}
-
             {showEditModal &&
                 editingDoctor && (
 
@@ -2325,10 +2239,6 @@ function Doctors() {
                     </div>
 
                 )}
-
-            {/* ==================================================
-                DELETE CONFIRMATION MODAL
-            ================================================== */}
 
             {deletingDoctor && (
 

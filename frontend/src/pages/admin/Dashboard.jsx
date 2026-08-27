@@ -14,10 +14,6 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // =========================================================
-    // FETCH DASHBOARD DATA
-    // =========================================================
-
     useEffect(() => {
         loadDashboardData();
     }, []);
@@ -32,10 +28,6 @@ function Dashboard() {
                 axios.get(`${API_BASE_URL}/doctors`),
                 axios.get(`${API_BASE_URL}/appointments`),
             ]);
-
-            // -------------------------------------------------
-            // PATIENTS
-            // -------------------------------------------------
 
             if (results[0].status === "fulfilled") {
                 const patientResponse =
@@ -70,11 +62,6 @@ function Dashboard() {
 
                 setPatients([]);
             }
-
-            // -------------------------------------------------
-            // DOCTORS
-            // -------------------------------------------------
-
             if (results[1].status === "fulfilled") {
                 const doctorResponse =
                     results[1].value.data;
@@ -108,11 +95,6 @@ function Dashboard() {
 
                 setDoctors([]);
             }
-
-            // -------------------------------------------------
-            // APPOINTMENTS
-            // -------------------------------------------------
-
             if (results[2].status === "fulfilled") {
                 const appointmentResponse =
                     results[2].value.data;
@@ -152,11 +134,6 @@ function Dashboard() {
 
                 setAppointments([]);
             }
-
-            // -------------------------------------------------
-            // SHOW WARNING ONLY IF ALL APIS FAILED
-            // -------------------------------------------------
-
             const allFailed = results.every(
                 (result) =>
                     result.status === "rejected"
@@ -180,11 +157,6 @@ function Dashboard() {
             setLoading(false);
         }
     }
-
-    // =========================================================
-    // TODAY
-    // =========================================================
-
     function isToday(dateValue) {
         if (!dateValue) {
             return false;
@@ -206,10 +178,6 @@ function Dashboard() {
         );
     }
 
-    // =========================================================
-    // TOTAL DEPARTMENTS
-    // =========================================================
-
     const totalDepartments = useMemo(() => {
         const departmentNames = doctors
             .map((doctor) =>
@@ -223,10 +191,6 @@ function Dashboard() {
 
         return new Set(departmentNames).size;
     }, [doctors]);
-
-    // =========================================================
-    // TODAY'S APPOINTMENTS
-    // =========================================================
 
     const todaysAppointments = useMemo(() => {
         return appointments.filter((appointment) => {
@@ -244,11 +208,6 @@ function Dashboard() {
             );
         });
     }, [appointments]);
-
-    // =========================================================
-    // TODAY'S REVENUE
-    // =========================================================
-
     const todaysRevenue = useMemo(() => {
         return todaysAppointments.reduce(
             (total, appointment) => {
@@ -276,10 +235,6 @@ function Dashboard() {
         );
     }, [todaysAppointments]);
 
-    // =========================================================
-    // RECENT APPOINTMENTS
-    // =========================================================
-
     const recentAppointments = useMemo(() => {
         const sorted = [...appointments].sort(
             (a, b) => {
@@ -306,10 +261,6 @@ function Dashboard() {
         return sorted.slice(0, 5);
     }, [appointments]);
 
-    // =========================================================
-    // FORMAT DATE
-    // =========================================================
-
     function formatDate(dateValue) {
         if (!dateValue) {
             return "-";
@@ -330,10 +281,6 @@ function Dashboard() {
             }
         );
     }
-
-    // =========================================================
-    // FORMAT TIME
-    // =========================================================
 
     function formatTime(timeValue, dateValue) {
         if (timeValue) {
@@ -358,11 +305,6 @@ function Dashboard() {
             }
         );
     }
-
-    // =========================================================
-    // GET PATIENT NAME
-    // =========================================================
-
     function getPatientName(appointment) {
         if (
             typeof appointment.patient ===
@@ -383,10 +325,6 @@ function Dashboard() {
         );
     }
 
-    // =========================================================
-    // GET DOCTOR NAME
-    // =========================================================
-
     function getDoctorName(appointment) {
         if (
             typeof appointment.doctor ===
@@ -406,11 +344,6 @@ function Dashboard() {
             "-"
         );
     }
-
-    // =========================================================
-    // GET APPOINTMENT DATE
-    // =========================================================
-
     function getAppointmentDate(appointment) {
         return (
             appointment.appointmentDate ||
@@ -419,10 +352,6 @@ function Dashboard() {
             appointment.createdAt
         );
     }
-
-    // =========================================================
-    // GET APPOINTMENT TIME
-    // =========================================================
 
     function getAppointmentTime(appointment) {
         return (
@@ -438,10 +367,6 @@ function Dashboard() {
         );
     }
 
-    // =========================================================
-    // GET STATUS
-    // =========================================================
-
     function getAppointmentStatus(appointment) {
         return (
             appointment.status ||
@@ -449,19 +374,11 @@ function Dashboard() {
         );
     }
 
-    // =========================================================
-    // STATUS CLASS
-    // =========================================================
-
     function getStatusClass(status) {
         return String(status)
             .toLowerCase()
             .replace(/\s+/g, "-");
     }
-
-    // =========================================================
-    // CURRENCY
-    // =========================================================
 
     function formatCurrency(amount) {
         return `₹${Number(amount || 0).toLocaleString(
@@ -469,24 +386,11 @@ function Dashboard() {
         )}`;
     }
 
-    // =========================================================
-    // REFRESH
-    // =========================================================
-
     function handleRefresh() {
         loadDashboardData();
     }
-
-    // =========================================================
-    // RETURN
-    // =========================================================
-
     return (
         <div className="dashboard-page">
-
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div className="dashboard-header">
 
@@ -514,25 +418,12 @@ function Dashboard() {
 
             </div>
 
-
-            {/* =================================================
-                ERROR
-            ================================================= */}
-
             {error && (
                 <div className="dashboard-error">
                     {error}
                 </div>
             )}
-
-
-            {/* =================================================
-                DASHBOARD CARDS
-            ================================================= */}
-
             <div className="dashboard-cards">
-
-                {/* PATIENTS */}
 
                 <div className="dashboard-card">
 
@@ -562,9 +453,6 @@ function Dashboard() {
 
                 </div>
 
-
-                {/* DOCTORS */}
-
                 <div className="dashboard-card">
 
                     <div className="dashboard-card-top">
@@ -592,10 +480,6 @@ function Dashboard() {
                     </p>
 
                 </div>
-
-
-                {/* DEPARTMENTS */}
-
                 <div className="dashboard-card">
 
                     <div className="dashboard-card-top">
@@ -622,9 +506,6 @@ function Dashboard() {
 
                 </div>
 
-
-                {/* APPOINTMENTS */}
-
                 <div className="dashboard-card">
 
                     <div className="dashboard-card-top">
@@ -650,9 +531,6 @@ function Dashboard() {
                     </p>
 
                 </div>
-
-
-                {/* REVENUE */}
 
                 <div className="dashboard-card">
 
@@ -684,11 +562,6 @@ function Dashboard() {
 
             </div>
 
-
-            {/* =================================================
-                RECENT APPOINTMENTS
-            ================================================= */}
-
             <div className="dashboard-section">
 
                 <div className="dashboard-section-header">
@@ -712,8 +585,6 @@ function Dashboard() {
 
 
                 <div className="appointment-table">
-
-                    {/* TABLE HEADER */}
 
                     <div className="table-header">
 
@@ -739,17 +610,11 @@ function Dashboard() {
 
                     </div>
 
-
-                    {/* LOADING */}
-
                     {loading && (
                         <div className="dashboard-table-message">
                             Loading appointments...
                         </div>
                     )}
-
-
-                    {/* EMPTY */}
 
                     {!loading &&
                         recentAppointments.length ===
@@ -759,10 +624,6 @@ function Dashboard() {
                                 found.
                             </div>
                         )}
-
-
-                    {/* APPOINTMENTS */}
-
                     {!loading &&
                         recentAppointments.length >
                             0 &&
@@ -830,11 +691,6 @@ function Dashboard() {
                 </div>
 
             </div>
-
-
-            {/* =================================================
-                DASHBOARD SUMMARY
-            ================================================= */}
 
             <div className="dashboard-bottom-grid">
 

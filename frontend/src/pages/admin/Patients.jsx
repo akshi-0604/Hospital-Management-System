@@ -23,10 +23,6 @@ function Patients() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // --------------------------------------------------
-  // GET PATIENTS
-  // --------------------------------------------------
-
   useEffect(() => {
     fetchPatients();
   }, []);
@@ -65,10 +61,6 @@ function Patients() {
     }
   }
 
-  // --------------------------------------------------
-  // ROLE FILTER VALUES
-  // --------------------------------------------------
-
   const roles = useMemo(() => {
     return [
       ...new Set(
@@ -78,10 +70,6 @@ function Patients() {
       ),
     ].sort();
   }, [patients]);
-
-  // --------------------------------------------------
-  // SEARCH + FILTER
-  // --------------------------------------------------
 
   const filteredPatients = useMemo(() => {
     const searchText = search.trim().toLowerCase();
@@ -111,10 +99,6 @@ function Patients() {
     });
   }, [patients, search, role]);
 
-  // --------------------------------------------------
-  // PAGINATION
-  // --------------------------------------------------
-
   const totalPatients = filteredPatients.length;
 
   const totalPages = Math.max(
@@ -139,11 +123,6 @@ function Patients() {
   useEffect(() => {
     setCurrentPage(1);
   }, [search, role, rowsPerPage]);
-
-  // --------------------------------------------------
-  // DATE FORMAT
-  // --------------------------------------------------
-
   function formatDate(date) {
     if (!date) {
       return "-";
@@ -158,10 +137,6 @@ function Patients() {
     return parsedDate.toLocaleDateString("en-IN");
   }
 
-  // --------------------------------------------------
-  // VIEW PATIENT
-  // --------------------------------------------------
-
   function handleView(patient) {
     setSelectedPatient(patient);
     setShowViewModal(true);
@@ -171,21 +146,11 @@ function Patients() {
     setSelectedPatient(null);
     setShowViewModal(false);
   }
-
-  // --------------------------------------------------
-  // CLEAR FILTERS
-  // --------------------------------------------------
-
   function clearFilters() {
     setSearch("");
     setRole("all");
     setCurrentPage(1);
   }
-
-  // --------------------------------------------------
-  // PAGINATION NUMBERS
-  // --------------------------------------------------
-
   function getPageNumbers() {
     const pages = [];
     const maxVisiblePages = 5;
@@ -220,16 +185,9 @@ function Patients() {
 
     return pages;
   }
-
-  // --------------------------------------------------
-  // RETURN
-  // --------------------------------------------------
-
   return (
     <div className="patients-page">
-
-      {/* HEADER */}
-
+      
       <div className="patients-header">
 
         <div>
@@ -246,9 +204,6 @@ function Patients() {
         </div>
 
       </div>
-
-
-      {/* SEARCH + FILTERS */}
 
       <div className="patient-filters">
 
@@ -298,9 +253,6 @@ function Patients() {
         </button>
 
       </div>
-
-
-      {/* PAGINATION */}
 
       <div className="patients-pagination">
 
@@ -429,10 +381,6 @@ function Patients() {
         </div>
 
       </div>
-
-
-      {/* PATIENT TABLE */}
-
       <div className="patients-card">
 
         <div className="patients-table-wrapper">
@@ -523,8 +471,6 @@ function Patients() {
                       key={patient._id}
                     >
 
-                      {/* NAME */}
-
                       <td>
 
                         <div className="patient-name-cell">
@@ -546,23 +492,14 @@ function Patients() {
 
                       </td>
 
-
-                      {/* EMAIL */}
-
                       <td>
                         {patient.email || "-"}
                       </td>
-
-
-                      {/* PHONE */}
 
                       <td>
                         {patient.phone ||
                           "Not provided"}
                       </td>
-
-
-                      {/* ROLE */}
 
                       <td>
 
@@ -575,17 +512,11 @@ function Patients() {
 
                       </td>
 
-
-                      {/* REGISTERED */}
-
                       <td>
                         {formatDate(
                           patient.createdAt
                         )}
                       </td>
-
-
-                      {/* ACTION */}
 
                       <td className="action-cell">
 
@@ -617,12 +548,6 @@ function Patients() {
         </div>
 
       </div>
-
-
-      {/* ==================================================
-          VIEW PATIENT MODAL
-      ================================================== */}
-
       {showViewModal &&
         selectedPatient && (
 
@@ -670,10 +595,6 @@ function Patients() {
                 </button>
 
               </div>
-
-
-              {/* MODAL BODY */}
-
               <div className="patient-modal-body">
 
                 <div className="patient-profile-header">
@@ -709,9 +630,6 @@ function Patients() {
                   </div>
 
                 </div>
-
-
-                {/* DETAILS */}
 
                 <div className="patient-details-grid">
 
@@ -817,9 +735,6 @@ function Patients() {
                 </div>
 
               </div>
-
-
-              {/* MODAL FOOTER */}
 
               <div className="patient-modal-footer">
 

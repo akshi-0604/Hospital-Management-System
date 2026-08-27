@@ -160,9 +160,6 @@ function ResetPassword() {
 
 
         <form onSubmit={handleSubmit}>
-
-          {/* New Password */}
-
           <div className="form-group">
 
             <label htmlFor="password">
@@ -205,10 +202,6 @@ function ResetPassword() {
             </div>
 
           </div>
-
-
-          {/* Confirm Password */}
-
           <div className="form-group">
 
             <label htmlFor="confirmPassword">
@@ -257,10 +250,6 @@ function ResetPassword() {
             </div>
 
           </div>
-
-
-          {/* Messages */}
-
           {message && (
             <p className="success-message">
               {message}
@@ -273,9 +262,6 @@ function ResetPassword() {
               {error}
             </p>
           )}
-
-
-          {/* Reset Button */}
 
           <button
             type="submit"
