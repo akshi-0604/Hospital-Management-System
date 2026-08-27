@@ -93,7 +93,7 @@ async function loginUser(req, res) {
     });
 
     if (!user) {
-      return res.status(404).json({
+      return res.status(401).json({
         message:
           "No account found with this email address",
       });
