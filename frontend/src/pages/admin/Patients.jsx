@@ -15,14 +15,12 @@ function Patients() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // View patient modal
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
+  
   useEffect(() => {
     fetchPatients();
   }, []);
@@ -44,7 +42,6 @@ function Patients() {
         setPatients(response.data.data);
       } else {
         setPatients([]);
-
         setError("Patient data format is invalid.");
       }
     } catch (error) {
@@ -60,7 +57,6 @@ function Patients() {
       setLoading(false);
     }
   }
-
   const roles = useMemo(() => {
     return [
       ...new Set(
@@ -70,7 +66,6 @@ function Patients() {
       ),
     ].sort();
   }, [patients]);
-
   const filteredPatients = useMemo(() => {
     const searchText = search.trim().toLowerCase();
 
@@ -123,6 +118,7 @@ function Patients() {
   useEffect(() => {
     setCurrentPage(1);
   }, [search, role, rowsPerPage]);
+
   function formatDate(date) {
     if (!date) {
       return "-";
@@ -136,6 +132,13 @@ function Patients() {
 
     return parsedDate.toLocaleDateString("en-IN");
   }
+  function getInitial(name) {
+    if (!name) {
+      return "?";
+    }
+
+    return name.charAt(0).toUpperCase();
+  }
 
   function handleView(patient) {
     setSelectedPatient(patient);
@@ -146,11 +149,13 @@ function Patients() {
     setSelectedPatient(null);
     setShowViewModal(false);
   }
+
   function clearFilters() {
     setSearch("");
     setRole("all");
     setCurrentPage(1);
   }
+
   function getPageNumbers() {
     const pages = [];
     const maxVisiblePages = 5;
@@ -187,14 +192,14 @@ function Patients() {
   }
   return (
     <div className="patients-page">
-      
+
       <div className="patients-header">
 
         <div>
           <h2>Patients</h2>
 
           <p>
-            Manage registered patient
+            Manage registered patients and their
             information.
           </p>
         </div>
@@ -204,18 +209,18 @@ function Patients() {
         </div>
 
       </div>
+      <div className="patients-filter-card">
 
-      <div className="patient-filters">
-
-        <div className="search-box">
+        <div className="patients-search-wrapper">
 
           <input
             type="text"
-            placeholder="Search by name, email, phone..."
             value={search}
             onChange={(event) =>
               setSearch(event.target.value)
             }
+            placeholder="Search by name, email, phone..."
+            className="patients-search"
           />
 
         </div>
@@ -226,18 +231,20 @@ function Patients() {
           onChange={(event) =>
             setRole(event.target.value)
           }
+          className="patients-role-select"
         >
 
           <option value="all">
             All Roles
           </option>
 
-          {roles.map((item) => (
+          {roles.map((patientRole) => (
             <option
-              key={item}
-              value={item}
+              key={patientRole}
+              value={patientRole}
             >
-              {item}
+              {patientRole.charAt(0).toUpperCase() +
+                patientRole.slice(1)}
             </option>
           ))}
 
@@ -246,88 +253,60 @@ function Patients() {
 
         <button
           type="button"
-          className="clear-filter-button"
+          className="patients-clear-button"
           onClick={clearFilters}
         >
           Clear
         </button>
 
       </div>
+      <div className="patients-pagination-card">
 
-      <div className="patients-pagination">
+        <div className="patients-result-info">
 
-        <div className="pagination-left">
-
-          <span className="pagination-result">
-
-            Showing{" "}
-
-            <strong>
-              {totalPatients === 0
-                ? 0
-                : startIndex + 1}
-            </strong>
-
-            {" "}to{" "}
-
-            <strong>
-              {endIndex}
-            </strong>
-
-            {" "}of{" "}
-
-            <strong>
-              {totalPatients}
-            </strong>
-
-            {" "}patients
-
-          </span>
+          {totalPatients === 0 ? (
+            "Showing 0 patients"
+          ) : (
+            <>
+              Showing{" "}
+              <strong>{startIndex + 1}</strong>
+              {" "}to{" "}
+              <strong>{endIndex}</strong>
+              {" "}of{" "}
+              <strong>{totalPatients}</strong>
+              {" "}patients
+            </>
+          )}
 
         </div>
 
 
-        <div className="pagination-right">
+        <div className="patients-pagination-controls">
 
-          <div className="rows-per-page">
+          <label htmlFor="rowsPerPage">
+            Show
+          </label>
 
-            <span>
-              Show
-            </span>
-
-            <select
-              value={rowsPerPage}
-              onChange={(event) =>
-                setRowsPerPage(
-                  Number(event.target.value)
-                )
-              }
-            >
-
-              <option value="5">
-                5
-              </option>
-
-              <option value="10">
-                10
-              </option>
-
-              <option value="20">
-                20
-              </option>
-
-              <option value="50">
-                50
-              </option>
-
-            </select>
-
-          </div>
+          <select
+            id="rowsPerPage"
+            value={rowsPerPage}
+            onChange={(event) =>
+              setRowsPerPage(
+                Number(event.target.value)
+              )
+            }
+            className="patients-page-size"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
 
 
           <button
             type="button"
-            className="pagination-button"
+            className="patients-page-button"
             disabled={currentPage === 1}
             onClick={() =>
               setCurrentPage(
@@ -339,36 +318,28 @@ function Patients() {
           </button>
 
 
-          <div className="pagination-pages">
-
-            {getPageNumbers().map(
-              (page) => (
-                <button
-                  type="button"
-                  key={page}
-                  className={`pagination-page ${
-                    currentPage === page
-                      ? "active"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    setCurrentPage(page)
-                  }
-                >
-                  {page}
-                </button>
-              )
-            )}
-
-          </div>
+          {getPageNumbers().map((page) => (
+            <button
+              type="button"
+              key={page}
+              className={`patients-page-number ${
+                currentPage === page
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                setCurrentPage(page)
+              }
+            >
+              {page}
+            </button>
+          ))}
 
 
           <button
             type="button"
-            className="pagination-button"
-            disabled={
-              currentPage === totalPages
-            }
+            className="patients-page-button"
+            disabled={currentPage === totalPages}
             onClick={() =>
               setCurrentPage(
                 (page) => page + 1
@@ -381,369 +352,285 @@ function Patients() {
         </div>
 
       </div>
-      <div className="patients-card">
+      <div className="patients-table-card">
 
-        <div className="patients-table-wrapper">
+        {loading && (
+          <div className="patients-message">
+            Loading patient records...
+          </div>
+        )}
 
-          <table className="patients-table">
 
-            <thead>
+        {!loading && error && (
+          <div className="patients-error">
+            {error}
+          </div>
+        )}
 
-              <tr>
 
-                <th>
-                  Patient Name
-                </th>
+        {!loading &&
+          !error &&
+          totalPatients === 0 && (
+            <div className="patients-message">
+              No patients found.
+            </div>
+          )}
 
-                <th>
+
+        {!loading &&
+          !error &&
+          totalPatients > 0 && (
+
+            <div className="patients-table">
+
+              <div className="patients-table-header">
+
+                <span>
+                  Full Name
+                </span>
+
+                <span>
                   Email
-                </th>
+                </span>
 
-                <th>
+                <span>
                   Phone
-                </th>
+                </span>
 
-                <th>
+                <span>
                   Role
-                </th>
+                </span>
 
-                <th>
+                <span>
                   Registered
-                </th>
+                </span>
 
-                <th>
+                <span>
                   Action
-                </th>
+                </span>
 
-              </tr>
+              </div>
+              {paginatedPatients.map(
+                (patient) => (
 
-            </thead>
-
-
-            <tbody>
-
-              {loading ? (
-
-                <tr>
-
-                  <td
-                    colSpan="6"
-                    className="table-message"
+                  <div
+                    className="patients-table-row"
+                    key={patient._id}
                   >
-                    Loading patient records...
-                  </td>
+                    <div className="patient-name-cell">
 
-                </tr>
-
-              ) : error ? (
-
-                <tr>
-
-                  <td
-                    colSpan="6"
-                    className="table-message"
-                  >
-                    {error}
-                  </td>
-
-                </tr>
-
-              ) : paginatedPatients.length ===
-                0 ? (
-
-                <tr>
-
-                  <td
-                    colSpan="6"
-                    className="table-message"
-                  >
-                    No patients found.
-                  </td>
-
-                </tr>
-
-              ) : (
-
-                paginatedPatients.map(
-                  (patient) => (
-
-                    <tr
-                      key={patient._id}
-                    >
-
-                      <td>
-
-                        <div className="patient-name-cell">
-
-                          <div className="patient-avatar">
-
-                            {patient.fullName
-                              ?.charAt(0)
-                              .toUpperCase() || "P"}
-
-                          </div>
-
-                          <strong>
-                            {patient.fullName ||
-                              "-"}
-                          </strong>
-
-                        </div>
-
-                      </td>
-
-                      <td>
-                        {patient.email || "-"}
-                      </td>
-
-                      <td>
-                        {patient.phone ||
-                          "Not provided"}
-                      </td>
-
-                      <td>
-
-                        <span className="patient-role">
-
-                          {patient.role ||
-                            "Patient"}
-
-                        </span>
-
-                      </td>
-
-                      <td>
-                        {formatDate(
-                          patient.createdAt
+                      <div className="patient-avatar">
+                        {getInitial(
+                          patient.fullName
                         )}
-                      </td>
+                      </div>
 
-                      <td className="action-cell">
+                      <strong>
+                        {patient.fullName ||
+                          "Unknown Patient"}
+                      </strong>
 
-                        <button
-                          type="button"
-                          className="view-button"
-                          onClick={() =>
-                            handleView(
-                              patient
-                            )
-                          }
-                        >
-                          View
-                        </button>
+                    </div>
 
-                      </td>
+                    <span className="patient-email">
+                      {patient.email ||
+                        "Not provided"}
+                    </span>
 
-                    </tr>
+                    <span>
+                      {patient.phone ||
+                        "Not provided"}
+                    </span>
 
-                  )
+                    <span className="patient-role">
+
+                      {patient.role
+                        ? patient.role
+                            .charAt(0)
+                            .toUpperCase() +
+                          patient.role.slice(1)
+                        : "Patient"}
+
+                    </span>
+
+                    <span className="patient-date">
+                      {formatDate(
+                        patient.createdAt
+                      )}
+                    </span>
+                    <div className="patient-action-cell">
+
+                      <button
+                        type="button"
+                        className="patient-view-button"
+                        onClick={() =>
+                          handleView(patient)
+                        }
+                      >
+                        View
+                      </button>
+
+                    </div>
+
+                  </div>
+
                 )
-
               )}
 
-            </tbody>
+            </div>
 
-          </table>
-
-        </div>
+          )}
 
       </div>
+
       {showViewModal &&
         selectedPatient && (
 
           <div
             className="patient-modal-overlay"
-            onMouseDown={(event) => {
-
-              if (
-                event.target ===
-                event.currentTarget
-              ) {
-                closeViewModal();
-              }
-
-            }}
+            onClick={closeViewModal}
           >
 
-            <div className="patient-modal">
-
-              {/* MODAL HEADER */}
+            <div
+              className="patient-modal"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
 
               <div className="patient-modal-header">
 
                 <div>
-
                   <h3>
                     Patient Details
                   </h3>
 
                   <p>
-                    Complete patient information.
+                    Registered patient information
                   </p>
-
                 </div>
-
 
                 <button
                   type="button"
-                  className="modal-close-button"
-                  onClick={
-                    closeViewModal
-                  }
+                  className="patient-modal-close"
+                  onClick={closeViewModal}
                 >
                   ×
                 </button>
 
               </div>
-              <div className="patient-modal-body">
-
-                <div className="patient-profile-header">
-
-                  <div className="large-patient-avatar">
-
-                    {selectedPatient.fullName
-                      ?.charAt(0)
-                      .toUpperCase() || "P"}
-
-                  </div>
 
 
-                  <div>
+              <div className="patient-modal-profile">
 
-                    <h3>
-                      {selectedPatient.fullName ||
-                        "-"}
-                    </h3>
-
-                    <p>
-                      {selectedPatient.email ||
-                        "-"}
-                    </p>
-
-                    <span className="patient-role">
-
-                      {selectedPatient.role ||
-                        "Patient"}
-
-                    </span>
-
-                  </div>
-
+                <div className="patient-modal-avatar">
+                  {getInitial(
+                    selectedPatient.fullName
+                  )}
                 </div>
 
-                <div className="patient-details-grid">
+                <div>
+                  <h4>
+                    {selectedPatient.fullName ||
+                      "Unknown Patient"}
+                  </h4>
 
-                  <div className="patient-detail-item">
-
-                    <span>
-                      Patient Name
-                    </span>
-
-                    <strong>
-                      {selectedPatient.fullName ||
-                        "-"}
-                    </strong>
-
-                  </div>
-
-
-                  <div className="patient-detail-item">
-
-                    <span>
-                      Email
-                    </span>
-
-                    <strong>
-                      {selectedPatient.email ||
-                        "-"}
-                    </strong>
-
-                  </div>
-
-
-                  <div className="patient-detail-item">
-
-                    <span>
-                      Phone
-                    </span>
-
-                    <strong>
-                      {selectedPatient.phone ||
-                        "Not provided"}
-                    </strong>
-
-                  </div>
-
-
-                  <div className="patient-detail-item">
-
-                    <span>
-                      Role
-                    </span>
-
-                    <strong>
-                      {selectedPatient.role ||
-                        "Patient"}
-                    </strong>
-
-                  </div>
-
-
-                  <div className="patient-detail-item">
-
-                    <span>
-                      Registered Date
-                    </span>
-
-                    <strong>
-                      {formatDate(
-                        selectedPatient.createdAt
-                      )}
-                    </strong>
-
-                  </div>
-
-
-                  <div className="patient-detail-item">
-
-                    <span>
-                      Last Updated
-                    </span>
-
-                    <strong>
-                      {formatDate(
-                        selectedPatient.updatedAt
-                      )}
-                    </strong>
-
-                  </div>
-
-
-                  <div className="patient-detail-item">
-
-                    <span>
-                      Patient ID
-                    </span>
-
-                    <strong>
-                      {selectedPatient._id ||
-                        "-"}
-                    </strong>
-
-                  </div>
-
+                  <span>
+                    {selectedPatient.role
+                      ? selectedPatient.role
+                          .charAt(0)
+                          .toUpperCase() +
+                        selectedPatient.role.slice(1)
+                      : "Patient"}
+                  </span>
                 </div>
 
               </div>
+
+
+              <div className="patient-details-grid">
+
+                <div className="patient-detail-item">
+                  <label>
+                    Full Name
+                  </label>
+
+                  <p>
+                    {selectedPatient.fullName ||
+                      "Not provided"}
+                  </p>
+                </div>
+
+
+                <div className="patient-detail-item">
+                  <label>
+                    Email
+                  </label>
+
+                  <p>
+                    {selectedPatient.email ||
+                      "Not provided"}
+                  </p>
+                </div>
+
+
+                <div className="patient-detail-item">
+                  <label>
+                    Phone
+                  </label>
+
+                  <p>
+                    {selectedPatient.phone ||
+                      "Not provided"}
+                  </p>
+                </div>
+
+
+                <div className="patient-detail-item">
+                  <label>
+                    Role
+                  </label>
+
+                  <p>
+                    {selectedPatient.role ||
+                      "patient"}
+                  </p>
+                </div>
+
+
+                <div className="patient-detail-item">
+                  <label>
+                    Registered
+                  </label>
+
+                  <p>
+                    {formatDate(
+                      selectedPatient.createdAt
+                    )}
+                  </p>
+                </div>
+
+
+                <div className="patient-detail-item">
+                  <label>
+                    Patient ID
+                  </label>
+
+                  <p className="patient-id">
+                    {selectedPatient._id ||
+                      "Not available"}
+                  </p>
+                </div>
+
+              </div>
+
 
               <div className="patient-modal-footer">
 
                 <button
                   type="button"
-                  className="modal-cancel-button"
-                  onClick={
-                    closeViewModal
-                  }
+                  className="patient-modal-done"
+                  onClick={closeViewModal}
                 >
                   Close
                 </button>
