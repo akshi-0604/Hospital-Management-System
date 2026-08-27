@@ -1,6 +1,6 @@
 const Appointment = require("../models/Appointment");
 
-// Create a new appointment
+// Create appointment
 const createAppointment = async (req, res) => {
   try {
     const {
@@ -32,8 +32,8 @@ const createAppointment = async (req, res) => {
       department,
       appointmentDate,
       appointmentTime,
-      reason,
-      notes,
+      reason: reason || "",
+      notes: notes || "",
       status: status || "Pending",
     });
 
@@ -43,14 +43,14 @@ const createAppointment = async (req, res) => {
       .populate("patient", "fullName email phone")
       .populate("doctor", "fullName email phone");
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Appointment created successfully.",
       appointment: populatedAppointment,
     });
   } catch (error) {
     console.error("Create appointment error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Unable to create appointment.",
       error: error.message,
     });
@@ -64,15 +64,18 @@ const getAppointments = async (req, res) => {
     const appointments = await Appointment.find()
       .populate("patient", "fullName email phone")
       .populate("doctor", "fullName email phone")
-      .sort({ appointmentDate: 1, appointmentTime: 1 });
+      .sort({
+        appointmentDate: 1,
+        appointmentTime: 1,
+      });
 
-    res.status(200).json({
+    return res.status(200).json({
       appointments,
     });
   } catch (error) {
     console.error("Get appointments error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Unable to fetch appointments.",
       error: error.message,
     });
@@ -80,7 +83,7 @@ const getAppointments = async (req, res) => {
 };
 
 
-// Get one appointment
+// Get appointment by ID
 const getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
@@ -93,13 +96,13 @@ const getAppointmentById = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       appointment,
     });
   } catch (error) {
     console.error("Get appointment error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Unable to fetch appointment.",
       error: error.message,
     });
@@ -127,14 +130,14 @@ const updateAppointment = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Appointment updated successfully.",
       appointment,
     });
   } catch (error) {
     console.error("Update appointment error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Unable to update appointment.",
       error: error.message,
     });
@@ -155,13 +158,13 @@ const deleteAppointment = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Appointment deleted successfully.",
     });
   } catch (error) {
     console.error("Delete appointment error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Unable to delete appointment.",
       error: error.message,
     });

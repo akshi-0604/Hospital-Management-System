@@ -10,25 +10,19 @@ const {
 
 const router = express.Router();
 
-
 // Create appointment
 router.post("/", createAppointment);
-
 
 // Get all appointments
 router.get("/", getAppointments);
 
-
-// Get appointment by ID
+// Get one appointment
 router.get("/:id", getAppointmentById);
-
 
 // Update appointment
 router.put("/:id", updateAppointment);
 
-
 // Delete appointment
 router.delete("/:id", deleteAppointment);
-
 
 module.exports = router;

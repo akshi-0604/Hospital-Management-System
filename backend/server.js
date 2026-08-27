@@ -11,26 +11,34 @@ const appointmentRoutes = require("./routes/appointmentRoutes");
 
 const app = express();
 
+/* =========================================================
+   CORS CONFIGURATION
+   ========================================================= */
+
 const allowedOrigins = [
   "http://localhost:5173",
+
+  // Main Vercel frontend
   "https://hospital-management-system-five-theta.vercel.app",
+
+  // Vercel deployment
   "https://hospital-management-system-dyyezsa45-akshitha-1747s-projects.vercel.app",
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests such as Postman or server-to-server requests
+      // Allow requests from Postman, server-to-server requests, etc.
       if (!origin) {
         return callback(null, true);
       }
 
-      // Allow known frontend URLs
+      // Allow the exact frontend URLs
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      // Allow Vercel preview deployments for this project
+      // Allow Vercel preview deployments
       if (
         origin.startsWith(
           "https://hospital-management-system-"
@@ -39,6 +47,8 @@ app.use(
       ) {
         return callback(null, true);
       }
+
+      console.log("Blocked by CORS:", origin);
 
       return callback(
         new Error("Not allowed by CORS")
@@ -61,23 +71,72 @@ app.use(
   })
 );
 
+/* =========================================================
+   BODY PARSER
+   ========================================================= */
+
 app.use(express.json());
+
+/* =========================================================
+   DATABASE CONNECTION
+   ========================================================= */
 
 connectDatabase();
 
+/* =========================================================
+   BASIC TEST ROUTE
+   ========================================================= */
+
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
+    success: true,
     message: "Hospital Management System API is running",
   });
 });
 
+/* =========================================================
+   API ROUTES
+   ========================================================= */
+
+// Authentication
 app.use("/api/auth", authRoutes);
 
+// Patients
 app.use("/api/patients", patientRoutes);
 
+// Doctors
 app.use("/api/doctors", doctorRoutes);
 
+// Appointments
 app.use("/api/appointments", appointmentRoutes);
+
+/* =========================================================
+   404 HANDLER
+   ========================================================= */
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
+/* =========================================================
+   GLOBAL ERROR HANDLER
+   ========================================================= */
+
+app.use((error, req, res, next) => {
+  console.error("Server error:", error);
+
+  res.status(500).json({
+    success: false,
+    message: error.message || "Internal server error",
+  });
+});
+
+/* =========================================================
+   START SERVER
+   ========================================================= */
 
 const PORT = process.env.PORT || 5000;
 
