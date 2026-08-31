@@ -5,10 +5,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 
-// ======================================================
-// REGISTER USER
-// ======================================================
-
 async function registerUser(req, res) {
     try {
         console.log("REGISTER REQUEST:", req.body);
@@ -114,11 +110,6 @@ async function registerUser(req, res) {
         });
     }
 }
-
-// ======================================================
-// LOGIN USER
-// ======================================================
-
 async function loginUser(req, res) {
     try {
         console.log("LOGIN REQUEST:", req.body.email);
@@ -226,11 +217,6 @@ async function loginUser(req, res) {
         });
     }
 }
-
-// ======================================================
-// FORGOT PASSWORD
-// ======================================================
-
 async function forgotPassword(req, res) {
     try {
         const { email } = req.body;
@@ -315,11 +301,6 @@ Hospital Management System`,
         });
     }
 }
-
-// ======================================================
-// RESET PASSWORD
-// ======================================================
-
 async function resetPassword(req, res) {
     try {
         const { token } = req.params;
@@ -390,11 +371,6 @@ async function resetPassword(req, res) {
         });
     }
 }
-
-// ======================================================
-// EXPORT
-// ======================================================
-
 module.exports = {
     registerUser,
     loginUser,

@@ -11,10 +11,6 @@ const appointmentRoutes = require("./routes/appointmentRoutes");
 
 const app = express();
 
-/* =========================================================
-   CORS CONFIGURATION
-   ========================================================= */
-
 const allowedOrigins = [
   "http://localhost:5173",
 
@@ -71,21 +67,8 @@ app.use(
   })
 );
 
-/* =========================================================
-   BODY PARSER
-   ========================================================= */
-
 app.use(express.json());
-
-/* =========================================================
-   DATABASE CONNECTION
-   ========================================================= */
-
 connectDatabase();
-
-/* =========================================================
-   BASIC TEST ROUTE
-   ========================================================= */
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -93,11 +76,6 @@ app.get("/", (req, res) => {
     message: "Hospital Management System API is running",
   });
 });
-
-/* =========================================================
-   API ROUTES
-   ========================================================= */
-
 // Authentication
 app.use("/api/auth", authRoutes);
 
@@ -110,20 +88,12 @@ app.use("/api/doctors", doctorRoutes);
 // Appointments
 app.use("/api/appointments", appointmentRoutes);
 
-/* =========================================================
-   404 HANDLER
-   ========================================================= */
-
 app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.method} ${req.originalUrl}`,
   });
 });
-
-/* =========================================================
-   GLOBAL ERROR HANDLER
-   ========================================================= */
 
 app.use((error, req, res, next) => {
   console.error("Server error:", error);
@@ -133,10 +103,6 @@ app.use((error, req, res, next) => {
     message: error.message || "Internal server error",
   });
 });
-
-/* =========================================================
-   START SERVER
-   ========================================================= */
 
 const PORT = process.env.PORT || 5000;
 
