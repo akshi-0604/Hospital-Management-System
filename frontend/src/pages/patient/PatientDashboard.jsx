@@ -26,6 +26,7 @@ function PatientDashboard() {
     fetchDoctors();
     fetchAppointments();
   }, []);
+
   function loadUser() {
     try {
       const storedUser = localStorage.getItem("user");
@@ -55,7 +56,7 @@ function PatientDashboard() {
       const response = await axios.get(DOCTORS_URL);
 
       console.log(
-        "Patient dashboard doctors:",
+        "Patient Dashboard Doctors:",
         response.data
       );
 
@@ -64,11 +65,11 @@ function PatientDashboard() {
       if (Array.isArray(response.data)) {
         doctorData = response.data;
       } else if (
-        Array.isArray(response.data.doctors)
+        Array.isArray(response.data?.doctors)
       ) {
         doctorData = response.data.doctors;
       } else if (
-        Array.isArray(response.data.data)
+        Array.isArray(response.data?.data)
       ) {
         doctorData = response.data.data;
       }
@@ -90,6 +91,7 @@ function PatientDashboard() {
       setLoadingDoctors(false);
     }
   }
+
   async function fetchAppointments() {
     try {
       setLoadingAppointments(true);
@@ -98,7 +100,7 @@ function PatientDashboard() {
         await axios.get(APPOINTMENTS_URL);
 
       console.log(
-        "Patient dashboard appointments:",
+        "Patient Dashboard Appointments:",
         response.data
       );
 
@@ -108,55 +110,68 @@ function PatientDashboard() {
         appointmentData = response.data;
       } else if (
         Array.isArray(
-          response.data.appointments
+          response.data?.appointments
         )
       ) {
         appointmentData =
           response.data.appointments;
       } else if (
-        Array.isArray(response.data.data)
+        Array.isArray(response.data?.data)
       ) {
         appointmentData =
           response.data.data;
       }
 
+      // Get the logged-in patient
       const storedUser =
         localStorage.getItem("user");
 
       if (storedUser) {
-        const currentUser =
-          JSON.parse(storedUser);
+        try {
+          const currentUser =
+            JSON.parse(storedUser);
 
-        const patientId =
-          currentUser?.id;
+          const patientId =
+            currentUser?.id ||
+            currentUser?._id;
 
-        if (patientId) {
-          appointmentData =
-            appointmentData.filter(
-              (appointment) => {
+          if (patientId) {
+            appointmentData =
+              appointmentData.filter(
+                (appointment) => {
+                  const appointmentPatient =
+                    appointment?.patient;
 
-                const appointmentPatient =
-                  appointment?.patient;
+                  // Populated patient object
+                  if (
+                    appointmentPatient &&
+                    typeof appointmentPatient ===
+                      "object"
+                  ) {
+                    return (
+                      String(
+                        appointmentPatient._id
+                      ) === String(patientId)
+                    );
+                  }
 
-                if (
-                  appointmentPatient &&
-                  typeof appointmentPatient ===
-                    "object"
-                ) {
+                  // Patient ID directly stored
                   return (
-                    appointmentPatient._id ===
-                    patientId
+                    String(
+                      appointmentPatient || ""
+                    ) === String(patientId) ||
+                    String(
+                      appointment?.patientId || ""
+                    ) === String(patientId)
                   );
                 }
-
-                return (
-                  appointmentPatient ===
-                  patientId ||
-                  appointment?.patientId ===
-                  patientId
-                );
-              }
-            );
+              );
+          }
+        } catch (error) {
+          console.error(
+            "Unable to read logged-in user:",
+            error
+          );
         }
       }
 
@@ -196,9 +211,7 @@ function PatientDashboard() {
     );
   }
 
-  function getAppointmentDate(
-    appointment
-  ) {
+  function getAppointmentDate(appointment) {
     return (
       appointment?.appointmentDate ||
       appointment?.date ||
@@ -207,9 +220,7 @@ function PatientDashboard() {
     );
   }
 
-  function getAppointmentTime(
-    appointment
-  ) {
+  function getAppointmentTime(appointment) {
     return (
       appointment?.appointmentTime ||
       appointment?.time ||
@@ -222,7 +233,13 @@ function PatientDashboard() {
     const name =
       doctor?.fullName ||
       doctor?.name ||
-      "Unknown Doctor";
+      doctor?.doctorName ||
+      doctor?.user?.fullName ||
+      "";
+
+    if (!name) {
+      return "Doctor information unavailable";
+    }
 
     if (
       name.toLowerCase().startsWith("dr.")
@@ -233,38 +250,57 @@ function PatientDashboard() {
     return `Dr. ${name}`;
   }
 
-  function getAppointmentDoctorName(appointment) {
-  const doctor = appointment?.doctor;
-  if (
-    doctor &&
-    typeof doctor === "object"
+  function getAppointmentDoctorName(
+    appointment
   ) {
-    const name =
-      doctor.fullName ||
-      doctor.name ||
-      doctor.doctorName ||
-      "";
+    const doctor =
+      appointment?.doctor;
 
-    if (name) {
-      return name.toLowerCase().startsWith("dr.")
-        ? name
-        : `Dr. ${name}`;
+    let name = "";
+
+    // Populated doctor object
+    if (
+      doctor &&
+      typeof doctor === "object"
+    ) {
+      name =
+        doctor.fullName ||
+        doctor.name ||
+        doctor.doctorName ||
+        doctor.user?.fullName ||
+        "";
     }
+
+    // Other possible appointment fields
+    if (!name) {
+      name =
+        appointment?.doctorName ||
+        appointment?.doctorFullName ||
+        "";
+    }
+
+    if (!name) {
+      return "Doctor information unavailable";
+    }
+
+    if (
+      name.toLowerCase().startsWith("dr.")
+    ) {
+      return name;
+    }
+
+    return `Dr. ${name}`;
   }
 
-  const name =
-    appointment?.doctorName ||
-    appointment?.doctorFullName ||
-    "";
-
-  if (name) {
-    return name.toLowerCase().startsWith("dr.")
-      ? name
-      : `Dr. ${name}`;
+  function getDoctorSpecializationFromAppointment(
+    appointment
+  ) {
+    return (
+      appointment?.doctor?.specialization ||
+      appointment?.specialization ||
+      "Specialization not available"
+    );
   }
-
-  return "Doctor information unavailable";
-}
 
   function getAppointmentDepartment(
     appointment
@@ -272,14 +308,16 @@ function PatientDashboard() {
     return (
       appointment?.department ||
       appointment?.doctor?.department ||
-      "Not assigned"
+      "Department not available"
     );
   }
+
   function getAppointmentStatus(
     appointment
   ) {
     return (
       appointment?.status ||
+      appointment?.appointmentStatus ||
       "Pending"
     );
   }
@@ -288,26 +326,27 @@ function PatientDashboard() {
     useMemo(() => {
       return doctors.filter(
         (doctor) => {
-          const status =
+          const doctorStatus =
             String(
               doctor?.status || ""
-            ).toLowerCase();
+            )
+              .trim()
+              .toLowerCase();
 
           return (
-            !status ||
-            status === "available"
+            !doctorStatus ||
+            doctorStatus === "available"
           );
         }
       );
     }, [doctors]);
- 
+
   const upcomingAppointments =
     useMemo(() => {
       const now = new Date();
 
       return appointments
         .filter((appointment) => {
-
           const appointmentDate =
             getAppointmentDate(
               appointment
@@ -330,7 +369,6 @@ function PatientDashboard() {
           );
         })
         .sort((a, b) => {
-
           const dateA =
             new Date(
               getAppointmentDate(a)
@@ -371,6 +409,7 @@ function PatientDashboard() {
         ).toLowerCase() ===
         "completed"
     ).length;
+
   function handleRefresh() {
     setError("");
 
@@ -393,13 +432,13 @@ function PatientDashboard() {
       </div>
     );
   }
-
   return (
     <div className="patient-dashboard-page">
 
       <div className="patient-dashboard-header">
 
         <div>
+
           <h2>
             Welcome back,{" "}
             {user?.fullName || "Patient"}
@@ -409,6 +448,7 @@ function PatientDashboard() {
             Here is your health and
             appointment overview.
           </p>
+
         </div>
 
         <button
@@ -420,7 +460,6 @@ function PatientDashboard() {
         </button>
 
       </div>
-
       {error && (
         <div className="patient-dashboard-error">
           {error}
@@ -438,8 +477,7 @@ function PatientDashboard() {
         <div className="patient-profile-info">
 
           <h3>
-            {user?.fullName ||
-              "Patient"}
+            {user?.fullName || "Patient"}
           </h3>
 
           <p>
@@ -454,7 +492,6 @@ function PatientDashboard() {
         </div>
 
       </div>
-
       <div className="patient-summary-grid">
 
         <div className="patient-summary-card">
@@ -566,15 +603,20 @@ function PatientDashboard() {
           <div className="upcoming-appointment-card">
 
             <div className="appointment-doctor-avatar">
+
               {getAppointmentDoctorName(
                 upcomingAppointments[0]
               )
                 .replace("Dr. ", "")
                 .charAt(0)
                 .toUpperCase()}
+
             </div>
 
+
             <div className="upcoming-appointment-info">
+
+              {/* ACTUAL DOCTOR NAME */}
 
               <h4>
                 {getAppointmentDoctorName(
@@ -582,11 +624,30 @@ function PatientDashboard() {
                 )}
               </h4>
 
-              <p>
+
+              {/* SPECIALIZATION */}
+
+              <p className="doctor-specialization">
+
+                {getDoctorSpecializationFromAppointment(
+                  upcomingAppointments[0]
+                )}
+
+              </p>
+
+
+              {/* DEPARTMENT */}
+
+              <span className="appointment-department">
+
                 {getAppointmentDepartment(
                   upcomingAppointments[0]
                 )}
-              </p>
+
+              </span>
+
+
+              {/* DATE + TIME */}
 
               <div className="appointment-date-info">
 
@@ -609,16 +670,25 @@ function PatientDashboard() {
             </div>
 
 
+            {/* STATUS */}
+
             <span
-              className={`patient-status-badge ${getAppointmentStatus(
-                upcomingAppointments[0]
-              )
-                .toLowerCase()
-                .replace(/\s+/g, "-")}`}
+              className={`patient-status-badge ${
+                getAppointmentStatus(
+                  upcomingAppointments[0]
+                )
+                  .toLowerCase()
+                  .replace(
+                    /\s+/g,
+                    "-"
+                  )
+              }`}
             >
+
               {getAppointmentStatus(
                 upcomingAppointments[0]
               )}
+
             </span>
 
           </div>
@@ -682,12 +752,17 @@ function PatientDashboard() {
                 >
 
                   <div className="available-doctor-avatar">
+
                     {doctor.fullName
                       ?.charAt(0)
                       .toUpperCase() || "D"}
+
                   </div>
 
+
                   <div className="available-doctor-info">
+
+                    {/* DOCTOR NAME */}
 
                     <h4>
                       {getDoctorName(
@@ -695,10 +770,16 @@ function PatientDashboard() {
                       )}
                     </h4>
 
+
+                    {/* SPECIALIZATION */}
+
                     <p>
                       {doctor.specialization ||
                         "Specialist"}
                     </p>
+
+
+                    {/* DEPARTMENT */}
 
                     <span>
                       {doctor.department ||
@@ -707,6 +788,8 @@ function PatientDashboard() {
 
                   </div>
 
+
+                  {/* AVAILABILITY */}
 
                   <div className="doctor-availability">
 
@@ -830,14 +913,16 @@ function PatientDashboard() {
                   <span>
 
                     <span
-                      className={`patient-status-badge ${getAppointmentStatus(
-                        appointment
-                      )
-                        .toLowerCase()
-                        .replace(
-                          /\s+/g,
-                          "-"
-                        )}`}
+                      className={`patient-status-badge ${
+                        getAppointmentStatus(
+                          appointment
+                        )
+                          .toLowerCase()
+                          .replace(
+                            /\s+/g,
+                            "-"
+                          )
+                      }`}
                     >
                       {getAppointmentStatus(
                         appointment
@@ -855,11 +940,6 @@ function PatientDashboard() {
         )}
 
       </div>
-
-
-      {/* ==================================================
-          PROFILE INFORMATION
-      ================================================== */}
 
       <div className="patient-dashboard-section">
 
@@ -884,6 +964,7 @@ function PatientDashboard() {
         <div className="patient-profile-details">
 
           <div>
+
             <label>
               Full Name
             </label>
@@ -892,10 +973,12 @@ function PatientDashboard() {
               {user?.fullName ||
                 "Not available"}
             </strong>
+
           </div>
 
 
           <div>
+
             <label>
               Email Address
             </label>
@@ -904,10 +987,12 @@ function PatientDashboard() {
               {user?.email ||
                 "Not available"}
             </strong>
+
           </div>
 
 
           <div>
+
             <label>
               Phone
             </label>
@@ -916,10 +1001,12 @@ function PatientDashboard() {
               {user?.phone ||
                 "Not provided"}
             </strong>
+
           </div>
 
 
           <div>
+
             <label>
               Role
             </label>
@@ -927,6 +1014,7 @@ function PatientDashboard() {
             <strong>
               Patient
             </strong>
+
           </div>
 
         </div>
