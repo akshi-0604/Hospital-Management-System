@@ -233,26 +233,38 @@ function PatientDashboard() {
     return `Dr. ${name}`;
   }
 
-  function getAppointmentDoctorName(
-    appointment
+  function getAppointmentDoctorName(appointment) {
+  const doctor = appointment?.doctor;
+  if (
+    doctor &&
+    typeof doctor === "object"
   ) {
-    const doctor =
-      appointment?.doctor;
-
     const name =
-      doctor?.fullName ||
-      doctor?.name ||
-      appointment?.doctorName ||
-      "Unknown Doctor";
+      doctor.fullName ||
+      doctor.name ||
+      doctor.doctorName ||
+      "";
 
-    if (
-      name.toLowerCase().startsWith("dr.")
-    ) {
-      return name;
+    if (name) {
+      return name.toLowerCase().startsWith("dr.")
+        ? name
+        : `Dr. ${name}`;
     }
-
-    return `Dr. ${name}`;
   }
+
+  const name =
+    appointment?.doctorName ||
+    appointment?.doctorFullName ||
+    "";
+
+  if (name) {
+    return name.toLowerCase().startsWith("dr.")
+      ? name
+      : `Dr. ${name}`;
+  }
+
+  return "Doctor information unavailable";
+}
 
   function getAppointmentDepartment(
     appointment
