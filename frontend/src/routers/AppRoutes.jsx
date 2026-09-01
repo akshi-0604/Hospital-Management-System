@@ -19,6 +19,7 @@ import Billing from "../pages/admin/Billing";
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import AddDoctor from "../components/admin/AddDoctor";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
+import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
 
 function AppRoutes() {
   return (
@@ -108,10 +109,15 @@ function AppRoutes() {
           path="/patient"
           element={<PatientDashboard />}
         />
-        
+
         <Route
           path="/doctor"
           element={<DoctorDashboard />}
+        />
+
+        <Route
+          path="/receptionist"
+          element={<ReceptionistDashboard />}
         />
 
       </Routes>
