@@ -4,238 +4,63 @@ import axios from "axios";
 import "./Appointments.css";
 
 const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
+    "https://hospital-management-system-nvjt.onrender.com/api";
 
 const APPOINTMENTS_URL =
-  `${API_BASE_URL}/appointments`;
+    `${API_BASE_URL}/appointments`;
 
 const PATIENTS_URL =
-  `${API_BASE_URL}/patients`;
+    `${API_BASE_URL}/patients`;
 
 const DOCTORS_URL =
-  `${API_BASE_URL}/doctors`;
-
+    `${API_BASE_URL}/doctors`;
 
 function Appointments() {
-  const [appointments, setAppointments] = useState([]);
+    const [appointments, setAppointments] =
+        useState([]);
 
-  const [patients, setPatients] = useState([]);
-  const [doctors, setDoctors] = useState([]);
+    const [patients, setPatients] =
+        useState([]);
 
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [date, setDate] = useState("");
+    const [doctors, setDoctors] =
+        useState([]);
+    const [search, setSearch] =
+        useState("");
 
-  const [loading, setLoading] = useState(true);
-  const [formLoading, setFormLoading] = useState(false);
+    const [status, setStatus] =
+        useState("all");
 
-  const [error, setError] = useState("");
-  const [formError, setFormError] = useState("");
+    const [date, setDate] =
+        useState("");
+    const [loading, setLoading] =
+        useState(true);
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] =
-    useState(null);
+    const [error, setError] =
+        useState("");
+    const [showAddModal, setShowAddModal] =
+        useState(false);
 
-  const [showViewModal, setShowViewModal] = useState(false);
+    const [savingAppointment, setSavingAppointment] =
+        useState(false);
+    const [selectedAppointment, setSelectedAppointment] =
+        useState(null);
 
-  const [editingAppointment, setEditingAppointment] =
-    useState(null);
+    const [showViewModal, setShowViewModal] =
+        useState(false);
+    const [editingAppointment, setEditingAppointment] =
+        useState(null);
 
-  const [showEditModal, setShowEditModal] =
-    useState(false);
+    const [showEditModal, setShowEditModal] =
+        useState(false);
 
-  const [updatingAppointment, setUpdatingAppointment] =
-    useState(false);
+    const [updatingAppointment, setUpdatingAppointment] =
+        useState(false);
+    const [formError, setFormError] =
+        useState("");
 
-  const [formData, setFormData] = useState({
-    patient: "",
-    doctor: "",
-    department: "",
-    appointmentDate: "",
-    appointmentTime: "",
-    reason: "",
-    notes: "",
-    status: "Pending",
-  });
-
-  useEffect(() => {
-    fetchAppointments();
-    fetchPatients();
-    fetchDoctors();
-  }, []);
-
-
-  async function fetchAppointments() {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await axios.get(APPOINTMENTS_URL);
-
-      console.log(
-        "Appointments API response:",
-        response.data
-      );
-
-      if (Array.isArray(response.data)) {
-        setAppointments(response.data);
-      } else if (
-        Array.isArray(response.data.appointments)
-      ) {
-        setAppointments(response.data.appointments);
-      } else if (
-        Array.isArray(response.data.data)
-      ) {
-        setAppointments(response.data.data);
-      } else {
-        setAppointments([]);
-      }
-    } catch (error) {
-      console.error(
-        "Error while getting appointments:",
-        error
-      );
-
-      setAppointments([]);
-
-      setError(
-        error.response?.data?.message ||
-        "Unable to load appointment records."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-  async function fetchPatients() {
-    try {
-      const response = await axios.get(PATIENTS_URL);
-
-      console.log(
-        "Patients API response:",
-        response.data
-      );
-
-      if (Array.isArray(response.data)) {
-        setPatients(response.data);
-      } else if (
-        Array.isArray(response.data.patients)
-      ) {
-        setPatients(response.data.patients);
-      } else if (
-        Array.isArray(response.data.data)
-      ) {
-        setPatients(response.data.data);
-      } else {
-        setPatients([]);
-      }
-    } catch (error) {
-      console.error(
-        "Error while getting patients:",
-        error
-      );
-    }
-  }
-
-  async function fetchDoctors() {
-    try {
-      const response = await axios.get(DOCTORS_URL);
-
-      console.log(
-        "Doctors API response:",
-        response.data
-      );
-
-      if (Array.isArray(response.data)) {
-        setDoctors(response.data);
-      } else if (
-        Array.isArray(response.data.doctors)
-      ) {
-        setDoctors(response.data.doctors);
-      } else if (
-        Array.isArray(response.data.data)
-      ) {
-        setDoctors(response.data.data);
-      } else {
-        setDoctors([]);
-      }
-    } catch (error) {
-      console.error(
-        "Error while getting doctors:",
-        error
-      );
-    }
-  }
-
-  function handleFormChange(event) {
-    const { name, value } = event.target;
-
-    setFormData((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-  }
-
-  function openAddModal() {
-    setFormError("");
-
-    setFormData({
-      patient: "",
-      doctor: "",
-      department: "",
-      appointmentDate: "",
-      appointmentTime: "",
-      reason: "",
-      notes: "",
-      status: "Pending",
-    });
-
-    setShowAddModal(true);
-  }
-
-  function closeAddModal() {
-    if (formLoading) {
-      return;
-    }
-
-    setShowAddModal(false);
-    setFormError("");
-  }
-
-  async function handleCreateAppointment(event) {
-    event.preventDefault();
-
-    setFormError("");
-
-    if (
-      !formData.patient ||
-      !formData.doctor ||
-      !formData.department ||
-      !formData.appointmentDate ||
-      !formData.appointmentTime
-    ) {
-      setFormError(
-        "Please fill all required appointment details."
-      );
-
-      return;
-    }
-
-    try {
-      setFormLoading(true);
-
-      const response = await axios.post(
-        APPOINTMENTS_URL,
-        formData
-      );
-
-      console.log(
-        "Created appointment:",
-        response.data
-      );
-
-      setShowAddModal(false);
-
-      setFormData({
+    const [formMessage, setFormMessage] =
+        useState("");
+    const emptyAppointmentForm = {
         patient: "",
         doctor: "",
         department: "",
@@ -244,1525 +69,2102 @@ function Appointments() {
         reason: "",
         notes: "",
         status: "Pending",
-      });
+    };
 
-      await fetchAppointments();
-
-      alert("Appointment created successfully.");
-    } catch (error) {
-      console.error(
-        "Create appointment error:",
-        error
-      );
-
-      setFormError(
-        error.response?.data?.message ||
-        "Unable to create appointment."
-      );
-    } finally {
-      setFormLoading(false);
+    const [appointmentForm, setAppointmentForm] =
+        useState(
+            emptyAppointmentForm
+        );
+    useEffect(() => {
+        loadPageData();
+    }, []);
+    async function loadPageData() {
+        await Promise.all([
+            fetchAppointments(),
+            fetchPatients(),
+            fetchDoctors(),
+        ]);
     }
-  }
+    async function fetchAppointments() {
+        try {
+            setLoading(true);
+            setError("");
 
-  function formatDate(value) {
-    if (!value) {
-      return "N/A";
+            const response =
+                await axios.get(
+                    APPOINTMENTS_URL
+                );
+
+            console.log(
+                "Appointments API response:",
+                response.data
+            );
+
+            let appointmentData = [];
+
+            if (
+                Array.isArray(response.data)
+            ) {
+                appointmentData =
+                    response.data;
+            } else if (
+                Array.isArray(
+                    response.data?.appointments
+                )
+            ) {
+                appointmentData =
+                    response.data.appointments;
+            } else if (
+                Array.isArray(
+                    response.data?.data
+                )
+            ) {
+                appointmentData =
+                    response.data.data;
+            }
+
+            setAppointments(
+                appointmentData
+            );
+        } catch (error) {
+            console.error(
+                "Error while getting appointments:",
+                error
+            );
+
+            setAppointments([]);
+
+            setError(
+                error.response?.data?.message ||
+                    "Unable to load appointment records."
+            );
+        } finally {
+            setLoading(false);
+        }
     }
+    async function fetchPatients() {
+        try {
+            const response =
+                await axios.get(
+                    PATIENTS_URL
+                );
 
-    const formattedDate = new Date(value);
+            console.log(
+                "Patients API response:",
+                response.data
+            );
 
-    if (Number.isNaN(formattedDate.getTime())) {
-      return value;
+            let patientData = [];
+
+            if (
+                Array.isArray(response.data)
+            ) {
+                patientData =
+                    response.data;
+            } else if (
+                Array.isArray(
+                    response.data?.patients
+                )
+            ) {
+                patientData =
+                    response.data.patients;
+            } else if (
+                Array.isArray(
+                    response.data?.data
+                )
+            ) {
+                patientData =
+                    response.data.data;
+            }
+
+            setPatients(
+                patientData
+            );
+        } catch (error) {
+            console.error(
+                "Error while getting patients:",
+                error
+            );
+
+            setPatients([]);
+        }
     }
+    async function fetchDoctors() {
+        try {
+            const response =
+                await axios.get(
+                    DOCTORS_URL
+                );
 
-    return formattedDate.toLocaleDateString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
+            console.log(
+                "Doctors API response:",
+                response.data
+            );
+
+            let doctorData = [];
+
+            if (
+                Array.isArray(response.data)
+            ) {
+                doctorData =
+                    response.data;
+            } else if (
+                Array.isArray(
+                    response.data?.doctors
+                )
+            ) {
+                doctorData =
+                    response.data.doctors;
+            } else if (
+                Array.isArray(
+                    response.data?.data
+                )
+            ) {
+                doctorData =
+                    response.data.data;
+            }
+
+            setDoctors(
+                doctorData
+            );
+        } catch (error) {
+            console.error(
+                "Error while getting doctors:",
+                error
+            );
+
+            setDoctors([]);
+        }
       }
-    );
-  }
+    function formatDate(value) {
+        if (!value) {
+            return "N/A";
+        }
 
-  function getPatientName(appointment) {
-    return (
-      appointment.patient?.fullName ||
-      appointment.patient?.name ||
-      appointment.patientName ||
-      "Unknown Patient"
-    );
-  }
+        const date =
+            new Date(value);
 
-  function getDoctorName(appointment) {
-    const name =
-      appointment.doctor?.fullName ||
-      appointment.doctor?.name ||
-      appointment.doctorName;
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return "N/A";
+        }
 
-    if (!name) {
-      return "Unknown Doctor";
+        return date.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+            }
+        );
     }
 
-    return name.startsWith("Dr.")
-      ? name
-      : `Dr. ${name}`;
-  }
 
+    function formatDateForInput(value) {
+        if (!value) {
+            return "";
+        }
 
-  function getDepartment(appointment) {
-    return (
-      appointment.department ||
-      appointment.doctor?.department ||
-      "Not assigned"
-    );
-  }
+        const date =
+            new Date(value);
 
-  function getAppointmentDate(appointment) {
-    return (
-      appointment.appointmentDate ||
-      appointment.date ||
-      ""
-    );
-  }
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return "";
+        }
 
-  function getAppointmentTime(appointment) {
-    return (
-      appointment.appointmentTime ||
-      appointment.time ||
-      "Not specified"
-    );
-  }
+        const year =
+            date.getFullYear();
 
-  function getAppointmentStatus(appointment) {
-    return (
-      appointment.status ||
-      "Pending"
-    );
-  }
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(2, "0");
 
-  const filteredAppointments = useMemo(() => {
-    const searchText =
-      search.trim().toLowerCase();
+        const day =
+            String(
+                date.getDate()
+            ).padStart(2, "0");
 
-    return appointments.filter(
-      (appointment) => {
-        const patientName =
-          getPatientName(
-            appointment
-          ).toLowerCase();
-
-        const doctorName =
-          getDoctorName(
-            appointment
-          ).toLowerCase();
-
-        const department =
-          getDepartment(
-            appointment
-          ).toLowerCase();
-
-        const appointmentStatus =
-          getAppointmentStatus(
-            appointment
-          ).toLowerCase();
-
-        const matchesSearch =
-          !searchText ||
-          patientName.includes(searchText) ||
-          doctorName.includes(searchText) ||
-          department.includes(searchText) ||
-          appointmentStatus.includes(searchText);
-
-        const matchesStatus =
-          status === "all" ||
-          appointmentStatus ===
-          status.toLowerCase();
-
-        const appointmentDate =
-          getAppointmentDate(
-            appointment
-          );
-
-        const formattedDate =
-          appointmentDate
-            ? new Date(appointmentDate)
-              .toISOString()
-              .split("T")[0]
-            : "";
-
-        const matchesDate =
-          !date ||
-          formattedDate === date;
+        return `${year}-${month}-${day}`;
+    }
+    function getPatientName(
+        appointment
+    ) {
+        if (
+            appointment?.patient &&
+            typeof appointment.patient ===
+                "object"
+        ) {
+            return (
+                appointment.patient.fullName ||
+                appointment.patient.name ||
+                "Patient unavailable"
+            );
+        }
 
         return (
-          matchesSearch &&
-          matchesStatus &&
-          matchesDate
+            appointment?.patientName ||
+            "Patient unavailable"
         );
-      }
-    );
-  }, [
-    appointments,
-    search,
-    status,
-    date,
-  ]);
-
-  function clearFilters() {
-    setSearch("");
-    setStatus("all");
-    setDate("");
-  }
-  function handleView(appointment) {
-    setSelectedAppointment(
-      appointment
-    );
-
-    setShowViewModal(true);
-  }
-
-
-  function closeViewModal() {
-    setSelectedAppointment(null);
-    setShowViewModal(false);
-  }
-
-  function openEditModal(appointment) {
-    setFormError("");
-
-    setEditingAppointment({
-      ...appointment,
-
-      patient:
-        typeof appointment.patient === "object"
-          ? appointment.patient?._id || ""
-          : appointment.patient || "",
-
-      doctor:
-        typeof appointment.doctor === "object"
-          ? appointment.doctor?._id || ""
-          : appointment.doctor || "",
-
-      department:
-        appointment.department || "",
-
-      appointmentDate:
-        formatDateForInput(
-          getAppointmentDate(appointment)
-        ),
-
-      appointmentTime:
-        getAppointmentTimeForInput(appointment),
-
-      reason:
-        appointment.reason || "",
-
-      notes:
-        appointment.notes || "",
-
-      status:
-        appointment.status || "Pending",
-    });
-
-    setShowEditModal(true);
-  }
-  function closeEditModal() {
-    if (updatingAppointment) {
-      return;
     }
-
-    setEditingAppointment(null);
-    setShowEditModal(false);
-    setFormError("");
-  }
-  function handleEditChange(event) {
-    const { name, value } = event.target;
-
-    setEditingAppointment((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-
-    // Automatically update department
-    // when doctor is changed
-    if (name === "doctor") {
-      const selectedDoctor = doctors.find(
-        (doctor) =>
-          String(doctor?._id) === String(value)
-      );
-
-      setEditingAppointment((previous) => ({
-        ...previous,
-        doctor: value,
-        department:
-          selectedDoctor?.department ||
-          previous.department ||
-          "",
-      }));
-    }
-  }
-
-  function formatDateForInput(value) {
-    if (!value) {
-      return "";
-    }
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return "";
-    }
-
-    const year = date.getFullYear();
-
-    const month = String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
-
-    const day = String(
-      date.getDate()
-    ).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-  }
-  function getAppointmentTimeForInput(
-    appointment
-  ) {
-    const time =
-      appointment?.appointmentTime ||
-      appointment?.time ||
-      "";
-
-    return time;
-  }
-  async function handleUpdateAppointment(
-    event
-  ) {
-    event.preventDefault();
-
-    if (!editingAppointment?._id) {
-      return;
-    }
-
-    setFormError("");
-
-    if (
-      !editingAppointment.doctor ||
-      !editingAppointment.department ||
-      !editingAppointment.appointmentDate ||
-      !editingAppointment.appointmentTime
+    function getDoctorName(
+        appointment
     ) {
-      setFormError(
-        "Please fill in all required appointment details."
-      );
-      return;
+        if (
+            appointment?.doctor &&
+            typeof appointment.doctor ===
+                "object"
+        ) {
+            const name =
+                appointment.doctor.fullName ||
+                appointment.doctor.name ||
+                "";
+
+            if (!name) {
+                return "Doctor unavailable";
+            }
+
+            return name
+                .toLowerCase()
+                .startsWith("dr.")
+                ? name
+                : `Dr. ${name}`;
+        }
+
+        const name =
+            appointment?.doctorName ||
+            appointment?.doctorFullName ||
+            "";
+
+        if (!name) {
+            return "Doctor unavailable";
+        }
+
+        return name
+            .toLowerCase()
+            .startsWith("dr.")
+            ? name
+            : `Dr. ${name}`;
+    }
+    function getDepartment(
+        appointment
+    ) {
+        return (
+            appointment?.department ||
+            appointment?.doctor?.department ||
+            "Department unavailable"
+        );
+    }
+    function getAppointmentDate(
+        appointment
+    ) {
+        return (
+            appointment?.appointmentDate ||
+            appointment?.date ||
+            appointment?.scheduledDate ||
+            ""
+        );
+    }
+    function getAppointmentTime(
+        appointment
+    ) {
+        return (
+            appointment?.appointmentTime ||
+            appointment?.time ||
+            appointment?.scheduledTime ||
+            ""
+        );
+    }
+    function getAppointmentStatus(
+        appointment
+    ) {
+        return (
+            appointment?.status ||
+            "Pending"
+        );
     }
 
-    try {
-      setUpdatingAppointment(true);
 
-      const updateData = {
-        patient:
-          editingAppointment.patient,
+    function getStatusClass(
+        value
+    ) {
+        return String(value)
+            .toLowerCase()
+            .replace(
+                /\s+/g,
+                "-"
+            );
+    }
+    const filteredAppointments =
+        useMemo(() => {
+            const searchText =
+                search
+                    .trim()
+                    .toLowerCase();
 
-        doctor:
-          editingAppointment.doctor,
+            return appointments.filter(
+                (appointment) => {
+                    const patientName =
+                        getPatientName(
+                            appointment
+                        ).toLowerCase();
 
-        department:
-          editingAppointment.department,
+                    const doctorName =
+                        getDoctorName(
+                            appointment
+                        ).toLowerCase();
 
-        appointmentDate:
-          editingAppointment.appointmentDate,
+                    const department =
+                        getDepartment(
+                            appointment
+                        ).toLowerCase();
 
-        appointmentTime:
-          editingAppointment.appointmentTime,
+                    const appointmentStatus =
+                        getAppointmentStatus(
+                            appointment
+                        ).toLowerCase();
 
-        reason:
-          editingAppointment.reason || "",
+                    const matchesSearch =
+                        !searchText ||
+                        patientName.includes(
+                            searchText
+                        ) ||
+                        doctorName.includes(
+                            searchText
+                        ) ||
+                        department.includes(
+                            searchText
+                        );
 
-        notes:
-          editingAppointment.notes || "",
+                    const matchesStatus =
+                        status ===
+                            "all" ||
+                        appointmentStatus ===
+                            status.toLowerCase();
 
-        status:
-          editingAppointment.status ||
-          "Pending",
-      };
+                    const appointmentDate =
+                        getAppointmentDate(
+                            appointment
+                        );
 
-      const response =
-        await axios.put(
-          `${APPOINTMENTS_URL}/${editingAppointment._id}`,
-          updateData
+                    const matchesDate =
+                        !date ||
+                        formatDateForInput(
+                            appointmentDate
+                        ) === date;
+
+                    return (
+                        matchesSearch &&
+                        matchesStatus &&
+                        matchesDate
+                    );
+                }
+            );
+        }, [
+            appointments,
+            search,
+            status,
+            date,
+        ]);
+    function clearFilters() {
+        setSearch("");
+        setStatus("all");
+        setDate("");
+    }
+    function openAddModal() {
+        setAppointmentForm({
+            ...emptyAppointmentForm,
+        });
+
+        setFormError("");
+        setFormMessage("");
+
+        setShowAddModal(true);
+    }
+
+
+    function closeAddModal() {
+        if (savingAppointment) {
+            return;
+        }
+
+        setShowAddModal(false);
+
+        setAppointmentForm({
+            ...emptyAppointmentForm,
+        });
+
+        setFormError("");
+        setFormMessage("");
+    }
+
+
+    function handleAppointmentChange(
+        event
+    ) {
+        const {
+            name,
+            value,
+        } = event.target;
+
+        setAppointmentForm(
+            (previous) => ({
+                ...previous,
+                [name]: value,
+            })
         );
 
-      console.log(
-        "Appointment updated:",
-        response.data
-      );
+        if (
+            name === "doctor"
+        ) {
+            const selectedDoctor =
+                doctors.find(
+                    (doctor) =>
+                        String(
+                            doctor._id
+                        ) ===
+                        String(value)
+                );
 
-      setShowEditModal(false);
-      setEditingAppointment(null);
-
-      await fetchAppointments();
-
-    } catch (error) {
-      console.error(
-        "Update appointment error:",
-        error
-      );
-
-      setFormError(
-        error.response?.data?.message ||
-        "Unable to update appointment."
-      );
-    } finally {
-      setUpdatingAppointment(false);
+            setAppointmentForm(
+                (previous) => ({
+                    ...previous,
+                    doctor: value,
+                    department:
+                        selectedDoctor?.department ||
+                        "",
+                })
+            );
+        }
     }
-  }
 
-  if (loading) {
+
+    async function handleCreateAppointment(
+        event
+    ) {
+        event.preventDefault();
+
+        setFormError("");
+        setFormMessage("");
+
+        if (
+            !appointmentForm.patient ||
+            !appointmentForm.doctor ||
+            !appointmentForm.department ||
+            !appointmentForm.appointmentDate ||
+            !appointmentForm.appointmentTime
+        ) {
+            setFormError(
+                "Please fill in all required appointment details."
+            );
+
+            return;
+        }
+
+        try {
+            setSavingAppointment(true);
+
+            const response =
+                await axios.post(
+                    APPOINTMENTS_URL,
+                    appointmentForm
+                );
+
+            console.log(
+                "Appointment created:",
+                response.data
+            );
+
+            setFormMessage(
+                "Appointment created successfully."
+            );
+
+            await fetchAppointments();
+
+            setTimeout(() => {
+                setShowAddModal(false);
+
+                setAppointmentForm({
+                    ...emptyAppointmentForm,
+                });
+
+                setFormMessage("");
+            }, 800);
+        } catch (error) {
+            console.error(
+                "Create appointment error:",
+                error
+            );
+
+            setFormError(
+                error.response?.data?.message ||
+                    "Unable to create appointment."
+            );
+        } finally {
+            setSavingAppointment(false);
+        }
+    }
+    function handleView(
+        appointment
+    ) {
+        setSelectedAppointment(
+            appointment
+        );
+
+        setShowViewModal(true);
+    }
+
+
+    function closeViewModal() {
+        setSelectedAppointment(null);
+        setShowViewModal(false);
+    }
+    function openEditModal(
+        appointment
+    ) {
+        setFormError("");
+        setFormMessage("");
+
+        setEditingAppointment({
+            ...appointment,
+
+            patient:
+                typeof appointment.patient ===
+                    "object"
+                    ? appointment.patient?._id ||
+                      ""
+                    : appointment.patient ||
+                      "",
+
+            doctor:
+                typeof appointment.doctor ===
+                    "object"
+                    ? appointment.doctor?._id ||
+                      ""
+                    : appointment.doctor ||
+                      "",
+
+            department:
+                appointment.department ||
+                appointment.doctor?.department ||
+                "",
+
+            appointmentDate:
+                formatDateForInput(
+                    getAppointmentDate(
+                        appointment
+                    )
+                ),
+
+            appointmentTime:
+                getAppointmentTime(
+                    appointment
+                ),
+
+            reason:
+                appointment.reason ||
+                "",
+
+            notes:
+                appointment.notes ||
+                "",
+
+            status:
+                appointment.status ||
+                "Pending",
+        });
+
+        setShowEditModal(true);
+    }
+    function closeEditModal() {
+        if (updatingAppointment) {
+            return;
+        }
+
+        setEditingAppointment(null);
+        setShowEditModal(false);
+
+        setFormError("");
+        setFormMessage("");
+    }
+    function handleEditChange(
+        event
+    ) {
+        const {
+            name,
+            value,
+        } = event.target;
+
+        setEditingAppointment(
+            (previous) => ({
+                ...previous,
+                [name]: value,
+            })
+        );
+
+        if (
+            name === "doctor"
+        ) {
+            const selectedDoctor =
+                doctors.find(
+                    (doctor) =>
+                        String(
+                            doctor._id
+                        ) ===
+                        String(value)
+                );
+
+            setEditingAppointment(
+                (previous) => ({
+                    ...previous,
+                    doctor: value,
+                    department:
+                        selectedDoctor?.department ||
+                        "",
+                })
+            );
+        }
+    }
+    async function handleUpdateAppointment(
+        event
+    ) {
+        event.preventDefault();
+
+        setFormError("");
+        setFormMessage("");
+
+        if (
+            !editingAppointment?._id
+        ) {
+            setFormError(
+                "Appointment ID is missing."
+            );
+
+            return;
+        }
+
+        if (
+            !editingAppointment.patient ||
+            !editingAppointment.doctor ||
+            !editingAppointment.department ||
+            !editingAppointment.appointmentDate ||
+            !editingAppointment.appointmentTime
+        ) {
+            setFormError(
+                "Please fill in all required appointment details."
+            );
+
+            return;
+        }
+
+        try {
+            setUpdatingAppointment(true);
+
+            const updateData = {
+                patient:
+                    editingAppointment.patient,
+
+                doctor:
+                    editingAppointment.doctor,
+
+                department:
+                    editingAppointment.department,
+
+                appointmentDate:
+                    editingAppointment.appointmentDate,
+
+                appointmentTime:
+                    editingAppointment.appointmentTime,
+
+                reason:
+                    editingAppointment.reason ||
+                    "",
+
+                notes:
+                    editingAppointment.notes ||
+                    "",
+
+                status:
+                    editingAppointment.status ||
+                    "Pending",
+            };
+
+            const response =
+                await axios.put(
+                    `${APPOINTMENTS_URL}/${editingAppointment._id}`,
+                    updateData
+                );
+
+            console.log(
+                "Appointment updated:",
+                response.data
+            );
+
+            setFormMessage(
+                "Appointment updated successfully."
+            );
+
+            await fetchAppointments();
+
+            setTimeout(() => {
+                setShowEditModal(false);
+
+                setEditingAppointment(null);
+
+                setFormMessage("");
+            }, 800);
+        } catch (error) {
+            console.error(
+                "Update appointment error:",
+                error
+            );
+
+            setFormError(
+                error.response?.data?.message ||
+                    "Unable to update appointment."
+            );
+        } finally {
+            setUpdatingAppointment(false);
+        }
+    }
+    async function handleRefresh() {
+        setError("");
+
+        await loadPageData();
+    }
     return (
-      <div className="appointments-page">
+        <div className="appointments-page">
 
-        <div className="appointments-header">
-          <div>
-            <h2>Appointments</h2>
+            <div className="appointments-header">
 
-            <p>
-              Schedule and manage patient
-              appointments.
-            </p>
-          </div>
-        </div>
+                <div>
 
-        <div className="appointments-message-card">
-          <div className="appointments-loader"></div>
+                    <h2>
+                        Appointments
+                    </h2>
 
-          <p>
-            Loading appointment records...
-          </p>
-        </div>
+                    <p>
+                        Schedule and manage
+                        patient appointments.
+                    </p>
 
-      </div>
-    );
-  }
-  return (
-    <div className="appointments-page">
-
-      {/* HEADER */}
-
-      <div className="appointments-header">
-
-        <div>
-          <h2>Appointments</h2>
-
-          <p>
-            Schedule and manage patient
-            appointments.
-          </p>
-        </div>
-
-        <button
-          className="add-appointment-button"
-          onClick={openAddModal}
-        >
-          + Add Appointment
-        </button>
-
-      </div>
+                </div>
 
 
-      {/* TOP FILTER CARD */}
+                <button
+                    type="button"
+                    className="add-appointment-button"
+                    onClick={
+                        openAddModal
+                    }
+                >
+                    + Add Appointment
+                </button>
 
-      <div className="appointments-filter-card">
+            </div>
+            {error && (
+                <div className="appointments-error">
+                    {error}
+                </div>
+            )}
+            <div className="appointments-filter-card">
 
-        <div className="appointment-search-wrapper">
-          <input
-            type="text"
-            placeholder="Search by patient, doctor, department..."
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
-          />
-        </div>
+                <div className="appointment-search-wrapper">
 
-        <select
-          value={status}
-          onChange={(event) =>
-            setStatus(event.target.value)
-          }
-        >
-          <option value="all">
-            All Status
-          </option>
+                    <input
+                        type="text"
+                        placeholder="Search by patient, doctor, department..."
+                        value={search}
+                        onChange={(
+                            event
+                        ) =>
+                            setSearch(
+                                event.target.value
+                            )
+                        }
+                    />
 
-          <option value="Pending">
-            Pending
-          </option>
-
-          <option value="Confirmed">
-            Confirmed
-          </option>
-
-          <option value="Completed">
-            Completed
-          </option>
-
-          <option value="Cancelled">
-            Cancelled
-          </option>
-        </select>
-
-        <input
-          type="date"
-          value={date}
-          onChange={(event) =>
-            setDate(event.target.value)
-          }
-        />
-
-        <button
-          className="clear-button"
-          onClick={clearFilters}
-        >
-          Clear
-        </button>
-
-      </div>
+                </div>
 
 
-      {/* COUNT */}
+                <select
+                    value={status}
+                    onChange={(
+                        event
+                    ) =>
+                        setStatus(
+                            event.target.value
+                        )
+                    }
+                >
 
-      <div className="appointments-list-header">
+                    <option value="all">
+                        All Status
+                    </option>
 
-        <span>
-          Showing{" "}
-          <strong>
-            {filteredAppointments.length}
-          </strong>{" "}
-          of{" "}
-          <strong>
-            {appointments.length}
-          </strong>{" "}
-          appointments
-        </span>
+                    <option value="pending">
+                        Pending
+                    </option>
 
-        <button
-          className="refresh-button"
-          onClick={fetchAppointments}
-        >
-          ↻ Refresh
-        </button>
+                    <option value="confirmed">
+                        Confirmed
+                    </option>
 
-      </div>
+                    <option value="completed">
+                        Completed
+                    </option>
 
+                    <option value="cancelled">
+                        Cancelled
+                    </option>
 
-      {/* ERROR */}
-
-      {error && (
-        <div className="appointments-error">
-          {error}
-        </div>
-      )}
+                </select>
 
 
-      {/* TABLE / EMPTY */}
+                <input
+                    type="date"
+                    value={date}
+                    onChange={(
+                        event
+                    ) =>
+                        setDate(
+                            event.target.value
+                        )
+                    }
+                />
 
-      {filteredAppointments.length === 0 ? (
 
-        <div className="appointments-empty-card">
+                <button
+                    type="button"
+                    className="clear-button"
+                    onClick={
+                        clearFilters
+                    }
+                >
+                    Clear
+                </button>
 
-          <div className="empty-icon">
-            📅
-          </div>
+            </div>
+            <div className="appointments-list-header">
 
-          <h3>
-            No appointments found
-          </h3>
+                <div>
 
-          <p>
-            There are no appointments
-            matching the current filters.
-          </p>
+                    Showing{" "}
 
-          <button
-            className="empty-add-button"
-            onClick={openAddModal}
-          >
-            + Add New Appointment
-          </button>
+                    <strong>
+                        {filteredAppointments.length}
+                    </strong>
 
-        </div>
+                    {" "}of{" "}
 
-      ) : (
+                    <strong>
+                        {appointments.length}
+                    </strong>
 
-        <div className="appointments-table-card">
+                    {" "}appointments
 
-          <div className="appointments-table">
+                </div>
 
-            <div className="appointments-table-header">
 
-              <span>Patient</span>
-              <span>Doctor</span>
-              <span>Department</span>
-              <span>Date</span>
-              <span>Time</span>
-              <span>Status</span>
-              <span>Action</span>
+                <button
+                    type="button"
+                    className="refresh-button"
+                    onClick={
+                        handleRefresh
+                    }
+                >
+                    ↻ Refresh
+                </button>
 
             </div>
 
+            {loading ? (
 
-            {filteredAppointments.map(
-              (appointment) => (
+                <div className="appointments-message-card">
 
-                <div
-                  className="appointments-table-row"
-                  key={appointment._id}
-                >
+                    <div className="appointments-loader"></div>
 
-                  <span>
-                    {getPatientName(
-                      appointment
-                    )}
-                  </span>
+                    <p>
+                        Loading appointment records...
+                    </p>
 
-                  <span>
-                    {getDoctorName(
-                      appointment
-                    )}
-                  </span>
+                </div>
 
-                  <span>
-                    {getDepartment(
-                      appointment
-                    )}
-                  </span>
+            ) : filteredAppointments.length ===
+              0 ? (
 
-                  <span>
-                    {formatDate(
-                      getAppointmentDate(
-                        appointment
-                      )
-                    )}
-                  </span>
+                <div className="appointments-empty-card">
 
-                  <span>
-                    {getAppointmentTime(
-                      appointment
-                    )}
-                  </span>
+                    <div className="empty-icon">
+                        📅
+                    </div>
 
-                  <span>
-                    <span
-                      className={`status-badge status-${getAppointmentStatus(
-                        appointment
-                      ).toLowerCase()}`}
+                    <h3>
+                        No appointments found
+                    </h3>
+
+                    <p>
+                        There are no appointments
+                        matching the current filters.
+                    </p>
+
+                    <button
+                        type="button"
+                        className="empty-add-button"
+                        onClick={
+                            openAddModal
+                        }
                     >
-                      {getAppointmentStatus(
-                        appointment
-                      )}
-                    </span>
-                  </span>
+                        + Add Appointment
+                    </button>
 
-                  <span>
+                </div>
 
-                    <div className="appointment-action-buttons">
+            ) : (
 
-                      <button
-                        type="button"
-                        className="view-button"
-                        onClick={() =>
-                          handleView(
-                            appointment
-                          )
-                        }
-                      >
-                        View
-                      </button>
+                <div className="appointments-table-card">
 
-                      <button
-                        type="button"
-                        className="edit-button"
-                        onClick={() =>
-                          openEditModal(
-                            appointment
-                          )
-                        }
-                      >
-                        Edit
-                      </button>
+                    <div className="appointments-table">
+
+                        {/* TABLE HEADER */}
+
+                        <div className="appointments-table-header">
+
+                            <span>
+                                Patient
+                            </span>
+
+                            <span>
+                                Doctor
+                            </span>
+
+                            <span>
+                                Department
+                            </span>
+
+                            <span>
+                                Date
+                            </span>
+
+                            <span>
+                                Time
+                            </span>
+
+                            <span>
+                                Status
+                            </span>
+
+                            <span>
+                                Action
+                            </span>
+
+                        </div>
+
+
+                        {/* TABLE ROWS */}
+
+                        {filteredAppointments.map(
+                            (appointment) => (
+
+                                <div
+                                    className="appointments-table-row"
+                                    key={
+                                        appointment._id
+                                    }
+                                >
+
+                                    <span>
+                                        {
+                                            getPatientName(
+                                                appointment
+                                            )
+                                        }
+                                    </span>
+
+
+                                    <span>
+                                        {
+                                            getDoctorName(
+                                                appointment
+                                            )
+                                        }
+                                    </span>
+
+
+                                    <span>
+                                        {
+                                            getDepartment(
+                                                appointment
+                                            )
+                                        }
+                                    </span>
+
+
+                                    <span>
+                                        {formatDate(
+                                            getAppointmentDate(
+                                                appointment
+                                            )
+                                        )}
+                                    </span>
+
+
+                                    <span>
+                                        {
+                                            getAppointmentTime(
+                                                appointment
+                                            ) || "-"
+                                        }
+                                    </span>
+
+
+                                    <span>
+
+                                        <span
+                                            className={`status-badge status-${getStatusClass(
+                                                getAppointmentStatus(
+                                                    appointment
+                                                )
+                                            )}`}
+                                        >
+                                            {
+                                                getAppointmentStatus(
+                                                    appointment
+                                                )
+                                            }
+                                        </span>
+
+                                    </span>
+
+
+                                    <span>
+
+                                        <div className="appointment-action-buttons">
+
+                                            <button
+                                                type="button"
+                                                className="view-button"
+                                                onClick={() =>
+                                                    handleView(
+                                                        appointment
+                                                    )
+                                                }
+                                            >
+                                                View
+                                            </button>
+
+
+                                            <button
+                                                type="button"
+                                                className="edit-button"
+                                                onClick={() =>
+                                                    openEditModal(
+                                                        appointment
+                                                    )
+                                                }
+                                            >
+                                                Edit
+                                            </button>
+
+                                        </div>
+
+                                    </span>
+
+                                </div>
+
+                            )
+                        )}
 
                     </div>
 
-                  </span>
-
                 </div>
 
-              )
             )}
+            {showAddModal && (
 
-          </div>
+                <div
+                    className="modal-overlay"
+                    onMouseDown={(
+                        event
+                    ) => {
 
-        </div>
+                        if (
+                            event.target ===
+                            event.currentTarget
+                        ) {
+                            closeAddModal();
+                        }
 
-      )}
+                    }}
+                >
 
+                    <div className="appointment-modal">
 
-      {/* ADD APPOINTMENT MODAL */}
+                        <div className="modal-header">
 
-      {showAddModal && (
-        <div className="modal-overlay">
+                            <div>
 
-          <div className="appointment-modal">
+                                <h3>
+                                    Add Appointment
+                                </h3>
 
-            <div className="modal-header">
+                                <p>
+                                    Create a new patient
+                                    appointment.
+                                </p>
 
-              <div>
-                <h3>
-                  Add New Appointment
-                </h3>
-
-                <p>
-                  Enter appointment details
-                  below.
-                </p>
-              </div>
-
-              <button
-                className="modal-close-button"
-                onClick={closeAddModal}
-              >
-                ×
-              </button>
-
-            </div>
+                            </div>
 
 
-            <form
-              onSubmit={
-                handleCreateAppointment
-              }
-            >
+                            <button
+                                type="button"
+                                className="modal-close-button"
+                                onClick={
+                                    closeAddModal
+                                }
+                                disabled={
+                                    savingAppointment
+                                }
+                            >
+                                ×
+                            </button>
 
-              <div className="form-grid">
+                        </div>
 
-                {/* PATIENT */}
 
-                <div className="form-group">
-
-                  <label>
-                    Patient *
-                  </label>
-
-                  <select
-                    name="patient"
-                    value={formData.patient}
-                    onChange={
-                      handleFormChange
-                    }
-                    required
-                  >
-
-                    <option value="">
-                      Select Patient
-                    </option>
-
-                    {patients.map(
-                      (patient) => (
-
-                        <option
-                          key={
-                            patient._id
-                          }
-                          value={
-                            patient._id
-                          }
+                        <form
+                            onSubmit={
+                                handleCreateAppointment
+                            }
                         >
-                          {patient.fullName ||
-                            patient.name ||
-                            patient.email}
-                        </option>
 
-                      )
-                    )}
+                            <div className="modal-body">
 
-                  </select>
+                                {formError && (
+                                    <div className="form-error">
+                                        {formError}
+                                    </div>
+                                )}
+
+
+                                {formMessage && (
+                                    <div className="form-success">
+                                        {formMessage}
+                                    </div>
+                                )}
+
+
+                                <div className="form-grid">
+
+                                    <div className="form-group">
+
+                                        <label>
+                                            Patient *
+                                        </label>
+
+                                        <select
+                                            name="patient"
+                                            value={
+                                                appointmentForm.patient
+                                            }
+                                            onChange={
+                                                handleAppointmentChange
+                                            }
+                                            required
+                                        >
+
+                                            <option value="">
+                                                Select patient
+                                            </option>
+
+                                            {patients.map(
+                                                (
+                                                    patient
+                                                ) => (
+
+                                                    <option
+                                                        key={
+                                                            patient._id
+                                                        }
+                                                        value={
+                                                            patient._id
+                                                        }
+                                                    >
+                                                        {
+                                                            patient.fullName ||
+                                                            patient.name ||
+                                                            patient.email
+                                                        }
+                                                    </option>
+
+                                                )
+                                            )}
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <div className="form-group">
+
+                                        <label>
+                                            Doctor *
+                                        </label>
+
+                                        <select
+                                            name="doctor"
+                                            value={
+                                                appointmentForm.doctor
+                                            }
+                                            onChange={
+                                                handleAppointmentChange
+                                            }
+                                            required
+                                        >
+
+                                            <option value="">
+                                                Select doctor
+                                            </option>
+
+                                            {doctors.map(
+                                                (
+                                                    doctor
+                                                ) => (
+
+                                                    <option
+                                                        key={
+                                                            doctor._id
+                                                        }
+                                                        value={
+                                                            doctor._id
+                                                        }
+                                                    >
+                                                        {getDoctorName(
+                                                            {
+                                                                doctor,
+                                                            }
+                                                        )}
+                                                    </option>
+
+                                                )
+                                            )}
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <div className="form-group">
+
+                                        <label>
+                                            Department *
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            name="department"
+                                            value={
+                                                appointmentForm.department
+                                            }
+                                            onChange={
+                                                handleAppointmentChange
+                                            }
+                                            readOnly
+                                            required
+                                        />
+
+                                    </div>
+
+
+                                    <div className="form-group">
+
+                                        <label>
+                                            Appointment Date *
+                                        </label>
+
+                                        <input
+                                            type="date"
+                                            name="appointmentDate"
+                                            value={
+                                                appointmentForm.appointmentDate
+                                            }
+                                            onChange={
+                                                handleAppointmentChange
+                                            }
+                                            min={
+                                                new Date()
+                                                    .toISOString()
+                                                    .split(
+                                                        "T"
+                                                    )[0]
+                                            }
+                                            required
+                                        />
+
+                                    </div>
+
+
+                                    <div className="form-group">
+
+                                        <label>
+                                            Appointment Time *
+                                        </label>
+
+                                        <input
+                                            type="time"
+                                            name="appointmentTime"
+                                            value={
+                                                appointmentForm.appointmentTime
+                                            }
+                                            onChange={
+                                                handleAppointmentChange
+                                            }
+                                            required
+                                        />
+
+                                    </div>
+
+
+                                    <div className="form-group">
+
+                                        <label>
+                                            Status
+                                        </label>
+
+                                        <select
+                                            name="status"
+                                            value={
+                                                appointmentForm.status
+                                            }
+                                            onChange={
+                                                handleAppointmentChange
+                                            }
+                                        >
+
+                                            <option value="Pending">
+                                                Pending
+                                            </option>
+
+                                            <option value="Confirmed">
+                                                Confirmed
+                                            </option>
+
+                                            <option value="Completed">
+                                                Completed
+                                            </option>
+
+                                            <option value="Cancelled">
+                                                Cancelled
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <div className="form-group full-width">
+
+                                        <label>
+                                            Reason
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            name="reason"
+                                            value={
+                                                appointmentForm.reason
+                                            }
+                                            onChange={
+                                                handleAppointmentChange
+                                            }
+                                            placeholder="Reason for visit"
+                                        />
+
+                                    </div>
+
+
+                                    <div className="form-group full-width">
+
+                                        <label>
+                                            Notes
+                                        </label>
+
+                                        <textarea
+                                            name="notes"
+                                            value={
+                                                appointmentForm.notes
+                                            }
+                                            onChange={
+                                                handleAppointmentChange
+                                            }
+                                            rows="4"
+                                            placeholder="Additional notes..."
+                                        />
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div className="modal-footer">
+
+                                <button
+                                    type="button"
+                                    className="cancel-button"
+                                    onClick={
+                                        closeAddModal
+                                    }
+                                    disabled={
+                                        savingAppointment
+                                    }
+                                >
+                                    Cancel
+                                </button>
+
+
+                                <button
+                                    type="submit"
+                                    className="save-appointment-button"
+                                    disabled={
+                                        savingAppointment
+                                    }
+                                >
+                                    {savingAppointment
+                                        ? "Saving..."
+                                        : "Save Appointment"}
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
 
                 </div>
 
-
-                {/* DOCTOR */}
-
-                <div className="form-group">
-
-                  <label>
-                    Doctor *
-                  </label>
-
-                  <select
-                    name="doctor"
-                    value={formData.doctor}
-                    onChange={
-                      handleFormChange
-                    }
-                    required
-                  >
-
-                    <option value="">
-                      Select Doctor
-                    </option>
-
-                    {doctors.map(
-                      (doctor) => (
-
-                        <option
-                          key={
-                            doctor._id
-                          }
-                          value={
-                            doctor._id
-                          }
-                        >
-                          Dr.{" "}
-                          {doctor.fullName ||
-                            doctor.name ||
-                            doctor.email}
-                        </option>
-
-                      )
-                    )}
-
-                  </select>
-
-                </div>
-
-
-                {/* DEPARTMENT */}
-
-                <div className="form-group">
-
-                  <label>
-                    Department *
-                  </label>
-
-                  <input
-                    type="text"
-                    name="department"
-                    value={
-                      formData.department
-                    }
-                    onChange={
-                      handleFormChange
-                    }
-                    placeholder="Example: Cardiology"
-                    required
-                  />
-
-                </div>
-
-
-                {/* DATE */}
-
-                <div className="form-group">
-
-                  <label>
-                    Appointment Date *
-                  </label>
-
-                  <input
-                    type="date"
-                    name="appointmentDate"
-                    value={
-                      formData.appointmentDate
-                    }
-                    onChange={
-                      handleFormChange
-                    }
-                    required
-                  />
-
-                </div>
-
-
-                {/* TIME */}
-
-                <div className="form-group">
-
-                  <label>
-                    Appointment Time *
-                  </label>
-
-                  <input
-                    type="time"
-                    name="appointmentTime"
-                    value={
-                      formData.appointmentTime
-                    }
-                    onChange={
-                      handleFormChange
-                    }
-                    required
-                  />
-
-                </div>
-
-
-                {/* STATUS */}
-
-                <div className="form-group">
-
-                  <label>
-                    Status
-                  </label>
-
-                  <select
-                    name="status"
-                    value={
-                      formData.status
-                    }
-                    onChange={
-                      handleFormChange
-                    }
-                  >
-
-                    <option value="Pending">
-                      Pending
-                    </option>
-
-                    <option value="Confirmed">
-                      Confirmed
-                    </option>
-
-                    <option value="Completed">
-                      Completed
-                    </option>
-
-                    <option value="Cancelled">
-                      Cancelled
-                    </option>
-
-                  </select>
-
-                </div>
-
-
-                {/* REASON */}
-
-                <div className="form-group full-width">
-
-                  <label>
-                    Reason
-                  </label>
-
-                  <input
-                    type="text"
-                    name="reason"
-                    value={
-                      formData.reason
-                    }
-                    onChange={
-                      handleFormChange
-                    }
-                    placeholder="Reason for appointment"
-                  />
-
-                </div>
-
-
-                {/* NOTES */}
-
-                <div className="form-group full-width">
-
-                  <label>
-                    Notes
-                  </label>
-
-                  <textarea
-                    name="notes"
-                    value={
-                      formData.notes
-                    }
-                    onChange={
-                      handleFormChange
-                    }
-                    placeholder="Additional notes"
-                    rows="3"
-                  />
-
-                </div>
-
-              </div>
-
-
-              {formError && (
-                <div className="form-error">
-                  {formError}
-                </div>
-              )}
-
-
-              <div className="modal-actions">
-
-                <button
-                  type="button"
-                  className="cancel-button"
-                  onClick={closeAddModal}
-                  disabled={formLoading}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="save-appointment-button"
-                  disabled={formLoading}
-                >
-                  {formLoading
-                    ? "Creating..."
-                    : "Create Appointment"}
-                </button>
-
-              </div>
-
-            </form>
-
-          </div>
-
-        </div>
-      )}
-
-
-      {/* VIEW APPOINTMENT MODAL */}
-
-      {showViewModal &&
-        selectedAppointment && (
-
-          <div className="modal-overlay">
-
-            <div className="appointment-modal view-modal">
-
-              <div className="modal-header">
-
-                <div>
-                  <h3>
-                    Appointment Details
-                  </h3>
-
-                  <p>
-                    View appointment
-                    information.
-                  </p>
-                </div>
-
-                <button
-                  className="modal-close-button"
-                  onClick={
-                    closeViewModal
-                  }
-                >
-                  ×
-                </button>
-
-              </div>
-
-
-              <div className="appointment-details">
-
-                <div>
-                  <label>
-                    Patient
-                  </label>
-
-                  <strong>
-                    {getPatientName(
-                      selectedAppointment
-                    )}
-                  </strong>
-                </div>
-
-                <div>
-                  <label>
-                    Doctor
-                  </label>
-
-                  <strong>
-                    {getDoctorName(
-                      selectedAppointment
-                    )}
-                  </strong>
-                </div>
-
-                <div>
-                  <label>
-                    Department
-                  </label>
-
-                  <strong>
-                    {getDepartment(
-                      selectedAppointment
-                    )}
-                  </strong>
-                </div>
-
-                <div>
-                  <label>
-                    Date
-                  </label>
-
-                  <strong>
-                    {formatDate(
-                      getAppointmentDate(
-                        selectedAppointment
-                      )
-                    )}
-                  </strong>
-                </div>
-
-                <div>
-                  <label>
-                    Time
-                  </label>
-
-                  <strong>
-                    {getAppointmentTime(
-                      selectedAppointment
-                    )}
-                  </strong>
-                </div>
-
-                <div>
-                  <label>
-                    Status
-                  </label>
-
-                  <strong>
-                    {getAppointmentStatus(
-                      selectedAppointment
-                    )}
-                  </strong>
-                </div>
-
-                <div className="details-full">
-
-                  <label>
-                    Reason
-                  </label>
-
-                  <p>
-                    {selectedAppointment.reason ||
-                      "No reason provided."}
-                  </p>
-
-                </div>
-
-                <div className="details-full">
-
-                  <label>
-                    Notes
-                  </label>
-
-                  <p>
-                    {selectedAppointment.notes ||
-                      "No additional notes."}
-                  </p>
-
-                </div>
-
-              </div>
-
-
-              <div className="modal-actions">
-
-                <button
-                  className="cancel-button"
-                  onClick={
-                    closeViewModal
-                  }
-                >
-                  Close
-                </button>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        )}
-
-        
-      {showEditModal &&
-        editingAppointment && (
-
-          <div
-            className="modal-overlay"
-            onMouseDown={(event) => {
-              if (
-                event.target ===
-                event.currentTarget
-              ) {
-                closeEditModal();
-              }
-            }}
-          >
-
-            <div className="appointment-modal">
-
-              {/* HEADER */}
-
-              <div className="modal-header">
-
-                <div>
-
-                  <h3>
-                    Edit Appointment
-                  </h3>
-
-                  <p>
-                    Update appointment
-                    schedule and details.
-                  </p>
-
-                </div>
-
-                <button
-                  type="button"
-                  className="modal-close-button"
-                  onClick={
-                    closeEditModal
-                  }
-                  disabled={
-                    updatingAppointment
-                  }
-                >
-                  ×
-                </button>
-
-              </div>
-
-
-              {/* FORM */}
-
-              <form
-                onSubmit={
-                  handleUpdateAppointment
-                }
-              >
-
-                <div className="form-grid">
-
-                  {/* PATIENT */}
-
-                  <div className="form-group">
-
-                    <label>
-                      Patient
-                    </label>
-
-                    <select
-                      name="patient"
-                      value={
-                        editingAppointment.patient
-                      }
-                      onChange={
-                        handleEditChange
-                      }
-                      required
+            )}
+            {showViewModal &&
+                selectedAppointment && (
+
+                    <div
+                        className="modal-overlay"
+                        onMouseDown={(
+                            event
+                        ) => {
+
+                            if (
+                                event.target ===
+                                event.currentTarget
+                            ) {
+                                closeViewModal();
+                            }
+
+                        }}
                     >
 
-                      <option value="">
-                        Select Patient
-                      </option>
+                        <div className="appointment-modal view-modal">
 
-                      {patients.map(
-                        (patient) => (
+                            <div className="modal-header">
 
-                          <option
-                            key={
-                              patient._id
+                                <div>
+
+                                    <h3>
+                                        Appointment Details
+                                    </h3>
+
+                                    <p>
+                                        Complete appointment
+                                        information.
+                                    </p>
+
+                                </div>
+
+
+                                <button
+                                    type="button"
+                                    className="modal-close-button"
+                                    onClick={
+                                        closeViewModal
+                                    }
+                                >
+                                    ×
+                                </button>
+
+                            </div>
+
+
+                            <div className="modal-body">
+
+                                <div className="appointment-details">
+
+                                    <div>
+                                        <label>
+                                            Patient
+                                        </label>
+
+                                        <strong>
+                                            {
+                                                getPatientName(
+                                                    selectedAppointment
+                                                )
+                                            }
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <label>
+                                            Doctor
+                                        </label>
+
+                                        <strong>
+                                            {
+                                                getDoctorName(
+                                                    selectedAppointment
+                                                )
+                                            }
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <label>
+                                            Department
+                                        </label>
+
+                                        <strong>
+                                            {
+                                                getDepartment(
+                                                    selectedAppointment
+                                                )
+                                            }
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <label>
+                                            Date
+                                        </label>
+
+                                        <strong>
+                                            {formatDate(
+                                                getAppointmentDate(
+                                                    selectedAppointment
+                                                )
+                                            )}
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <label>
+                                            Time
+                                        </label>
+
+                                        <strong>
+                                            {
+                                                getAppointmentTime(
+                                                    selectedAppointment
+                                                ) ||
+                                                "-"
+                                            }
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <label>
+                                            Status
+                                        </label>
+
+                                        <span
+                                            className={`status-badge status-${getStatusClass(
+                                                getAppointmentStatus(
+                                                    selectedAppointment
+                                                )
+                                            )}`}
+                                        >
+                                            {
+                                                getAppointmentStatus(
+                                                    selectedAppointment
+                                                )
+                                            }
+                                        </span>
+                                    </div>
+
+
+                                    <div className="details-full">
+                                        <label>
+                                            Reason
+                                        </label>
+
+                                        <p>
+                                            {
+                                                selectedAppointment.reason ||
+                                                "No reason provided."
+                                            }
+                                        </p>
+                                    </div>
+
+
+                                    <div className="details-full">
+                                        <label>
+                                            Notes
+                                        </label>
+
+                                        <p>
+                                            {
+                                                selectedAppointment.notes ||
+                                                "No additional notes."
+                                            }
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div className="modal-footer">
+
+                                <button
+                                    type="button"
+                                    className="cancel-button"
+                                    onClick={
+                                        closeViewModal
+                                    }
+                                >
+                                    Close
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    className="save-appointment-button"
+                                    onClick={() => {
+
+                                        closeViewModal();
+
+                                        openEditModal(
+                                            selectedAppointment
+                                        );
+
+                                    }}
+                                >
+                                    Edit Appointment
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                )}
+            {showEditModal &&
+                editingAppointment && (
+
+                    <div
+                        className="modal-overlay"
+                        onMouseDown={(
+                            event
+                        ) => {
+
+                            if (
+                                event.target ===
+                                event.currentTarget
+                            ) {
+                                closeEditModal();
                             }
-                            value={
-                              patient._id
-                            }
-                          >
-                            {patient.fullName ||
-                              patient.name ||
-                              patient.email}
-                          </option>
 
-                        )
-                      )}
-
-                    </select>
-
-                  </div>
-
-
-                  {/* DOCTOR */}
-
-                  <div className="form-group">
-
-                    <label>
-                      Doctor
-                    </label>
-
-                    <select
-                      name="doctor"
-                      value={
-                        editingAppointment.doctor
-                      }
-                      onChange={
-                        handleEditChange
-                      }
-                      required
+                        }}
                     >
 
-                      <option value="">
-                        Select Doctor
-                      </option>
+                        <div className="appointment-modal">
 
-                      {doctors.map(
-                        (doctor) => (
+                            {/* FIXED HEADER */}
 
-                          <option
-                            key={
-                              doctor._id
-                            }
-                            value={
-                              doctor._id
-                            }
-                          >
-                            Dr.{" "}
-                            {doctor.fullName ||
-                              doctor.name ||
-                              doctor.email}
-                          </option>
+                            <div className="modal-header">
 
-                        )
-                      )}
+                                <div>
 
-                    </select>
+                                    <h3>
+                                        Edit Appointment
+                                    </h3>
 
-                  </div>
+                                    <p>
+                                        Update appointment
+                                        schedule and details.
+                                    </p>
+
+                                </div>
 
 
-                  {/* DEPARTMENT */}
+                                <button
+                                    type="button"
+                                    className="modal-close-button"
+                                    onClick={
+                                        closeEditModal
+                                    }
+                                    disabled={
+                                        updatingAppointment
+                                    }
+                                >
+                                    ×
+                                </button>
 
-                  <div className="form-group">
-
-                    <label>
-                      Department
-                    </label>
-
-                    <input
-                      type="text"
-                      name="department"
-                      value={
-                        editingAppointment.department ||
-                        ""
-                      }
-                      onChange={
-                        handleEditChange
-                      }
-                      placeholder="Department"
-                      required
-                    />
-
-                  </div>
+                            </div>
 
 
-                  {/* DATE */}
+                            {/* SCROLLABLE BODY */}
 
-                  <div className="form-group">
+                            <form
+                                onSubmit={
+                                    handleUpdateAppointment
+                                }
+                            >
 
-                    <label>
-                      Appointment Date
-                    </label>
+                                <div className="modal-body">
 
-                    <input
-                      type="date"
-                      name="appointmentDate"
-                      value={
-                        editingAppointment.appointmentDate ||
-                        ""
-                      }
-                      onChange={
-                        handleEditChange
-                      }
-                      required
-                    />
-
-                  </div>
+                                    {formError && (
+                                        <div className="form-error">
+                                            {formError}
+                                        </div>
+                                    )}
 
 
-                  {/* TIME */}
-
-                  <div className="form-group">
-
-                    <label>
-                      Appointment Time
-                    </label>
-
-                    <input
-                      type="time"
-                      name="appointmentTime"
-                      value={
-                        editingAppointment.appointmentTime ||
-                        ""
-                      }
-                      onChange={
-                        handleEditChange
-                      }
-                      required
-                    />
-
-                  </div>
+                                    {formMessage && (
+                                        <div className="form-success">
+                                            {formMessage}
+                                        </div>
+                                    )}
 
 
-                  {/* STATUS */}
+                                    <div className="form-grid">
 
-                  <div className="form-group">
+                                        {/* PATIENT */}
 
-                    <label>
-                      Status
-                    </label>
+                                        <div className="form-group">
 
-                    <select
-                      name="status"
-                      value={
-                        editingAppointment.status ||
-                        "Pending"
-                      }
-                      onChange={
-                        handleEditChange
-                      }
-                    >
+                                            <label>
+                                                Patient *
+                                            </label>
 
-                      <option value="Pending">
-                        Pending
-                      </option>
+                                            <select
+                                                name="patient"
+                                                value={
+                                                    editingAppointment.patient ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                                required
+                                            >
 
-                      <option value="Confirmed">
-                        Confirmed
-                      </option>
+                                                <option value="">
+                                                    Select patient
+                                                </option>
 
-                      <option value="Completed">
-                        Completed
-                      </option>
+                                                {patients.map(
+                                                    (
+                                                        patient
+                                                    ) => (
 
-                      <option value="Cancelled">
-                        Cancelled
-                      </option>
+                                                        <option
+                                                            key={
+                                                                patient._id
+                                                            }
+                                                            value={
+                                                                patient._id
+                                                            }
+                                                        >
+                                                            {
+                                                                patient.fullName ||
+                                                                patient.name ||
+                                                                patient.email
+                                                            }
+                                                        </option>
 
-                    </select>
+                                                    )
+                                                )}
 
-                  </div>
+                                            </select>
 
-
-                  {/* REASON */}
-
-                  <div className="form-group full-width">
-
-                    <label>
-                      Reason
-                    </label>
-
-                    <input
-                      type="text"
-                      name="reason"
-                      value={
-                        editingAppointment.reason ||
-                        ""
-                      }
-                      onChange={
-                        handleEditChange
-                      }
-                      placeholder="Reason for appointment"
-                    />
-
-                  </div>
+                                        </div>
 
 
-                  {/* NOTES */}
+                                        {/* DOCTOR */}
 
-                  <div className="form-group full-width">
+                                        <div className="form-group">
 
-                    <label>
-                      Notes
-                    </label>
+                                            <label>
+                                                Doctor *
+                                            </label>
 
-                    <textarea
-                      name="notes"
-                      value={
-                        editingAppointment.notes ||
-                        ""
-                      }
-                      onChange={
-                        handleEditChange
-                      }
-                      placeholder="Additional notes"
-                      rows="4"
-                    />
+                                            <select
+                                                name="doctor"
+                                                value={
+                                                    editingAppointment.doctor ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                                required
+                                            >
 
-                  </div>
+                                                <option value="">
+                                                    Select doctor
+                                                </option>
 
-                </div>
+                                                {doctors.map(
+                                                    (
+                                                        doctor
+                                                    ) => (
+
+                                                        <option
+                                                            key={
+                                                                doctor._id
+                                                            }
+                                                            value={
+                                                                doctor._id
+                                                            }
+                                                        >
+                                                            {
+                                                                getDoctorName(
+                                                                    {
+                                                                        doctor,
+                                                                    }
+                                                                )
+                                                            }
+                                                        </option>
+
+                                                    )
+                                                )}
+
+                                            </select>
+
+                                        </div>
 
 
-                {/* ERROR */}
+                                        {/* DEPARTMENT */}
 
-                {formError && (
+                                        <div className="form-group">
 
-                  <div className="form-error">
-                    {formError}
-                  </div>
+                                            <label>
+                                                Department *
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="department"
+                                                value={
+                                                    editingAppointment.department ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                                readOnly
+                                                required
+                                            />
+
+                                        </div>
+
+
+                                        {/* DATE */}
+
+                                        <div className="form-group">
+
+                                            <label>
+                                                Appointment Date *
+                                            </label>
+
+                                            <input
+                                                type="date"
+                                                name="appointmentDate"
+                                                value={
+                                                    editingAppointment.appointmentDate ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                                required
+                                            />
+
+                                        </div>
+
+
+                                        {/* TIME */}
+
+                                        <div className="form-group">
+
+                                            <label>
+                                                Appointment Time *
+                                            </label>
+
+                                            <input
+                                                type="time"
+                                                name="appointmentTime"
+                                                value={
+                                                    editingAppointment.appointmentTime ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                                required
+                                            />
+
+                                        </div>
+
+
+                                        {/* STATUS */}
+
+                                        <div className="form-group">
+
+                                            <label>
+                                                Status
+                                            </label>
+
+                                            <select
+                                                name="status"
+                                                value={
+                                                    editingAppointment.status ||
+                                                    "Pending"
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                            >
+
+                                                <option value="Pending">
+                                                    Pending
+                                                </option>
+
+                                                <option value="Confirmed">
+                                                    Confirmed
+                                                </option>
+
+                                                <option value="Completed">
+                                                    Completed
+                                                </option>
+
+                                                <option value="Cancelled">
+                                                    Cancelled
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+
+                                        {/* REASON */}
+
+                                        <div className="form-group full-width">
+
+                                            <label>
+                                                Reason
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="reason"
+                                                value={
+                                                    editingAppointment.reason ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                                placeholder="Reason for appointment"
+                                            />
+
+                                        </div>
+
+
+                                        {/* NOTES */}
+
+                                        <div className="form-group full-width">
+
+                                            <label>
+                                                Notes
+                                            </label>
+
+                                            <textarea
+                                                name="notes"
+                                                value={
+                                                    editingAppointment.notes ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                                rows="5"
+                                                placeholder="Additional notes..."
+                                            />
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                {/* FIXED FOOTER */}
+
+                                <div className="modal-footer">
+
+                                    <button
+                                        type="button"
+                                        className="cancel-button"
+                                        onClick={
+                                            closeEditModal
+                                        }
+                                        disabled={
+                                            updatingAppointment
+                                        }
+                                    >
+                                        Cancel
+                                    </button>
+
+
+                                    <button
+                                        type="submit"
+                                        className="save-appointment-button"
+                                        disabled={
+                                            updatingAppointment
+                                        }
+                                    >
+                                        {updatingAppointment
+                                            ? "Saving Changes..."
+                                            : "Save Changes"}
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
 
                 )}
 
-
-                {/* ACTIONS */}
-
-                <div className="modal-actions">
-
-                  <button
-                    type="button"
-                    className="cancel-button"
-                    onClick={
-                      closeEditModal
-                    }
-                    disabled={
-                      updatingAppointment
-                    }
-                  >
-                    Cancel
-                  </button>
-
-
-                  <button
-                    type="submit"
-                    className="save-appointment-button"
-                    disabled={
-                      updatingAppointment
-                    }
-                  >
-                    {updatingAppointment
-                      ? "Updating..."
-                      : "Save Changes"}
-                  </button>
-
-                </div>
-
-              </form>
-
-            </div>
-
-          </div>
-        )}
-
-    </div>
-  );
+        </div>
+    );
 }
 
 export default Appointments;
