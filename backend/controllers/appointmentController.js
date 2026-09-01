@@ -1,7 +1,6 @@
 const Appointment = require("../models/Appointment");
 const User = require("../models/User");
 const Doctor = require("../models/Doctor");
-
 const createAppointment = async (req, res) => {
   try {
     const {
@@ -38,7 +37,7 @@ const createAppointment = async (req, res) => {
       });
     }
 
-    // Check doctor exists in Doctor collection
+    // Check doctor exists
     const doctorExists = await Doctor.findById(doctor);
 
     if (!doctorExists) {
@@ -47,7 +46,28 @@ const createAppointment = async (req, res) => {
       });
     }
 
-    // Create appointment
+    if (doctorExists.status !== "Available") {
+      return res.status(409).json({
+        message:
+          `Dr. ${doctorExists.fullName} is currently ${doctorExists.status.toLowerCase()}. Please select another doctor.`,
+      });
+    }
+    const conflictingAppointment =
+      await Appointment.findOne({
+        doctor: doctor,
+        appointmentDate: new Date(appointmentDate),
+        appointmentTime: appointmentTime,
+        status: {
+          $in: ["Pending", "Confirmed"],
+        },
+      });
+
+    if (conflictingAppointment) {
+      return res.status(409).json({
+        message:
+          `Dr. ${doctorExists.fullName} is already booked on ${appointmentDate} at ${appointmentTime}. Please choose another time.`,
+      });
+    }
     const appointment =
       await Appointment.create({
         patient,
@@ -60,7 +80,6 @@ const createAppointment = async (req, res) => {
         status: status || "Pending",
       });
 
-    // Return appointment with real patient + doctor details
     const populatedAppointment =
       await Appointment.findById(
         appointment._id
@@ -132,7 +151,6 @@ const getAppointments = async (
     });
   }
 };
-
 const getAppointmentById = async (
   req,
   res
@@ -190,74 +208,125 @@ const updateAppointment = async (
       notes,
       status,
     } = req.body;
+    const existingAppointment =
+      await Appointment.findById(
+        req.params.id
+      );
 
-    // If patient is being changed, verify it
-    if (patient) {
-      const patientExists =
-        await User.findById(patient);
-
-      if (!patientExists) {
-        return res.status(404).json({
-          message:
-            "Selected patient was not found.",
-        });
-      }
+    if (!existingAppointment) {
+      return res.status(404).json({
+        message:
+          "Appointment not found.",
+      });
     }
 
-    // If doctor is being changed, verify it
-    if (doctor) {
-      const doctorExists =
-        await Doctor.findById(doctor);
+    // Use existing values when fields
+    // are not being changed
+    const finalPatient =
+      patient !== undefined
+        ? patient
+        : existingAppointment.patient;
 
-      if (!doctorExists) {
-        return res.status(404).json({
-          message:
-            "Selected doctor was not found.",
-        });
-      }
+    const finalDoctor =
+      doctor !== undefined
+        ? doctor
+        : existingAppointment.doctor;
+
+    const finalDate =
+      appointmentDate !== undefined
+        ? appointmentDate
+        : existingAppointment.appointmentDate;
+
+    const finalTime =
+      appointmentTime !== undefined
+        ? appointmentTime
+        : existingAppointment.appointmentTime;
+
+    const finalDepartment =
+      department !== undefined
+        ? department
+        : existingAppointment.department;
+
+    const finalStatus =
+      status !== undefined
+        ? status
+        : existingAppointment.status;
+
+
+    const patientExists =
+      await User.findById(finalPatient);
+
+    if (!patientExists) {
+      return res.status(404).json({
+        message:
+          "Selected patient was not found.",
+      });
+    }
+    const doctorExists =
+      await Doctor.findById(finalDoctor);
+
+    if (!doctorExists) {
+      return res.status(404).json({
+        message:
+          "Selected doctor was not found.",
+      });
     }
 
-    const updateData = {};
-
-    if (patient !== undefined) {
-      updateData.patient = patient;
-    }
-
-    if (doctor !== undefined) {
-      updateData.doctor = doctor;
-    }
-
-    if (department !== undefined) {
-      updateData.department = department;
-    }
+    const doctorWasChanged =
+      String(finalDoctor) !==
+      String(existingAppointment.doctor);
 
     if (
-      appointmentDate !==
-      undefined
+      doctorWasChanged &&
+      doctorExists.status !== "Available"
     ) {
-      updateData.appointmentDate =
-        appointmentDate;
+      return res.status(409).json({
+        message:
+          `Dr. ${doctorExists.fullName} is currently ${doctorExists.status.toLowerCase()}. Please select an available doctor.`,
+      });
     }
 
-    if (
-      appointmentTime !==
-      undefined
-    ) {
-      updateData.appointmentTime =
-        appointmentTime;
+    const conflict =
+      await Appointment.findOne({
+        _id: {
+          $ne: existingAppointment._id,
+        },
+
+        doctor: finalDoctor,
+
+        appointmentDate:
+          new Date(finalDate),
+
+        appointmentTime: finalTime,
+
+        status: {
+          $in: ["Pending", "Confirmed"],
+        },
+      });
+
+    if (conflict) {
+      return res.status(409).json({
+        message:
+          `Dr. ${doctorExists.fullName} is already booked on ${finalDate} at ${finalTime}. Please choose another time.`,
+      });
     }
 
-    if (reason !== undefined) {
-      updateData.reason = reason;
-    }
-
-    if (notes !== undefined) {
-      updateData.notes = notes;
-    }
-
-    if (status !== undefined) {
-      updateData.status = status;
-    }
+    const updateData = {
+      patient: finalPatient,
+      doctor: finalDoctor,
+      department: finalDepartment,
+      appointmentDate: finalDate,
+      appointmentTime: finalTime,
+      reason:
+        reason !== undefined
+          ? reason
+          : existingAppointment.reason,
+      notes:
+        notes !== undefined
+          ? notes
+          : existingAppointment.notes,
+      status: finalStatus,
+    };
 
     const appointment =
       await Appointment.findByIdAndUpdate(
@@ -277,13 +346,6 @@ const updateAppointment = async (
           "fullName doctorId email phone specialization department experience qualification consultationFee gender status"
         );
 
-    if (!appointment) {
-      return res.status(404).json({
-        message:
-          "Appointment not found.",
-      });
-    }
-
     return res.status(200).json({
       message:
         "Appointment updated successfully.",
@@ -302,6 +364,7 @@ const updateAppointment = async (
     });
   }
 };
+
 const deleteAppointment = async (
   req,
   res

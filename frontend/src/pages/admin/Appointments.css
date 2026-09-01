@@ -4,12 +4,6 @@
   margin: 0 auto;
   padding-bottom: 40px;
 }
-
-
-/* ================================
-   HEADER
-================================ */
-
 .appointments-header {
   display: flex;
   align-items: center;
@@ -30,12 +24,6 @@
   color: #64748b;
   font-size: 14px;
 }
-
-
-/* ================================
-   ADD APPOINTMENT BUTTON
-================================ */
-
 .add-appointment-button {
   border: none;
   border-radius: 8px;
@@ -58,12 +46,6 @@
   background: #0b625c;
   transform: translateY(-1px);
 }
-
-
-/* ================================
-   FILTER CARD
-================================ */
-
 .appointments-filter-card {
   display: grid;
 
@@ -117,12 +99,6 @@
 .appointment-search-wrapper {
   width: 100%;
 }
-
-
-/* ================================
-   CLEAR BUTTON
-================================ */
-
 .clear-button {
   height: 44px;
 
@@ -143,12 +119,6 @@
   border-color: #0f766e;
   color: #0f766e;
 }
-
-
-/* ================================
-   LIST HEADER
-================================ */
-
 .appointments-list-header {
   display: flex;
   align-items: center;
@@ -179,12 +149,6 @@
 .refresh-button:hover {
   text-decoration: underline;
 }
-
-
-/* ================================
-   TABLE
-================================ */
-
 .appointments-table-card {
   width: 100%;
 
@@ -271,12 +235,6 @@
   color: #172033;
   font-weight: 600;
 }
-
-
-/* ================================
-   STATUS
-================================ */
-
 .status-badge {
   display: inline-flex;
 
@@ -312,12 +270,6 @@
   background: #fef2f2;
   color: #b91c1c;
 }
-
-
-/* ================================
-   VIEW BUTTON
-================================ */
-
 .view-button {
   padding: 8px 14px;
 
@@ -338,12 +290,6 @@
   border-color: #0f766e;
   color: #0f766e;
 }
-
-
-/* ================================
-   EMPTY STATE
-================================ */
-
 .appointments-empty-card {
   min-height: 330px;
 
@@ -418,12 +364,6 @@
 .empty-add-button:hover {
   background: #0b625c;
 }
-
-
-/* ================================
-   ERROR
-================================ */
-
 .appointments-error {
   margin-bottom: 15px;
 
@@ -438,12 +378,6 @@
 
   font-size: 14px;
 }
-
-
-/* ================================
-   LOADING
-================================ */
-
 .appointments-message-card {
   min-height: 300px;
 
@@ -484,12 +418,6 @@
     transform: rotate(360deg);
   }
 }
-
-
-/* ================================
-   MODAL
-================================ */
-
 .modal-overlay {
   position: fixed;
 
@@ -568,12 +496,6 @@
 .modal-close-button:hover {
   background: #e2e8f0;
 }
-
-
-/* ================================
-   FORM
-================================ */
-
 .appointment-modal form {
   padding: 24px;
 }
@@ -645,12 +567,6 @@
   box-shadow:
     0 0 0 3px rgba(15, 118, 110, 0.08);
 }
-
-
-/* ================================
-   FORM ERROR
-================================ */
-
 .form-error {
   margin-top: 18px;
 
@@ -665,12 +581,6 @@
 
   font-size: 13px;
 }
-
-
-/* ================================
-   MODAL ACTIONS
-================================ */
-
 .modal-actions {
   display: flex;
 
@@ -729,12 +639,6 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
-
-
-/* ================================
-   VIEW DETAILS
-================================ */
-
 .view-modal {
   max-width: 650px;
 }
@@ -785,12 +689,6 @@
 .details-full {
   grid-column: 1 / -1;
 }
-
-
-/* ================================
-   RESPONSIVE
-================================ */
-
 @media (max-width: 900px) {
   .appointments-filter-card {
     grid-template-columns: 1fr 1fr;
@@ -835,4 +733,128 @@
   .details-full {
     grid-column: auto;
   }
+}
+.appointment-action-buttons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+.appointment-action-buttons button {
+    white-space: nowrap;
+}
+.edit-button {
+    padding: 6px 10px;
+
+    border: 1px solid #0f766e;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #0f766e;
+
+    cursor: pointer;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.edit-button:hover {
+    background: #effcf9;
+}
+.appointment-modal form {
+    display: block;
+}
+
+.appointment-modal .form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 16px;
+
+    padding: 20px;
+}
+
+.appointment-modal .form-group {
+    min-width: 0;
+}
+
+.appointment-modal .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.appointment-modal .form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.appointment-modal .form-group input,
+.appointment-modal .form-group select,
+.appointment-modal .form-group textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d5dee7;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-family: inherit;
+
+    font-size: 13px;
+}
+
+.appointment-modal .form-group input:focus,
+.appointment-modal .form-group select:focus,
+.appointment-modal .form-group textarea:focus {
+    border-color: #0f766e;
+
+    box-shadow:
+        0 0 0 3px rgba(
+            15,
+            118,
+            110,
+            0.08
+        );
+}
+
+.appointment-modal .form-group textarea {
+    resize: vertical;
+
+    min-height: 90px;
+}
+@media (max-width: 700px) {
+
+    .appointment-modal .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .appointment-modal
+        .form-group.full-width {
+        grid-column: auto;
+    }
+
+    .appointment-action-buttons {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
 }

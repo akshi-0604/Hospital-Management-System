@@ -38,6 +38,15 @@ function Appointments() {
 
   const [showViewModal, setShowViewModal] = useState(false);
 
+  const [editingAppointment, setEditingAppointment] =
+    useState(null);
+
+  const [showEditModal, setShowEditModal] =
+    useState(false);
+
+  const [updatingAppointment, setUpdatingAppointment] =
+    useState(false);
+
   const [formData, setFormData] = useState({
     patient: "",
     doctor: "",
@@ -48,11 +57,6 @@ function Appointments() {
     notes: "",
     status: "Pending",
   });
-
-
-  // --------------------------------------------------
-  // FETCH APPOINTMENTS
-  // --------------------------------------------------
 
   useEffect(() => {
     fetchAppointments();
@@ -96,18 +100,12 @@ function Appointments() {
 
       setError(
         error.response?.data?.message ||
-          "Unable to load appointment records."
+        "Unable to load appointment records."
       );
     } finally {
       setLoading(false);
     }
   }
-
-
-  // --------------------------------------------------
-  // FETCH PATIENTS
-  // --------------------------------------------------
-
   async function fetchPatients() {
     try {
       const response = await axios.get(PATIENTS_URL);
@@ -137,11 +135,6 @@ function Appointments() {
       );
     }
   }
-
-
-  // --------------------------------------------------
-  // FETCH DOCTORS
-  // --------------------------------------------------
 
   async function fetchDoctors() {
     try {
@@ -173,11 +166,6 @@ function Appointments() {
     }
   }
 
-
-  // --------------------------------------------------
-  // FORM CHANGE
-  // --------------------------------------------------
-
   function handleFormChange(event) {
     const { name, value } = event.target;
 
@@ -186,11 +174,6 @@ function Appointments() {
       [name]: value,
     }));
   }
-
-
-  // --------------------------------------------------
-  // OPEN ADD FORM
-  // --------------------------------------------------
 
   function openAddModal() {
     setFormError("");
@@ -209,11 +192,6 @@ function Appointments() {
     setShowAddModal(true);
   }
 
-
-  // --------------------------------------------------
-  // CLOSE ADD FORM
-  // --------------------------------------------------
-
   function closeAddModal() {
     if (formLoading) {
       return;
@@ -222,11 +200,6 @@ function Appointments() {
     setShowAddModal(false);
     setFormError("");
   }
-
-
-  // --------------------------------------------------
-  // CREATE APPOINTMENT
-  // --------------------------------------------------
 
   async function handleCreateAppointment(event) {
     event.preventDefault();
@@ -284,17 +257,12 @@ function Appointments() {
 
       setFormError(
         error.response?.data?.message ||
-          "Unable to create appointment."
+        "Unable to create appointment."
       );
     } finally {
       setFormLoading(false);
     }
   }
-
-
-  // --------------------------------------------------
-  // FORMAT DATE
-  // --------------------------------------------------
 
   function formatDate(value) {
     if (!value) {
@@ -317,11 +285,6 @@ function Appointments() {
     );
   }
 
-
-  // --------------------------------------------------
-  // GET PATIENT NAME
-  // --------------------------------------------------
-
   function getPatientName(appointment) {
     return (
       appointment.patient?.fullName ||
@@ -330,11 +293,6 @@ function Appointments() {
       "Unknown Patient"
     );
   }
-
-
-  // --------------------------------------------------
-  // GET DOCTOR NAME
-  // --------------------------------------------------
 
   function getDoctorName(appointment) {
     const name =
@@ -352,10 +310,6 @@ function Appointments() {
   }
 
 
-  // --------------------------------------------------
-  // GET DEPARTMENT
-  // --------------------------------------------------
-
   function getDepartment(appointment) {
     return (
       appointment.department ||
@@ -363,11 +317,6 @@ function Appointments() {
       "Not assigned"
     );
   }
-
-
-  // --------------------------------------------------
-  // GET DATE
-  // --------------------------------------------------
 
   function getAppointmentDate(appointment) {
     return (
@@ -377,11 +326,6 @@ function Appointments() {
     );
   }
 
-
-  // --------------------------------------------------
-  // GET TIME
-  // --------------------------------------------------
-
   function getAppointmentTime(appointment) {
     return (
       appointment.appointmentTime ||
@@ -390,22 +334,12 @@ function Appointments() {
     );
   }
 
-
-  // --------------------------------------------------
-  // GET STATUS
-  // --------------------------------------------------
-
   function getAppointmentStatus(appointment) {
     return (
       appointment.status ||
       "Pending"
     );
   }
-
-
-  // --------------------------------------------------
-  // FILTER APPOINTMENTS
-  // --------------------------------------------------
 
   const filteredAppointments = useMemo(() => {
     const searchText =
@@ -443,7 +377,7 @@ function Appointments() {
         const matchesStatus =
           status === "all" ||
           appointmentStatus ===
-            status.toLowerCase();
+          status.toLowerCase();
 
         const appointmentDate =
           getAppointmentDate(
@@ -453,8 +387,8 @@ function Appointments() {
         const formattedDate =
           appointmentDate
             ? new Date(appointmentDate)
-                .toISOString()
-                .split("T")[0]
+              .toISOString()
+              .split("T")[0]
             : "";
 
         const matchesDate =
@@ -475,22 +409,11 @@ function Appointments() {
     date,
   ]);
 
-
-  // --------------------------------------------------
-  // CLEAR FILTERS
-  // --------------------------------------------------
-
   function clearFilters() {
     setSearch("");
     setStatus("all");
     setDate("");
   }
-
-
-  // --------------------------------------------------
-  // VIEW APPOINTMENT
-  // --------------------------------------------------
-
   function handleView(appointment) {
     setSelectedAppointment(
       appointment
@@ -505,10 +428,197 @@ function Appointments() {
     setShowViewModal(false);
   }
 
+  function openEditModal(appointment) {
+    setFormError("");
 
-  // --------------------------------------------------
-  // LOADING
-  // --------------------------------------------------
+    setEditingAppointment({
+      ...appointment,
+
+      patient:
+        typeof appointment.patient === "object"
+          ? appointment.patient?._id || ""
+          : appointment.patient || "",
+
+      doctor:
+        typeof appointment.doctor === "object"
+          ? appointment.doctor?._id || ""
+          : appointment.doctor || "",
+
+      department:
+        appointment.department || "",
+
+      appointmentDate:
+        formatDateForInput(
+          getAppointmentDate(appointment)
+        ),
+
+      appointmentTime:
+        getAppointmentTimeForInput(appointment),
+
+      reason:
+        appointment.reason || "",
+
+      notes:
+        appointment.notes || "",
+
+      status:
+        appointment.status || "Pending",
+    });
+
+    setShowEditModal(true);
+  }
+  function closeEditModal() {
+    if (updatingAppointment) {
+      return;
+    }
+
+    setEditingAppointment(null);
+    setShowEditModal(false);
+    setFormError("");
+  }
+  function handleEditChange(event) {
+    const { name, value } = event.target;
+
+    setEditingAppointment((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+
+    // Automatically update department
+    // when doctor is changed
+    if (name === "doctor") {
+      const selectedDoctor = doctors.find(
+        (doctor) =>
+          String(doctor?._id) === String(value)
+      );
+
+      setEditingAppointment((previous) => ({
+        ...previous,
+        doctor: value,
+        department:
+          selectedDoctor?.department ||
+          previous.department ||
+          "",
+      }));
+    }
+  }
+
+  function formatDateForInput(value) {
+    if (!value) {
+      return "";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+  function getAppointmentTimeForInput(
+    appointment
+  ) {
+    const time =
+      appointment?.appointmentTime ||
+      appointment?.time ||
+      "";
+
+    return time;
+  }
+  async function handleUpdateAppointment(
+    event
+  ) {
+    event.preventDefault();
+
+    if (!editingAppointment?._id) {
+      return;
+    }
+
+    setFormError("");
+
+    if (
+      !editingAppointment.doctor ||
+      !editingAppointment.department ||
+      !editingAppointment.appointmentDate ||
+      !editingAppointment.appointmentTime
+    ) {
+      setFormError(
+        "Please fill in all required appointment details."
+      );
+      return;
+    }
+
+    try {
+      setUpdatingAppointment(true);
+
+      const updateData = {
+        patient:
+          editingAppointment.patient,
+
+        doctor:
+          editingAppointment.doctor,
+
+        department:
+          editingAppointment.department,
+
+        appointmentDate:
+          editingAppointment.appointmentDate,
+
+        appointmentTime:
+          editingAppointment.appointmentTime,
+
+        reason:
+          editingAppointment.reason || "",
+
+        notes:
+          editingAppointment.notes || "",
+
+        status:
+          editingAppointment.status ||
+          "Pending",
+      };
+
+      const response =
+        await axios.put(
+          `${APPOINTMENTS_URL}/${editingAppointment._id}`,
+          updateData
+        );
+
+      console.log(
+        "Appointment updated:",
+        response.data
+      );
+
+      setShowEditModal(false);
+      setEditingAppointment(null);
+
+      await fetchAppointments();
+
+    } catch (error) {
+      console.error(
+        "Update appointment error:",
+        error
+      );
+
+      setFormError(
+        error.response?.data?.message ||
+        "Unable to update appointment."
+      );
+    } finally {
+      setUpdatingAppointment(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -536,12 +646,6 @@ function Appointments() {
       </div>
     );
   }
-
-
-  // --------------------------------------------------
-  // PAGE
-  // --------------------------------------------------
-
   return (
     <div className="appointments-page">
 
@@ -764,16 +868,33 @@ function Appointments() {
 
                   <span>
 
-                    <button
-                      className="view-button"
-                      onClick={() =>
-                        handleView(
-                          appointment
-                        )
-                      }
-                    >
-                      View
-                    </button>
+                    <div className="appointment-action-buttons">
+
+                      <button
+                        type="button"
+                        className="view-button"
+                        onClick={() =>
+                          handleView(
+                            appointment
+                          )
+                        }
+                      >
+                        View
+                      </button>
+
+                      <button
+                        type="button"
+                        className="edit-button"
+                        onClick={() =>
+                          openEditModal(
+                            appointment
+                          )
+                        }
+                      >
+                        Edit
+                      </button>
+
+                    </div>
 
                   </span>
 
@@ -1269,6 +1390,375 @@ function Appointments() {
 
           </div>
 
+        )}
+
+        
+      {showEditModal &&
+        editingAppointment && (
+
+          <div
+            className="modal-overlay"
+            onMouseDown={(event) => {
+              if (
+                event.target ===
+                event.currentTarget
+              ) {
+                closeEditModal();
+              }
+            }}
+          >
+
+            <div className="appointment-modal">
+
+              {/* HEADER */}
+
+              <div className="modal-header">
+
+                <div>
+
+                  <h3>
+                    Edit Appointment
+                  </h3>
+
+                  <p>
+                    Update appointment
+                    schedule and details.
+                  </p>
+
+                </div>
+
+                <button
+                  type="button"
+                  className="modal-close-button"
+                  onClick={
+                    closeEditModal
+                  }
+                  disabled={
+                    updatingAppointment
+                  }
+                >
+                  ×
+                </button>
+
+              </div>
+
+
+              {/* FORM */}
+
+              <form
+                onSubmit={
+                  handleUpdateAppointment
+                }
+              >
+
+                <div className="form-grid">
+
+                  {/* PATIENT */}
+
+                  <div className="form-group">
+
+                    <label>
+                      Patient
+                    </label>
+
+                    <select
+                      name="patient"
+                      value={
+                        editingAppointment.patient
+                      }
+                      onChange={
+                        handleEditChange
+                      }
+                      required
+                    >
+
+                      <option value="">
+                        Select Patient
+                      </option>
+
+                      {patients.map(
+                        (patient) => (
+
+                          <option
+                            key={
+                              patient._id
+                            }
+                            value={
+                              patient._id
+                            }
+                          >
+                            {patient.fullName ||
+                              patient.name ||
+                              patient.email}
+                          </option>
+
+                        )
+                      )}
+
+                    </select>
+
+                  </div>
+
+
+                  {/* DOCTOR */}
+
+                  <div className="form-group">
+
+                    <label>
+                      Doctor
+                    </label>
+
+                    <select
+                      name="doctor"
+                      value={
+                        editingAppointment.doctor
+                      }
+                      onChange={
+                        handleEditChange
+                      }
+                      required
+                    >
+
+                      <option value="">
+                        Select Doctor
+                      </option>
+
+                      {doctors.map(
+                        (doctor) => (
+
+                          <option
+                            key={
+                              doctor._id
+                            }
+                            value={
+                              doctor._id
+                            }
+                          >
+                            Dr.{" "}
+                            {doctor.fullName ||
+                              doctor.name ||
+                              doctor.email}
+                          </option>
+
+                        )
+                      )}
+
+                    </select>
+
+                  </div>
+
+
+                  {/* DEPARTMENT */}
+
+                  <div className="form-group">
+
+                    <label>
+                      Department
+                    </label>
+
+                    <input
+                      type="text"
+                      name="department"
+                      value={
+                        editingAppointment.department ||
+                        ""
+                      }
+                      onChange={
+                        handleEditChange
+                      }
+                      placeholder="Department"
+                      required
+                    />
+
+                  </div>
+
+
+                  {/* DATE */}
+
+                  <div className="form-group">
+
+                    <label>
+                      Appointment Date
+                    </label>
+
+                    <input
+                      type="date"
+                      name="appointmentDate"
+                      value={
+                        editingAppointment.appointmentDate ||
+                        ""
+                      }
+                      onChange={
+                        handleEditChange
+                      }
+                      required
+                    />
+
+                  </div>
+
+
+                  {/* TIME */}
+
+                  <div className="form-group">
+
+                    <label>
+                      Appointment Time
+                    </label>
+
+                    <input
+                      type="time"
+                      name="appointmentTime"
+                      value={
+                        editingAppointment.appointmentTime ||
+                        ""
+                      }
+                      onChange={
+                        handleEditChange
+                      }
+                      required
+                    />
+
+                  </div>
+
+
+                  {/* STATUS */}
+
+                  <div className="form-group">
+
+                    <label>
+                      Status
+                    </label>
+
+                    <select
+                      name="status"
+                      value={
+                        editingAppointment.status ||
+                        "Pending"
+                      }
+                      onChange={
+                        handleEditChange
+                      }
+                    >
+
+                      <option value="Pending">
+                        Pending
+                      </option>
+
+                      <option value="Confirmed">
+                        Confirmed
+                      </option>
+
+                      <option value="Completed">
+                        Completed
+                      </option>
+
+                      <option value="Cancelled">
+                        Cancelled
+                      </option>
+
+                    </select>
+
+                  </div>
+
+
+                  {/* REASON */}
+
+                  <div className="form-group full-width">
+
+                    <label>
+                      Reason
+                    </label>
+
+                    <input
+                      type="text"
+                      name="reason"
+                      value={
+                        editingAppointment.reason ||
+                        ""
+                      }
+                      onChange={
+                        handleEditChange
+                      }
+                      placeholder="Reason for appointment"
+                    />
+
+                  </div>
+
+
+                  {/* NOTES */}
+
+                  <div className="form-group full-width">
+
+                    <label>
+                      Notes
+                    </label>
+
+                    <textarea
+                      name="notes"
+                      value={
+                        editingAppointment.notes ||
+                        ""
+                      }
+                      onChange={
+                        handleEditChange
+                      }
+                      placeholder="Additional notes"
+                      rows="4"
+                    />
+
+                  </div>
+
+                </div>
+
+
+                {/* ERROR */}
+
+                {formError && (
+
+                  <div className="form-error">
+                    {formError}
+                  </div>
+
+                )}
+
+
+                {/* ACTIONS */}
+
+                <div className="modal-actions">
+
+                  <button
+                    type="button"
+                    className="cancel-button"
+                    onClick={
+                      closeEditModal
+                    }
+                    disabled={
+                      updatingAppointment
+                    }
+                  >
+                    Cancel
+                  </button>
+
+
+                  <button
+                    type="submit"
+                    className="save-appointment-button"
+                    disabled={
+                      updatingAppointment
+                    }
+                  >
+                    {updatingAppointment
+                      ? "Updating..."
+                      : "Save Changes"}
+                  </button>
+
+                </div>
+
+              </form>
+
+            </div>
+
+          </div>
         )}
 
     </div>
