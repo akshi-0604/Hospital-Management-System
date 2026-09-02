@@ -34,6 +34,14 @@ const departmentSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Multiple doctors belonging to this department
+    doctors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Doctor",
+      },
+    ],
+
     status: {
       type: String,
       enum: ["Active", "Inactive"],
@@ -47,7 +55,4 @@ const departmentSchema = new mongoose.Schema(
 
 module.exports =
   mongoose.models.Department ||
-  mongoose.model(
-    "Department",
-    departmentSchema
-  );
+  mongoose.model("Department", departmentSchema);

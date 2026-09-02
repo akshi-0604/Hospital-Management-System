@@ -1,5 +1,7 @@
 const Department = require("../models/Department");
 const Doctor = require("../models/Doctor");
+
+// Create Department
 const createDepartment = async (req, res) => {
   try {
     const {
@@ -8,401 +10,412 @@ const createDepartment = async (req, res) => {
       description,
       location,
       headDoctor,
-      status,
+      doctors = [],
+      status = "Active",
     } = req.body;
 
     if (!name || !code) {
       return res.status(400).json({
-        message:
-          "Department name and code are required.",
+        success: false,
+        message: "Department name and code are required",
       });
     }
 
-    const normalizedName =
-      name.trim();
+    const departmentName = name.trim();
+    const departmentCode = code.trim().toUpperCase();
 
-    const normalizedCode =
-      code.trim().toUpperCase();
+    // Check duplicate department name
+    const existingName = await Department.findOne({
+      name: {
+        $regex: `^${departmentName}$`,
+        $options: "i",
+      },
+    });
 
-    const existingDepartment =
-      await Department.findOne({
-        $or: [
-          {
-            name: normalizedName,
-          },
-          {
-            code: normalizedCode,
-          },
-        ],
-      });
-
-    if (existingDepartment) {
+    if (existingName) {
       return res.status(409).json({
-        message:
-          "A department with this name or code already exists.",
+        success: false,
+        message: "Department with this name already exists",
       });
     }
 
-    // Check head doctor if provided
-    if (headDoctor) {
-      const doctor =
-        await Doctor.findById(
-          headDoctor
-        );
+    // Check duplicate code
+    const existingCode = await Department.findOne({
+      code: departmentCode,
+    });
 
-      if (!doctor) {
-        return res.status(404).json({
-          message:
-            "Selected head doctor was not found.",
+    if (existingCode) {
+      return res.status(409).json({
+        success: false,
+        message: "Department with this code already exists",
+      });
+    }
+
+    // Make sure doctors is always an array
+    const doctorIds = Array.isArray(doctors) ? doctors : [];
+
+    // Validate selected doctors
+    if (doctorIds.length > 0) {
+      const foundDoctors = await Doctor.find({
+        _id: { $in: doctorIds },
+      });
+
+      if (foundDoctors.length !== doctorIds.length) {
+        return res.status(400).json({
+          success: false,
+          message: "One or more selected doctors were not found",
         });
       }
     }
 
-    const department =
-      await Department.create({
-        name: normalizedName,
+    // Head doctor must exist
+    if (headDoctor) {
+      const headDoctorExists = await Doctor.findById(headDoctor);
 
-        code: normalizedCode,
-
-        description:
-          description || "",
-
-        location:
-          location || "",
-
-        headDoctor:
-          headDoctor || null,
-
-        status:
-          status || "Active",
-      });
-
-    const populatedDepartment =
-      await Department.findById(
-        department._id
-      ).populate(
-        "headDoctor",
-        "fullName doctorId specialization department status"
-      );
-
-    return res.status(201).json({
-      message:
-        "Department created successfully.",
-      department:
-        populatedDepartment,
-    });
-
-  } catch (error) {
-    console.error(
-      "Create department error:",
-      error
-    );
-
-    return res.status(500).json({
-      message:
-        "Unable to create department.",
-    });
-  }
-};
-const getDepartments = async (
-  req,
-  res
-) => {
-  try {
-    const departments =
-      await Department.find()
-        .populate(
-          "headDoctor",
-          "fullName doctorId specialization department status"
-        )
-        .sort({
-          createdAt: -1,
+      if (!headDoctorExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Selected head doctor was not found",
         });
+      }
 
-    // Get doctor count for each department
-    const departmentsWithCounts =
-      await Promise.all(
-        departments.map(
-          async (department) => {
+      // Automatically make head doctor part of department doctors
+      if (!doctorIds.includes(String(headDoctor))) {
+        doctorIds.push(String(headDoctor));
+      }
+    }
 
-            const doctorCount =
-              await Doctor.countDocuments(
-                {
-                  department:
-                    department.name,
-                }
-              );
-
-            return {
-              ...department.toObject(),
-              doctorCount,
-            };
-          }
-        )
-      );
-
-    return res.status(200).json({
-      message:
-        "Departments fetched successfully.",
-      departments:
-        departmentsWithCounts,
+    // Create department
+    const department = await Department.create({
+      name: departmentName,
+      code: departmentCode,
+      description: description || "",
+      location: location || "",
+      headDoctor: headDoctor || null,
+      doctors: doctorIds,
+      status,
     });
 
-  } catch (error) {
-    console.error(
-      "Get departments error:",
-      error
-    );
+    // Update selected doctors' department
+    if (doctorIds.length > 0) {
+      await Doctor.updateMany(
+        {
+          _id: { $in: doctorIds },
+        },
+        {
+          $set: {
+            department: departmentName,
+          },
+        }
+      );
+    }
 
-    return res.status(500).json({
-      message:
-        "Unable to fetch departments.",
+    const populatedDepartment = await Department.findById(
+      department._id
+    )
+      .populate("headDoctor", "fullName doctorId specialization department")
+      .populate("doctors", "fullName doctorId specialization department");
+
+    res.status(201).json({
+      success: true,
+      message: "Department created successfully",
+      department: populatedDepartment,
+    });
+  } catch (error) {
+    console.error("Create Department Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to create department",
     });
   }
 };
-const getDepartmentById = async (
-  req,
-  res
-) => {
+
+// Get All Departments
+const getDepartments = async (req, res) => {
   try {
-    const department =
-      await Department.findById(
-        req.params.id
-      ).populate(
-        "headDoctor",
-        "fullName doctorId specialization department status"
-      );
+    const departments = await Department.find()
+      .populate("headDoctor", "fullName doctorId specialization department")
+      .populate("doctors", "fullName doctorId specialization department")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      departments,
+    });
+  } catch (error) {
+    console.error("Get Departments Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch departments",
+    });
+  }
+};
+
+// Get Department By ID
+const getDepartmentById = async (req, res) => {
+  try {
+    const department = await Department.findById(req.params.id)
+      .populate("headDoctor", "fullName doctorId specialization department")
+      .populate("doctors", "fullName doctorId specialization department");
 
     if (!department) {
       return res.status(404).json({
-        message:
-          "Department not found.",
+        success: false,
+        message: "Department not found",
       });
     }
 
-    const doctorCount =
-      await Doctor.countDocuments({
-        department:
-          department.name,
-      });
-
-    return res.status(200).json({
-      department: {
-        ...department.toObject(),
-        doctorCount,
-      },
+    res.status(200).json({
+      success: true,
+      department,
     });
-
   } catch (error) {
-    console.error(
-      "Get department error:",
-      error
-    );
+    console.error("Get Department By ID Error:", error);
 
-    return res.status(500).json({
-      message:
-        "Unable to fetch department.",
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch department",
     });
   }
 };
-const updateDepartment = async (
-  req,
-  res
-) => {
+
+// Update Department
+const updateDepartment = async (req, res) => {
   try {
+    const { id } = req.params;
+
     const {
       name,
       code,
       description,
       location,
       headDoctor,
+      doctors = [],
       status,
     } = req.body;
 
-    const department =
-      await Department.findById(
-        req.params.id
-      );
+    const existingDepartment = await Department.findById(id);
 
-    if (!department) {
+    if (!existingDepartment) {
       return res.status(404).json({
-        message:
-          "Department not found.",
+        success: false,
+        message: "Department not found",
       });
     }
 
-    if (headDoctor) {
-      const doctor =
-        await Doctor.findById(
-          headDoctor
-        );
+    const oldDepartmentName = existingDepartment.name;
 
-      if (!doctor) {
-        return res.status(404).json({
-          message:
-            "Selected head doctor was not found.",
+    const updatedName = name
+      ? name.trim()
+      : existingDepartment.name;
+
+    const updatedCode = code
+      ? code.trim().toUpperCase()
+      : existingDepartment.code;
+
+    // Check duplicate name
+    const duplicateName = await Department.findOne({
+      name: {
+        $regex: `^${updatedName}$`,
+        $options: "i",
+      },
+      _id: { $ne: id },
+    });
+
+    if (duplicateName) {
+      return res.status(409).json({
+        success: false,
+        message: "Another department already uses this name",
+      });
+    }
+
+    // Check duplicate code
+    const duplicateCode = await Department.findOne({
+      code: updatedCode,
+      _id: { $ne: id },
+    });
+
+    if (duplicateCode) {
+      return res.status(409).json({
+        success: false,
+        message: "Another department already uses this code",
+      });
+    }
+
+    const doctorIds = Array.isArray(doctors)
+      ? [...doctors]
+      : [...(existingDepartment.doctors || [])];
+
+    // Validate selected doctors
+    if (doctorIds.length > 0) {
+      const foundDoctors = await Doctor.find({
+        _id: { $in: doctorIds },
+      });
+
+      if (foundDoctors.length !== doctorIds.length) {
+        return res.status(400).json({
+          success: false,
+          message: "One or more selected doctors were not found",
         });
       }
     }
 
-    const oldName =
-      department.name;
-
-    const newName =
-      name !== undefined &&
-      name.trim() !== ""
-        ? name.trim()
-        : department.name;
-
-    const newCode =
-      code !== undefined &&
-      code.trim() !== ""
-        ? code.trim().toUpperCase()
-        : department.code;
-
-    // Check duplicate name/code
-    const duplicate =
-      await Department.findOne({
-        _id: {
-          $ne: department._id,
-        },
-        $or: [
-          {
-            name: newName,
-          },
-          {
-            code: newCode,
-          },
-        ],
-      });
-
-    if (duplicate) {
-      return res.status(409).json({
-        message:
-          "Another department already uses this name or code.",
-      });
-    }
-
-    department.name =
-      newName;
-
-    department.code =
-      newCode;
-
-    department.description =
-      description !== undefined
-        ? description
-        : department.description;
-
-    department.location =
-      location !== undefined
-        ? location
-        : department.location;
-
-    department.headDoctor =
+    // Validate head doctor
+    const updatedHeadDoctor =
       headDoctor !== undefined
         ? headDoctor || null
-        : department.headDoctor;
+        : existingDepartment.headDoctor;
 
-    department.status =
-      status !== undefined
-        ? status
-        : department.status;
+    if (updatedHeadDoctor) {
+      const headDoctorExists = await Doctor.findById(
+        updatedHeadDoctor
+      );
 
-    await department.save();
+      if (!headDoctorExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Selected head doctor was not found",
+        });
+      }
 
-    if (oldName !== newName) {
+      // Head doctor must also be part of department doctors
+      if (!doctorIds.includes(String(updatedHeadDoctor))) {
+        doctorIds.push(String(updatedHeadDoctor));
+      }
+    }
+
+    // Find old doctors assigned to this department
+    const oldDoctorIds = (existingDepartment.doctors || []).map(
+      (doctor) => String(doctor)
+    );
+
+    // Remove doctors that are no longer selected
+    const removedDoctorIds = oldDoctorIds.filter(
+      (doctorId) => !doctorIds.includes(doctorId)
+    );
+
+    if (removedDoctorIds.length > 0) {
       await Doctor.updateMany(
         {
-          department: oldName,
+          _id: { $in: removedDoctorIds },
+          department: oldDepartmentName,
         },
         {
           $set: {
-            department: newName,
+            department: "",
           },
         }
       );
     }
 
-    const populatedDepartment =
-      await Department.findById(
-        department._id
-      ).populate(
-        "headDoctor",
-        "fullName doctorId specialization department status"
+    // Update selected doctors
+    if (doctorIds.length > 0) {
+      await Doctor.updateMany(
+        {
+          _id: { $in: doctorIds },
+        },
+        {
+          $set: {
+            department: updatedName,
+          },
+        }
       );
+    }
 
-    return res.status(200).json({
-      message:
-        "Department updated successfully.",
-      department:
-        populatedDepartment,
+    // If department name changed, update all its doctors
+    if (oldDepartmentName !== updatedName) {
+      await Doctor.updateMany(
+        {
+          department: oldDepartmentName,
+        },
+        {
+          $set: {
+            department: updatedName,
+          },
+        }
+      );
+    }
+
+    existingDepartment.name = updatedName;
+    existingDepartment.code = updatedCode;
+    existingDepartment.description =
+      description !== undefined
+        ? description
+        : existingDepartment.description;
+    existingDepartment.location =
+      location !== undefined
+        ? location
+        : existingDepartment.location;
+    existingDepartment.headDoctor = updatedHeadDoctor;
+    existingDepartment.doctors = doctorIds;
+
+    if (status) {
+      existingDepartment.status = status;
+    }
+
+    await existingDepartment.save();
+
+    const populatedDepartment = await Department.findById(id)
+      .populate("headDoctor", "fullName doctorId specialization department")
+      .populate("doctors", "fullName doctorId specialization department");
+
+    res.status(200).json({
+      success: true,
+      message: "Department updated successfully",
+      department: populatedDepartment,
     });
-
   } catch (error) {
-    console.error(
-      "Update department error:",
-      error
-    );
+    console.error("Update Department Error:", error);
 
-    return res.status(500).json({
-      message:
-        "Unable to update department.",
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update department",
     });
   }
 };
 
-const deleteDepartment = async (
-  req,
-  res
-) => {
+// Delete Department
+const deleteDepartment = async (req, res) => {
   try {
-    const department =
-      await Department.findById(
-        req.params.id
-      );
+    const department = await Department.findById(req.params.id);
 
     if (!department) {
       return res.status(404).json({
-        message:
-          "Department not found.",
-      });
-    }
-    const doctorCount =
-      await Doctor.countDocuments({
-        department:
-          department.name,
-      });
-
-    if (doctorCount > 0) {
-      return res.status(409).json({
-        message:
-          "This department cannot be deleted because doctors are still assigned to it.",
+        success: false,
+        message: "Department not found",
       });
     }
 
-    await Department.findByIdAndDelete(
-      req.params.id
-    );
-
-    return res.status(200).json({
-      message:
-        "Department deleted successfully.",
+    // Don't allow deletion when doctors are assigned
+    const assignedDoctors = await Doctor.countDocuments({
+      department: department.name,
     });
 
-  } catch (error) {
-    console.error(
-      "Delete department error:",
-      error
-    );
+    if (assignedDoctors > 0) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "Cannot delete this department because doctors are still assigned to it",
+      });
+    }
 
-    return res.status(500).json({
-      message:
-        "Unable to delete department.",
+    await Department.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Department deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete Department Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to delete department",
     });
   }
 };
-
 
 module.exports = {
   createDepartment,
