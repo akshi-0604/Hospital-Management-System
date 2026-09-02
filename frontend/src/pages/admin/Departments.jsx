@@ -1,1676 +1,833 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-
 import "./Departments.css";
 
 const API_URL =
-    "https://hospital-management-system-nvjt.onrender.com/api/departments";
+  "https://hospital-management-system-nvjt.onrender.com/api/departments";
 
 const DOCTORS_URL =
-    "https://hospital-management-system-nvjt.onrender.com/api/doctors";
+  "https://hospital-management-system-nvjt.onrender.com/api/doctors";
 
-const EMPTY_FORM = {
-    name: "",
-    code: "",
-    description: "",
-    location: "",
-    headDoctor: "",
-    status: "Active",
+const emptyForm = {
+  name: "",
+  code: "",
+  description: "",
+  location: "",
+  headDoctor: "",
+  doctors: [],
+  status: "Active",
 };
 
 function Departments() {
-    const [departments, setDepartments] =
-        useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
-    const [doctors, setDoctors] =
-        useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    const [search, setSearch] =
-        useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
-    const [statusFilter, setStatusFilter] =
-        useState("all");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
-    const [loading, setLoading] =
-        useState(true);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
 
-    const [error, setError] =
-        useState("");
+  const [formData, setFormData] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const fetchDepartments = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-    const [formError, setFormError] =
-        useState("");
+      const response = await axios.get(API_URL);
 
-    const [formMessage, setFormMessage] =
-        useState("");
+      setDepartments(response.data.departments || []);
+    } catch (err) {
+      console.error("Fetch departments error:", err);
 
-    const [showAddModal, setShowAddModal] =
-        useState(false);
-
-    const [showEditModal, setShowEditModal] =
-        useState(false);
-
-    const [showViewModal, setShowViewModal] =
-        useState(false);
-
-    const [saving, setSaving] =
-        useState(false);
-
-    const [updating, setUpdating] =
-        useState(false);
-
-    const [selectedDepartment, setSelectedDepartment] =
-        useState(null);
-
-    const [editingDepartment, setEditingDepartment] =
-        useState(null);
-
-    const [departmentForm, setDepartmentForm] =
-        useState({
-            ...EMPTY_FORM,
-        });
-    useEffect(() => {
-        loadData();
-    }, []);
-    async function loadData() {
-        try {
-            setLoading(true);
-            setError("");
-
-            await Promise.all([
-                fetchDepartments(),
-                fetchDoctors(),
-            ]);
-        } catch (error) {
-            console.error(
-                "Department page loading error:",
-                error
-            );
-        } finally {
-            setLoading(false);
-        }
+      setError(
+        err.response?.data?.message ||
+          "Failed to load departments"
+      );
+    } finally {
+      setLoading(false);
     }
-    async function fetchDepartments() {
-        try {
-            const response =
-                await axios.get(API_URL);
+  };
+  const fetchDoctors = async () => {
+    try {
+      const response = await axios.get(DOCTORS_URL);
 
-            console.log(
-                "Departments API response:",
-                response.data
-            );
-
-            if (
-                Array.isArray(
-                    response.data?.departments
-                )
-            ) {
-                setDepartments(
-                    response.data.departments
-                );
-            } else if (
-                Array.isArray(response.data)
-            ) {
-                setDepartments(
-                    response.data
-                );
-            } else {
-                setDepartments([]);
-            }
-        } catch (error) {
-            console.error(
-                "Unable to load departments:",
-                error
-            );
-
-            setDepartments([]);
-
-            setError(
-                error.response?.data?.message ||
-                    "Unable to load departments."
-            );
-        }
+      setDoctors(response.data.doctors || []);
+    } catch (err) {
+      console.error("Fetch doctors error:", err);
     }
-    async function fetchDoctors() {
-        try {
-            const response =
-                await axios.get(
-                    DOCTORS_URL
-                );
+  };
 
-            if (
-                Array.isArray(
-                    response.data?.doctors
-                )
-            ) {
-                setDoctors(
-                    response.data.doctors
-                );
-            } else if (
-                Array.isArray(response.data)
-            ) {
-                setDoctors(
-                    response.data
-                );
-            } else {
-                setDoctors([]);
-            }
-        } catch (error) {
-            console.error(
-                "Unable to load doctors:",
-                error
-            );
+  useEffect(() => {
+    fetchDepartments();
+    fetchDoctors();
+  }, []);
+  const filteredDepartments = useMemo(() => {
+    return departments.filter((department) => {
+      const matchesSearch =
+        department.name
+          ?.toLowerCase()
+          .includes(search.toLowerCase()) ||
+        department.code
+          ?.toLowerCase()
+          .includes(search.toLowerCase()) ||
+        department.location
+          ?.toLowerCase()
+          .includes(search.toLowerCase());
 
-            setDoctors([]);
-        }
-    }
-    const filteredDepartments =
-        useMemo(() => {
-            const searchText =
-                search
-                    .trim()
-                    .toLowerCase();
+      const matchesStatus =
+        statusFilter === "All" ||
+        department.status === statusFilter;
 
-            return departments.filter(
-                (department) => {
+      return matchesSearch && matchesStatus;
+    });
+  }, [departments, search, statusFilter]);
+  const totalDepartments = departments.length;
 
-                    const matchesSearch =
-                        !searchText ||
-                        department.name
-                            ?.toLowerCase()
-                            .includes(
-                                searchText
-                            ) ||
-                        department.code
-                            ?.toLowerCase()
-                            .includes(
-                                searchText
-                            ) ||
-                        department.location
-                            ?.toLowerCase()
-                            .includes(
-                                searchText
-                            );
+  const activeDepartments = departments.filter(
+    (department) => department.status === "Active"
+  ).length;
 
-                    const matchesStatus =
-                        statusFilter ===
-                            "all" ||
-                        department.status
-                            ?.toLowerCase() ===
-                            statusFilter;
+  const inactiveDepartments = departments.filter(
+    (department) => department.status === "Inactive"
+  ).length;
 
-                    return (
-                        matchesSearch &&
-                        matchesStatus
-                    );
-                }
-            );
-        }, [
-            departments,
-            search,
-            statusFilter,
-        ]);
-    const activeCount =
-        departments.filter(
-            (department) =>
-                department.status ===
-                "Active"
-        ).length;
-    const inactiveCount =
-        departments.filter(
-            (department) =>
-                department.status ===
-                "Inactive"
-        ).length;
-    const totalDoctors =
-        departments.reduce(
-            (
-                total,
-                department
-            ) =>
-                total +
-                Number(
-                    department.doctorCount ||
-                    0
-                ),
-            0
+  const totalAssignedDoctors = departments.reduce(
+    (total, department) =>
+      total + (department.doctors?.length || 0),
+    0
+  );
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  const handleDoctorToggle = (doctorId) => {
+    setFormData((prev) => {
+      const alreadySelected =
+        prev.doctors.includes(doctorId);
+
+      let updatedDoctors;
+
+      if (alreadySelected) {
+        updatedDoctors = prev.doctors.filter(
+          (id) => id !== doctorId
         );
-    function handleFormChange(
-        event
-    ) {
-        const {
-            name,
-            value,
-        } = event.target;
+      } else {
+        updatedDoctors = [
+          ...prev.doctors,
+          doctorId,
+        ];
+      }
 
-        setDepartmentForm(
-            (previous) => ({
-                ...previous,
-                [name]: value,
-            })
-        );
+      // If the head doctor is removed,
+      // clear the head doctor as well.
+      const updatedHeadDoctor =
+        prev.headDoctor &&
+        !updatedDoctors.includes(prev.headDoctor)
+          ? ""
+          : prev.headDoctor;
+
+      return {
+        ...prev,
+        doctors: updatedDoctors,
+        headDoctor: updatedHeadDoctor,
+      };
+    });
+  };
+  const handleHeadDoctorChange = (event) => {
+    const doctorId = event.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      headDoctor: doctorId,
+
+      // Automatically add head doctor
+      // to assigned doctors.
+      doctors:
+        doctorId && !prev.doctors.includes(doctorId)
+          ? [...prev.doctors, doctorId]
+          : prev.doctors,
+    }));
+  };
+  const openAddModal = () => {
+    setFormData(emptyForm);
+    setShowAddModal(true);
+  };
+  const openEditModal = (department) => {
+    setSelectedDepartment(department);
+
+    setFormData({
+      name: department.name || "",
+      code: department.code || "",
+      description: department.description || "",
+      location: department.location || "",
+      headDoctor: department.headDoctor?._id || "",
+      doctors:
+        department.doctors?.map((doctor) => doctor._id) || [],
+      status: department.status || "Active",
+    });
+
+    setShowEditModal(true);
+  };
+  const openViewModal = (department) => {
+    setSelectedDepartment(department);
+    setShowViewModal(true);
+  };
+  const closeModals = () => {
+    setShowAddModal(false);
+    setShowViewModal(false);
+    setShowEditModal(false);
+    setSelectedDepartment(null);
+    setFormData(emptyForm);
+  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!formData.name.trim()) {
+      alert("Please enter department name");
+      return;
     }
 
-
-    function handleEditChange(
-        event
-    ) {
-        const {
-            name,
-            value,
-        } = event.target;
-
-        setEditingDepartment(
-            (previous) => ({
-                ...previous,
-                [name]: value,
-            })
-        );
-    }
-    function openAddDepartment() {
-        setDepartmentForm({
-            ...EMPTY_FORM,
-        });
-
-        setFormError("");
-        setFormMessage("");
-
-        setShowAddModal(true);
+    if (!formData.code.trim()) {
+      alert("Please enter department code");
+      return;
     }
 
-
-    function closeAddDepartment() {
-        if (saving) {
-            return;
-        }
-
-        setShowAddModal(false);
-
-        setFormError("");
-        setFormMessage("");
+    if (formData.headDoctor && !formData.doctors.includes(formData.headDoctor)) {
+      alert("Head doctor must also be selected as a department doctor");
+      return;
     }
 
+    try {
+      setSaving(true);
 
-    async function handleAddDepartment(
-        event
-    ) {
-        event.preventDefault();
+      const payload = {
+        name: formData.name.trim(),
+        code: formData.code.trim().toUpperCase(),
+        description: formData.description.trim(),
+        location: formData.location.trim(),
+        headDoctor: formData.headDoctor || null,
+        doctors: formData.doctors,
+        status: formData.status,
+      };
 
-        setFormError("");
-        setFormMessage("");
-
-        if (
-            !departmentForm.name ||
-            !departmentForm.code
-        ) {
-            setFormError(
-                "Department name and code are required."
-            );
-
-            return;
-        }
-
-        try {
-            setSaving(true);
-
-            const response =
-                await axios.post(
-                    API_URL,
-                    departmentForm
-                );
-
-            console.log(
-                "Department created:",
-                response.data
-            );
-
-            setFormMessage(
-                "Department created successfully."
-            );
-
-            await fetchDepartments();
-
-            setTimeout(() => {
-                setShowAddModal(false);
-
-                setDepartmentForm({
-                    ...EMPTY_FORM,
-                });
-
-                setFormMessage("");
-            }, 700);
-
-        } catch (error) {
-            console.error(
-                "Create department error:",
-                error
-            );
-
-            setFormError(
-                error.response?.data?.message ||
-                    "Unable to create department."
-            );
-        } finally {
-            setSaving(false);
-        }
-    }
-    function openViewDepartment(
-        department
-    ) {
-        setSelectedDepartment(
-            department
+      if (showEditModal && selectedDepartment) {
+        await axios.put(
+          `${API_URL}/${selectedDepartment._id}`,
+          payload
         );
 
-        setShowViewModal(true);
+        alert("Department updated successfully");
+      } else {
+        await axios.post(API_URL, payload);
+
+        alert("Department created successfully");
+      }
+
+      closeModals();
+      fetchDepartments();
+      fetchDoctors();
+    } catch (err) {
+      console.error("Save department error:", err);
+
+      alert(
+        err.response?.data?.message ||
+          "Failed to save department"
+      );
+    } finally {
+      setSaving(false);
     }
+  };
+  const handleRefresh = () => {
+    fetchDepartments();
+    fetchDoctors();
+  };
 
+  return (
+    <div className="departments-page">
+      {/* Header */}
+      <div className="departments-header">
+        <div>
+          <h1>Departments</h1>
+          <p>
+            Manage hospital departments, department heads
+            and assigned doctors.
+          </p>
+        </div>
 
-    function closeViewDepartment() {
-        setSelectedDepartment(null);
-        setShowViewModal(false);
-    }
-    function openEditDepartment(
-        department
-    ) {
-        setEditingDepartment({
-            ...department,
+        <div className="departments-header-actions">
+          <button
+            type="button"
+            className="refresh-button"
+            onClick={handleRefresh}
+          >
+            ↻ Refresh
+          </button>
 
-            headDoctor:
-                department.headDoctor
-                    ?._id ||
-                department.headDoctor ||
-                "",
-        });
+          <button
+            type="button"
+            className="add-button"
+            onClick={openAddModal}
+          >
+            + Add Department
+          </button>
+        </div>
+      </div>
 
-        setFormError("");
-        setFormMessage("");
+      {/* Summary Cards */}
+      <div className="department-summary">
+        <div className="summary-card">
+          <span>Total Departments</span>
+          <strong>{totalDepartments}</strong>
+          <small>Registered departments</small>
+        </div>
 
-        setShowEditModal(true);
-    }
+        <div className="summary-card">
+          <span>Active Departments</span>
+          <strong>{activeDepartments}</strong>
+          <small>Currently active</small>
+        </div>
 
+        <div className="summary-card">
+          <span>Inactive Departments</span>
+          <strong>{inactiveDepartments}</strong>
+          <small>Temporarily unavailable</small>
+        </div>
 
-    function closeEditDepartment() {
-        if (updating) {
-            return;
-        }
+        <div className="summary-card">
+          <span>Doctors Assigned</span>
+          <strong>{totalAssignedDoctors}</strong>
+          <small>Across departments</small>
+        </div>
+      </div>
 
-        setEditingDepartment(null);
-        setShowEditModal(false);
+      {/* Filters */}
+      <div className="department-filters">
+        <input
+          type="text"
+          placeholder="Search department, code or location..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
 
-        setFormError("");
-        setFormMessage("");
-    }
+        <select
+          value={statusFilter}
+          onChange={(event) =>
+            setStatusFilter(event.target.value)
+          }
+        >
+          <option value="All">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
 
+        <button
+          type="button"
+          onClick={() => {
+            setSearch("");
+            setStatusFilter("All");
+          }}
+        >
+          Clear
+        </button>
+      </div>
 
-    async function handleUpdateDepartment(
-        event
-    ) {
-        event.preventDefault();
+      {/* Error */}
+      {error && (
+        <div className="department-error">
+          {error}
+        </div>
+      )}
 
-        if (
-            !editingDepartment?._id
-        ) {
-            return;
-        }
+      {/* Table */}
+      <div className="department-table-card">
+        {loading ? (
+          <div className="department-loading">
+            Loading departments...
+          </div>
+        ) : filteredDepartments.length === 0 ? (
+          <div className="department-empty">
+            No departments found.
+          </div>
+        ) : (
+          <div className="department-table-wrapper">
+            <table className="department-table">
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Code</th>
+                  <th>Location</th>
+                  <th>Head Doctor</th>
+                  <th>Doctors</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-        setFormError("");
-        setFormMessage("");
+              <tbody>
+                {filteredDepartments.map((department) => (
+                  <tr key={department._id}>
+                    <td>
+                      <div className="department-name-cell">
+                        <div className="department-icon">
+                          ▦
+                        </div>
 
-        try {
-            setUpdating(true);
+                        <div>
+                          <strong>{department.name}</strong>
 
-            const updateData = {
-                name:
-                    editingDepartment.name,
+                          <span>
+                            {department.description ||
+                              "No description"}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
 
-                code:
-                    editingDepartment.code,
+                    <td>
+                      <span className="department-code">
+                        {department.code}
+                      </span>
+                    </td>
 
-                description:
-                    editingDepartment.description ||
-                    "",
+                    <td>
+                      {department.location || "-"}
+                    </td>
 
-                location:
-                    editingDepartment.location ||
-                    "",
+                    <td>
+                      {department.headDoctor?.fullName ||
+                        "Not assigned"}
+                    </td>
 
-                headDoctor:
-                    editingDepartment.headDoctor ||
-                    null,
+                    <td>
+                      <span className="doctor-count">
+                        {department.doctors?.length || 0}
+                      </span>
+                    </td>
 
-                status:
-                    editingDepartment.status ||
-                    "Active",
-            };
+                    <td>
+                      <span
+                        className={`department-status ${department.status?.toLowerCase()}`}
+                      >
+                        {department.status}
+                      </span>
+                    </td>
 
-            const response =
-                await axios.put(
-                    `${API_URL}/${editingDepartment._id}`,
-                    updateData
-                );
+                    <td>
+                      <div className="department-actions">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openViewModal(department)
+                          }
+                        >
+                          View
+                        </button>
 
-            console.log(
-                "Department updated:",
-                response.data
-            );
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openEditModal(department)
+                          }
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      {(showAddModal || showEditModal) && (
+        <div className="department-modal-overlay">
+          <div className="department-modal">
+            <div className="department-modal-header">
+              <div>
+                <h2>
+                  {showEditModal
+                    ? "Edit Department"
+                    : "Add Department"}
+                </h2>
 
-            setFormMessage(
-                "Department updated successfully."
-            );
+                <p>
+                  {showEditModal
+                    ? "Update department information and assigned doctors."
+                    : "Create a new hospital department."}
+                </p>
+              </div>
 
-            await fetchDepartments();
-
-            setTimeout(() => {
-                setShowEditModal(false);
-                setEditingDepartment(null);
-                setFormMessage("");
-            }, 700);
-
-        } catch (error) {
-            console.error(
-                "Update department error:",
-                error
-            );
-
-            setFormError(
-                error.response?.data?.message ||
-                    "Unable to update department."
-            );
-        } finally {
-            setUpdating(false);
-        }
-    }
-    async function handleRefresh() {
-        setError("");
-
-        await loadData();
-    }
-    if (loading) {
-        return (
-            <div className="departments-page">
-
-                <div className="departments-loading">
-
-                    <div className="departments-spinner"></div>
-
-                    Loading departments...
-
-                </div>
-
-            </div>
-        );
-    }
-    return (
-        <div className="departments-page">
-
-            {/* HEADER */}
-
-            <div className="departments-header">
-
-                <div>
-
-                    <h2>
-                        Departments
-                    </h2>
-
-                    <p>
-                        Manage hospital
-                        departments and
-                        clinical services.
-                    </p>
-
-                </div>
-
-
-                <div className="departments-header-actions">
-
-                    <button
-                        type="button"
-                        className="departments-refresh-button"
-                        onClick={
-                            handleRefresh
-                        }
-                    >
-                        ↻ Refresh
-                    </button>
-
-
-                    <button
-                        type="button"
-                        className="add-department-button"
-                        onClick={
-                            openAddDepartment
-                        }
-                    >
-                        + Add Department
-                    </button>
-
-                </div>
-
+              <button
+                type="button"
+                className="modal-close"
+                onClick={closeModals}
+              >
+                ×
+              </button>
             </div>
 
+            <form
+              onSubmit={handleSubmit}
+              className="department-form"
+            >
+              <div className="form-row">
+                <div className="form-group">
+                  <label>
+                    Department Name *
+                  </label>
 
-            {/* ERROR */}
-
-            {error && (
-                <div className="departments-error">
-                    {error}
-                </div>
-            )}
-
-
-            {/* SUMMARY */}
-
-            <div className="department-summary-grid">
-
-                <div className="department-summary-card">
-
-                    <span>
-                        Total Departments
-                    </span>
-
-                    <strong>
-                        {departments.length}
-                    </strong>
-
-                    <p>
-                        Registered departments
-                    </p>
-
+                  <input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Example: Cardiology"
+                    required
+                  />
                 </div>
 
+                <div className="form-group">
+                  <label>
+                    Department Code *
+                  </label>
 
-                <div className="department-summary-card">
-
-                    <span>
-                        Active Departments
-                    </span>
-
-                    <strong>
-                        {activeCount}
-                    </strong>
-
-                    <p>
-                        Currently active
-                    </p>
-
+                  <input
+                    name="code"
+                    value={formData.code}
+                    onChange={handleChange}
+                    placeholder="Example: CARD"
+                    required
+                  />
                 </div>
+              </div>
 
+              <div className="form-group">
+                <label>Description</label>
 
-                <div className="department-summary-card">
-
-                    <span>
-                        Inactive Departments
-                    </span>
-
-                    <strong>
-                        {inactiveCount}
-                    </strong>
-
-                    <p>
-                        Temporarily unavailable
-                    </p>
-
-                </div>
-
-
-                <div className="department-summary-card">
-
-                    <span>
-                        Doctors Assigned
-                    </span>
-
-                    <strong>
-                        {totalDoctors}
-                    </strong>
-
-                    <p>
-                        Across departments
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            {/* FILTERS */}
-
-            <div className="departments-filter-card">
-
-                <input
-                    type="text"
-                    value={search}
-                    onChange={(event) =>
-                        setSearch(
-                            event.target.value
-                        )
-                    }
-                    placeholder="Search department, code or location..."
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Describe the department..."
+                  rows="3"
                 />
+              </div>
 
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Location / Floor</label>
+
+                  <input
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    placeholder="Example: Block A - 2nd Floor"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Department Head</label>
+
+                  <select
+                    value={formData.headDoctor}
+                    onChange={handleHeadDoctorChange}
+                  >
+                    <option value="">
+                      Not assigned
+                    </option>
+
+                    {doctors.map((doctor) => (
+                      <option
+                        key={doctor._id}
+                        value={doctor._id}
+                      >
+                        {doctor.fullName} -{" "}
+                        {doctor.specialization}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* MULTIPLE DOCTORS */}
+              <div className="form-group">
+                <label>
+                  Doctors in Department
+                  <span className="field-count">
+                    {formData.doctors.length} selected
+                  </span>
+                </label>
+
+                <div className="doctor-selection-box">
+                  {doctors.length === 0 ? (
+                    <p className="no-doctors-message">
+                      No doctors available.
+                    </p>
+                  ) : (
+                    doctors.map((doctor) => {
+                      const isSelected =
+                        formData.doctors.includes(
+                          doctor._id
+                        );
+
+                      const isHead =
+                        formData.headDoctor ===
+                        doctor._id;
+
+                      return (
+                        <label
+                          key={doctor._id}
+                          className={`doctor-selection-item ${
+                            isSelected
+                              ? "selected"
+                              : ""
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() =>
+                              handleDoctorToggle(
+                                doctor._id
+                              )
+                            }
+                          />
+
+                          <div className="doctor-selection-info">
+                            <strong>
+                              {doctor.fullName}
+                            </strong>
+
+                            <span>
+                              {doctor.specialization ||
+                                "Specialist"}{" "}
+                              •{" "}
+                              {doctor.department ||
+                                "No department"}
+                            </span>
+                          </div>
+
+                          {isHead && (
+                            <span className="head-badge">
+                              Head
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              <div className="doctor-help-text">
+                Select all doctors who belong to this
+                department. The Department Head will
+                automatically be included in this list.
+              </div>
+
+              <div className="form-group status-group">
+                <label>Status</label>
 
                 <select
-                    value={statusFilter}
-                    onChange={(event) =>
-                        setStatusFilter(
-                            event.target.value
-                        )
-                    }
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
                 >
+                  <option value="Active">
+                    Active
+                  </option>
 
-                    <option value="all">
-                        All Status
-                    </option>
-
-                    <option value="active">
-                        Active
-                    </option>
-
-                    <option value="inactive">
-                        Inactive
-                    </option>
-
+                  <option value="Inactive">
+                    Inactive
+                  </option>
                 </select>
+              </div>
 
-
+              <div className="department-modal-footer">
                 <button
-                    type="button"
-                    onClick={() => {
-                        setSearch("");
-                        setStatusFilter(
-                            "all"
-                        );
-                    }}
+                  type="button"
+                  className="cancel-button"
+                  onClick={closeModals}
                 >
-                    Clear
+                  Cancel
                 </button>
 
+                <button
+                  type="submit"
+                  className="save-button"
+                  disabled={saving}
+                >
+                  {saving
+                    ? "Saving..."
+                    : showEditModal
+                    ? "Update Department"
+                    : "Save Department"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showViewModal && selectedDepartment && (
+        <div className="department-modal-overlay">
+          <div className="department-modal view-modal">
+            <div className="department-modal-header">
+              <div>
+                <h2>
+                  {selectedDepartment.name}
+                </h2>
+
+                <p>
+                  Department details and assigned doctors
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="modal-close"
+                onClick={closeModals}
+              >
+                ×
+              </button>
             </div>
 
-
-            {/* TABLE */}
-
-            {filteredDepartments.length ===
-            0 ? (
-
-                <div className="departments-empty">
-
-                    <div className="department-empty-icon">
-                        ▦
-                    </div>
-
-                    <h3>
-                        No departments found
-                    </h3>
-
-                    <p>
-                        Create your first
-                        hospital department.
-                    </p>
-
-                    <button
-                        type="button"
-                        onClick={
-                            openAddDepartment
-                        }
-                    >
-                        + Add Department
-                    </button>
-
+            <div className="department-details">
+              <div className="detail-grid">
+                <div>
+                  <span>Department Code</span>
+                  <strong>
+                    {selectedDepartment.code}
+                  </strong>
                 </div>
 
-            ) : (
-
-                <div className="departments-table-card">
-
-                    <div className="departments-table-wrapper">
-
-                        <table className="departments-table">
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        Department
-                                    </th>
-
-                                    <th>
-                                        Code
-                                    </th>
-
-                                    <th>
-                                        Location
-                                    </th>
-
-                                    <th>
-                                        Head Doctor
-                                    </th>
-
-                                    <th>
-                                        Doctors
-                                    </th>
-
-                                    <th>
-                                        Status
-                                    </th>
-
-                                    <th>
-                                        Action
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody>
-
-                                {filteredDepartments.map(
-                                    (
-                                        department
-                                    ) => (
-
-                                        <tr
-                                            key={
-                                                department._id
-                                            }
-                                        >
-
-                                            <td>
-
-                                                <div className="department-name-cell">
-
-                                                    <div className="department-icon">
-                                                        ▦
-                                                    </div>
-
-                                                    <div>
-
-                                                        <strong>
-                                                            {
-                                                                department.name
-                                                            }
-                                                        </strong>
-
-                                                        <span>
-                                                            {
-                                                                department.description ||
-                                                                "No description"
-                                                            }
-                                                        </span>
-
-                                                    </div>
-
-                                                </div>
-
-                                            </td>
-
-
-                                            <td>
-
-                                                <span className="department-code">
-                                                    {
-                                                        department.code
-                                                    }
-                                                </span>
-
-                                            </td>
-
-
-                                            <td>
-
-                                                {
-                                                    department.location ||
-                                                    "Not specified"
-                                                }
-
-                                            </td>
-
-
-                                            <td>
-
-                                                {
-                                                    department
-                                                        .headDoctor
-                                                        ?.fullName
-                                                    ||
-                                                    "Not assigned"
-                                                }
-
-                                            </td>
-
-
-                                            <td>
-
-                                                <strong>
-                                                    {
-                                                        department.doctorCount ||
-                                                        0
-                                                    }
-                                                </strong>
-
-                                            </td>
-
-
-                                            <td>
-
-                                                <span
-                                                    className={`department-status ${department.status?.toLowerCase()}`}
-                                                >
-                                                    {
-                                                        department.status
-                                                    }
-                                                </span>
-
-                                            </td>
-
-
-                                            <td>
-
-                                                <div className="department-action-buttons">
-
-                                                    <button
-                                                        type="button"
-                                                        className="department-view-button"
-                                                        onClick={() =>
-                                                            openViewDepartment(
-                                                                department
-                                                            )
-                                                        }
-                                                    >
-                                                        View
-                                                    </button>
-
-
-                                                    <button
-                                                        type="button"
-                                                        className="department-edit-button"
-                                                        onClick={() =>
-                                                            openEditDepartment(
-                                                                department
-                                                            )
-                                                        }
-                                                    >
-                                                        Edit
-                                                    </button>
-
-                                                </div>
-
-                                            </td>
-
-                                        </tr>
-
-                                    )
-                                )}
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
+                <div>
+                  <span>Location</span>
+                  <strong>
+                    {selectedDepartment.location ||
+                      "Not specified"}
+                  </strong>
                 </div>
 
-            )}
-            {showAddModal && (
+                <div>
+                  <span>Status</span>
+                  <strong>
+                    {selectedDepartment.status}
+                  </strong>
+                </div>
 
-                <div
-                    className="department-modal-overlay"
-                    onMouseDown={(event) => {
+                <div>
+                  <span>Total Doctors</span>
+                  <strong>
+                    {selectedDepartment.doctors
+                      ?.length || 0}
+                  </strong>
+                </div>
+              </div>
 
-                        if (
-                            event.target ===
-                            event.currentTarget
-                        ) {
-                            closeAddDepartment();
-                        }
+              <div className="view-section">
+                <h3>Department Head</h3>
 
-                    }}
-                >
+                <div className="head-doctor-card">
+                  <strong>
+                    {selectedDepartment.headDoctor
+                      ?.fullName ||
+                      "Not assigned"}
+                  </strong>
 
-                    <div className="department-modal">
+                  {selectedDepartment.headDoctor && (
+                    <span>
+                      {
+                        selectedDepartment.headDoctor
+                          .specialization
+                      }
+                    </span>
+                  )}
+                </div>
+              </div>
 
-                        <div className="department-modal-header">
+              <div className="view-section">
+                <h3>
+                  Doctors in Department (
+                  {selectedDepartment.doctors
+                    ?.length || 0}
+                  )
+                </h3>
 
-                            <div>
-
-                                <h3>
-                                    Add Department
-                                </h3>
-
-                                <p>
-                                    Create a new
-                                    hospital department.
-                                </p>
-
-                            </div>
-
-
-                            <button
-                                type="button"
-                                className="department-modal-close"
-                                onClick={
-                                    closeAddDepartment
-                                }
-                            >
-                                ×
-                            </button>
-
-                        </div>
-
-
-                        <form
-                            onSubmit={
-                                handleAddDepartment
-                            }
+                {selectedDepartment.doctors?.length >
+                0 ? (
+                  <div className="assigned-doctors-list">
+                    {selectedDepartment.doctors.map(
+                      (doctor) => (
+                        <div
+                          className="assigned-doctor-card"
+                          key={doctor._id}
                         >
+                          <div>
+                            <strong>
+                              {doctor.fullName}
+                            </strong>
 
-                            <div className="department-modal-body">
+                            <span>
+                              {doctor.specialization ||
+                                "Specialist"}
+                            </span>
+                          </div>
 
-                                {formError && (
-                                    <div className="department-form-error">
-                                        {formError}
-                                    </div>
-                                )}
+                          {selectedDepartment.headDoctor
+                            ?._id === doctor._id && (
+                            <span className="head-badge">
+                              Head
+                            </span>
+                          )}
+                        </div>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <p className="no-assigned-doctors">
+                    No doctors assigned to this
+                    department.
+                  </p>
+                )}
+              </div>
 
+              {selectedDepartment.description && (
+                <div className="view-section">
+                  <h3>Description</h3>
 
-                                {formMessage && (
-                                    <div className="department-form-success">
-                                        {
-                                            formMessage
-                                        }
-                                    </div>
-                                )}
-
-
-                                <div className="department-form-grid">
-
-                                    <div className="department-form-group">
-
-                                        <label>
-                                            Department Name *
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={
-                                                departmentForm.name
-                                            }
-                                            onChange={
-                                                handleFormChange
-                                            }
-                                            placeholder="Example: Cardiology"
-                                            required
-                                        />
-
-                                    </div>
-
-
-                                    <div className="department-form-group">
-
-                                        <label>
-                                            Department Code *
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            name="code"
-                                            value={
-                                                departmentForm.code
-                                            }
-                                            onChange={
-                                                handleFormChange
-                                            }
-                                            placeholder="Example: CARD"
-                                            required
-                                        />
-
-                                    </div>
-
-
-                                    <div className="department-form-group full-width">
-
-                                        <label>
-                                            Description
-                                        </label>
-
-                                        <textarea
-                                            name="description"
-                                            value={
-                                                departmentForm.description
-                                            }
-                                            onChange={
-                                                handleFormChange
-                                            }
-                                            placeholder="Describe the department..."
-                                            rows="3"
-                                        />
-
-                                    </div>
-
-
-                                    <div className="department-form-group">
-
-                                        <label>
-                                            Location
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            name="location"
-                                            value={
-                                                departmentForm.location
-                                            }
-                                            onChange={
-                                                handleFormChange
-                                            }
-                                            placeholder="Example: Block A - 2nd Floor"
-                                        />
-
-                                    </div>
-
-
-                                    <div className="department-form-group">
-
-                                        <label>
-                                            Department Head
-                                        </label>
-
-                                        <select
-                                            name="headDoctor"
-                                            value={
-                                                departmentForm.headDoctor
-                                            }
-                                            onChange={
-                                                handleFormChange
-                                            }
-                                        >
-
-                                            <option value="">
-                                                Not assigned
-                                            </option>
-
-                                            {doctors.map(
-                                                (
-                                                    doctor
-                                                ) => (
-
-                                                    <option
-                                                        key={
-                                                            doctor._id
-                                                        }
-                                                        value={
-                                                            doctor._id
-                                                        }
-                                                    >
-                                                        Dr.{" "}
-                                                        {
-                                                            doctor.fullName
-                                                        }
-                                                    </option>
-
-                                                )
-                                            )}
-
-                                        </select>
-
-                                    </div>
-
-
-                                    <div className="department-form-group">
-
-                                        <label>
-                                            Status
-                                        </label>
-
-                                        <select
-                                            name="status"
-                                            value={
-                                                departmentForm.status
-                                            }
-                                            onChange={
-                                                handleFormChange
-                                            }
-                                        >
-
-                                            <option value="Active">
-                                                Active
-                                            </option>
-
-                                            <option value="Inactive">
-                                                Inactive
-                                            </option>
-
-                                        </select>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="department-modal-footer">
-
-                                <button
-                                    type="button"
-                                    className="department-cancel-button"
-                                    onClick={
-                                        closeAddDepartment
-                                    }
-                                    disabled={saving}
-                                >
-                                    Cancel
-                                </button>
-
-
-                                <button
-                                    type="submit"
-                                    className="department-save-button"
-                                    disabled={saving}
-                                >
-                                    {saving
-                                        ? "Saving..."
-                                        : "Save Department"}
-                                </button>
-
-                            </div>
-
-                        </form>
-
-                    </div>
-
+                  <p className="description-text">
+                    {selectedDepartment.description}
+                  </p>
                 </div>
-
-            )}
-
-            {showViewModal &&
-                selectedDepartment && (
-
-                    <div
-                        className="department-modal-overlay"
-                        onMouseDown={(event) => {
-
-                            if (
-                                event.target ===
-                                event.currentTarget
-                            ) {
-                                closeViewDepartment();
-                            }
-
-                        }}
-                    >
-
-                        <div className="department-modal">
-
-                            <div className="department-modal-header">
-
-                                <div>
-
-                                    <h3>
-                                        Department Details
-                                    </h3>
-
-                                    <p>
-                                        Complete department
-                                        information.
-                                    </p>
-
-                                </div>
-
-
-                                <button
-                                    type="button"
-                                    className="department-modal-close"
-                                    onClick={
-                                        closeViewDepartment
-                                    }
-                                >
-                                    ×
-                                </button>
-
-                            </div>
-
-
-                            <div className="department-modal-body">
-
-                                <div className="department-profile">
-
-                                    <div className="department-large-icon">
-                                        ▦
-                                    </div>
-
-                                    <div>
-
-                                        <h3>
-                                            {
-                                                selectedDepartment.name
-                                            }
-                                        </h3>
-
-                                        <span>
-                                            {
-                                                selectedDepartment.code
-                                            }
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div className="department-details-grid">
-
-                                    <div>
-
-                                        <label>
-                                            Location
-                                        </label>
-
-                                        <strong>
-                                            {
-                                                selectedDepartment.location ||
-                                                "Not specified"
-                                            }
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Head Doctor
-                                        </label>
-
-                                        <strong>
-                                            {
-                                                selectedDepartment
-                                                    .headDoctor
-                                                    ?.fullName ||
-                                                "Not assigned"
-                                            }
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Doctors
-                                        </label>
-
-                                        <strong>
-                                            {
-                                                selectedDepartment.doctorCount ||
-                                                0
-                                            }
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label>
-                                            Status
-                                        </label>
-
-                                        <span
-                                            className={`department-status ${selectedDepartment.status?.toLowerCase()}`}
-                                        >
-                                            {
-                                                selectedDepartment.status
-                                            }
-                                        </span>
-
-                                    </div>
-
-
-                                    <div className="full-width">
-
-                                        <label>
-                                            Description
-                                        </label>
-
-                                        <p>
-                                            {
-                                                selectedDepartment.description ||
-                                                "No description provided."
-                                            }
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="department-modal-footer">
-
-                                <button
-                                    type="button"
-                                    className="department-cancel-button"
-                                    onClick={
-                                        closeViewDepartment
-                                    }
-                                >
-                                    Close
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    className="department-save-button"
-                                    onClick={() => {
-
-                                        closeViewDepartment();
-
-                                        openEditDepartment(
-                                            selectedDepartment
-                                        );
-
-                                    }}
-                                >
-                                    Edit Department
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                )}
-
-            {showEditModal &&
-                editingDepartment && (
-
-                    <div
-                        className="department-modal-overlay"
-                        onMouseDown={(event) => {
-
-                            if (
-                                event.target ===
-                                event.currentTarget
-                            ) {
-                                closeEditDepartment();
-                            }
-
-                        }}
-                    >
-
-                        <div className="department-modal">
-
-                            <div className="department-modal-header">
-
-                                <div>
-
-                                    <h3>
-                                        Edit Department
-                                    </h3>
-
-                                    <p>
-                                        Update department
-                                        information.
-                                    </p>
-
-                                </div>
-
-
-                                <button
-                                    type="button"
-                                    className="department-modal-close"
-                                    onClick={
-                                        closeEditDepartment
-                                    }
-                                    disabled={
-                                        updating
-                                    }
-                                >
-                                    ×
-                                </button>
-
-                            </div>
-
-
-                            <form
-                                onSubmit={
-                                    handleUpdateDepartment
-                                }
-                            >
-
-                                <div className="department-modal-body">
-
-                                    {formError && (
-                                        <div className="department-form-error">
-                                            {formError}
-                                        </div>
-                                    )}
-
-
-                                    {formMessage && (
-                                        <div className="department-form-success">
-                                            {
-                                                formMessage
-                                            }
-                                        </div>
-                                    )}
-
-
-                                    <div className="department-form-grid">
-
-                                        <div className="department-form-group">
-
-                                            <label>
-                                                Department Name *
-                                            </label>
-
-                                            <input
-                                                type="text"
-                                                name="name"
-                                                value={
-                                                    editingDepartment.name ||
-                                                    ""
-                                                }
-                                                onChange={
-                                                    handleEditChange
-                                                }
-                                                required
-                                            />
-
-                                        </div>
-
-
-                                        <div className="department-form-group">
-
-                                            <label>
-                                                Department Code *
-                                            </label>
-
-                                            <input
-                                                type="text"
-                                                name="code"
-                                                value={
-                                                    editingDepartment.code ||
-                                                    ""
-                                                }
-                                                onChange={
-                                                    handleEditChange
-                                                }
-                                                required
-                                            />
-
-                                        </div>
-
-
-                                        <div className="department-form-group full-width">
-
-                                            <label>
-                                                Description
-                                            </label>
-
-                                            <textarea
-                                                name="description"
-                                                value={
-                                                    editingDepartment.description ||
-                                                    ""
-                                                }
-                                                onChange={
-                                                    handleEditChange
-                                                }
-                                                rows="3"
-                                            />
-
-                                        </div>
-
-
-                                        <div className="department-form-group">
-
-                                            <label>
-                                                Location
-                                            </label>
-
-                                            <input
-                                                type="text"
-                                                name="location"
-                                                value={
-                                                    editingDepartment.location ||
-                                                    ""
-                                                }
-                                                onChange={
-                                                    handleEditChange
-                                                }
-                                            />
-
-                                        </div>
-
-
-                                        <div className="department-form-group">
-
-                                            <label>
-                                                Department Head
-                                            </label>
-
-                                            <select
-                                                name="headDoctor"
-                                                value={
-                                                    editingDepartment.headDoctor ||
-                                                    ""
-                                                }
-                                                onChange={
-                                                    handleEditChange
-                                                }
-                                            >
-
-                                                <option value="">
-                                                    Not assigned
-                                                </option>
-
-                                                {doctors.map(
-                                                    (
-                                                        doctor
-                                                    ) => (
-
-                                                        <option
-                                                            key={
-                                                                doctor._id
-                                                            }
-                                                            value={
-                                                                doctor._id
-                                                            }
-                                                        >
-                                                            Dr.{" "}
-                                                            {
-                                                                doctor.fullName
-                                                            }
-                                                        </option>
-
-                                                    )
-                                                )}
-
-                                            </select>
-
-                                        </div>
-
-
-                                        <div className="department-form-group">
-
-                                            <label>
-                                                Status
-                                            </label>
-
-                                            <select
-                                                name="status"
-                                                value={
-                                                    editingDepartment.status ||
-                                                    "Active"
-                                                }
-                                                onChange={
-                                                    handleEditChange
-                                                }
-                                            >
-
-                                                <option value="Active">
-                                                    Active
-                                                </option>
-
-                                                <option value="Inactive">
-                                                    Inactive
-                                                </option>
-
-                                            </select>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div className="department-modal-footer">
-
-                                    <button
-                                        type="button"
-                                        className="department-cancel-button"
-                                        onClick={
-                                            closeEditDepartment
-                                        }
-                                        disabled={
-                                            updating
-                                        }
-                                    >
-                                        Cancel
-                                    </button>
-
-
-                                    <button
-                                        type="submit"
-                                        className="department-save-button"
-                                        disabled={
-                                            updating
-                                        }
-                                    >
-                                        {updating
-                                            ? "Saving..."
-                                            : "Save Changes"}
-                                    </button>
-
-                                </div>
-
-                            </form>
-
-                        </div>
-
-                    </div>
-
-                )}
-
+              )}
+            </div>
+
+            <div className="department-modal-footer">
+              <button
+                type="button"
+                className="cancel-button"
+                onClick={closeModals}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 }
 
 export default Departments;
