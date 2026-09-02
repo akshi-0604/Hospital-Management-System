@@ -11,6 +11,7 @@ import Dashboard from "../pages/admin/Dashboard";
 import Patients from "../pages/admin/Patients";
 import Doctors from "../pages/admin/Doctors";
 import Appointments from "../pages/admin/Appointments";
+import Departments from "../pages/admin/Departments";
 import MedicalRecords from "../pages/admin/MedicalRecords";
 import Prescriptions from "../pages/admin/Prescriptions";
 import Laboratory from "../pages/admin/Laboratory";
@@ -81,6 +82,11 @@ function AppRoutes() {
           <Route
             path="appointments"
             element={<Appointments />}
+          />
+
+          <Route
+            path="/admin/departments"
+            element={<Departments />}
           />
 
           <Route

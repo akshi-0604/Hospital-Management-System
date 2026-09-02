@@ -10,10 +10,9 @@ function Sidebar() {
 
         navigate("/login");
     }
+
     return (
         <aside className="admin-sidebar">
-
-            {/* Hospital Logo */}
             <div className="sidebar-brand">
 
                 <div className="sidebar-logo">
@@ -21,18 +20,28 @@ function Sidebar() {
                 </div>
 
                 <div className="sidebar-brand-text">
-                    <h2>HMS</h2>
-                    <span>Hospital Management</span>
+
+                    <h2>
+                        HMS
+                    </h2>
+
+                    <span>
+                        Hospital Management
+                    </span>
+
                 </div>
 
             </div>
-
             <nav className="sidebar-navigation">
+
+                {/* MAIN MENU */}
 
                 <p className="navigation-title">
                     MAIN MENU
                 </p>
 
+
+                {/* DASHBOARD */}
 
                 <NavLink
                     to="/admin"
@@ -53,6 +62,8 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* PATIENTS */}
+
                 <NavLink
                     to="/admin/patients"
                     className={({ isActive }) =>
@@ -71,9 +82,15 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* DOCTORS */}
+
                 <NavLink
                     to="/admin/doctors"
-                    className="sidebar-link"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "sidebar-link active"
+                            : "sidebar-link"
+                    }
                 >
                     <span className="sidebar-link-icon">
                         ♙
@@ -85,9 +102,15 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* APPOINTMENTS */}
+
                 <NavLink
                     to="/admin/appointments"
-                    className="sidebar-link"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "sidebar-link active"
+                            : "sidebar-link"
+                    }
                 >
                     <span className="sidebar-link-icon">
                         ▣
@@ -99,14 +122,42 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* DEPARTMENTS */}
+
+                <NavLink
+                    to="/admin/departments"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "sidebar-link active"
+                            : "sidebar-link"
+                    }
+                >
+                    <span className="sidebar-link-icon">
+                        ▦
+                    </span>
+
+                    <span>
+                        Departments
+                    </span>
+                </NavLink>
+
+
+                {/* HOSPITAL MANAGEMENT */}
+
                 <p className="navigation-title second-title">
                     HOSPITAL MANAGEMENT
                 </p>
 
 
+                {/* MEDICAL RECORDS */}
+
                 <NavLink
                     to="/admin/medical-records"
-                    className="sidebar-link"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "sidebar-link active"
+                            : "sidebar-link"
+                    }
                 >
                     <span className="sidebar-link-icon">
                         ▤
@@ -118,9 +169,15 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* PRESCRIPTIONS */}
+
                 <NavLink
                     to="/admin/prescriptions"
-                    className="sidebar-link"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "sidebar-link active"
+                            : "sidebar-link"
+                    }
                 >
                     <span className="sidebar-link-icon">
                         ▤
@@ -132,9 +189,15 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* LABORATORY */}
+
                 <NavLink
                     to="/admin/laboratory"
-                    className="sidebar-link"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "sidebar-link active"
+                            : "sidebar-link"
+                    }
                 >
                     <span className="sidebar-link-icon">
                         +
@@ -146,9 +209,15 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* BILLING */}
+
                 <NavLink
                     to="/admin/billing"
-                    className="sidebar-link"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "sidebar-link active"
+                            : "sidebar-link"
+                    }
                 >
                     <span className="sidebar-link-icon">
                         ₹
@@ -160,11 +229,18 @@ function Sidebar() {
                 </NavLink>
 
             </nav>
+
             <div className="sidebar-bottom">
+
+                {/* SETTINGS */}
 
                 <NavLink
                     to="/admin/settings"
-                    className="sidebar-link"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "sidebar-link active"
+                            : "sidebar-link"
+                    }
                 >
                     <span className="sidebar-link-icon">
                         ⚙
@@ -176,15 +252,23 @@ function Sidebar() {
                 </NavLink>
 
 
+                {/* LOGOUT */}
+
                 <button
                     type="button"
                     className="sidebar-logout"
                     onClick={handleLogout}
                 >
-                    <span className="sidebar-icon">↪</span>
-                    <span>Logout</span>
-                </button>
 
+                    <span className="sidebar-icon">
+                        ↪
+                    </span>
+
+                    <span>
+                        Logout
+                    </span>
+
+                </button>
 
             </div>
 
