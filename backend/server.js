@@ -9,6 +9,10 @@ const patientRoutes = require("./routes/patientRoutes");
 const doctorRoutes = require("./routes/doctorRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const departmentRoutes = require("./routes/departmentRoutes");
+const medicalRecordRoutes = require("./routes/medicalRecordRoutes");
+const prescriptionRoutes = require("./routes/prescriptionRoutes");
+const laboratoryRoutes = require("./routes/laboratoryRoutes");
+const billingRoutes = require("./routes/billingRoutes");
 
 const app = express();
 
@@ -90,6 +94,26 @@ app.use("/api/doctors", doctorRoutes);
 app.use("/api/appointments", appointmentRoutes);
 
 app.use( "/api/departments",departmentRoutes);
+
+app.use(
+  "/api/medical-records",
+  medicalRecordRoutes
+);
+
+app.use(
+  "/api/prescriptions",
+  prescriptionRoutes
+);
+
+app.use(
+  "/api/laboratory",
+  laboratoryRoutes
+);
+
+app.use(
+  "/api/billing",
+  billingRoutes
+);
 
 app.use((req, res) => {
   res.status(404).json({

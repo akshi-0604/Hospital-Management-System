@@ -90,24 +90,26 @@ function AppRoutes() {
           />
 
           <Route
-            path="medical-records"
+            path="/admin/medical-records"
             element={<MedicalRecords />}
           />
 
           <Route
-            path="prescriptions"
+            path="/admin/prescriptions"
             element={<Prescriptions />}
           />
 
           <Route
-            path="laboratory"
+            path="/admin/laboratory"
             element={<Laboratory />}
           />
 
           <Route
-            path="billing"
+            path="/admin/billing"
             element={<Billing />}
           />
+
+
         </Route>
 
 
