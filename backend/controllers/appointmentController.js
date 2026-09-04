@@ -1,6 +1,12 @@
 const Appointment = require("../models/Appointment");
 const User = require("../models/User");
 const Doctor = require("../models/Doctor");
+const Department = require("../models/Department");
+
+const {
+  createPatientNotification,
+  sendAppointmentEmail,
+} = require("../services/patientNotificationService");
 const createAppointment = async (req, res) => {
   try {
     const {
@@ -29,36 +35,54 @@ const createAppointment = async (req, res) => {
     }
 
     // Check patient exists
-    const patientExists = await User.findById(patient);
+    const patientExists =
+      await User.findById(patient);
 
     if (!patientExists) {
       return res.status(404).json({
-        message: "Selected patient was not found.",
+        message:
+          "Selected patient was not found.",
       });
     }
 
     // Check doctor exists
-    const doctorExists = await Doctor.findById(doctor);
+    const doctorExists =
+      await Doctor.findById(doctor);
 
     if (!doctorExists) {
       return res.status(404).json({
-        message: "Selected doctor was not found.",
+        message:
+          "Selected doctor was not found.",
       });
     }
 
-    if (doctorExists.status !== "Available") {
+    // Check doctor availability
+    if (
+      doctorExists.status !==
+      "Available"
+    ) {
       return res.status(409).json({
         message:
           `Dr. ${doctorExists.fullName} is currently ${doctorExists.status.toLowerCase()}. Please select another doctor.`,
       });
     }
+
+    // Check appointment conflict
     const conflictingAppointment =
       await Appointment.findOne({
         doctor: doctor,
-        appointmentDate: new Date(appointmentDate),
-        appointmentTime: appointmentTime,
+
+        appointmentDate:
+          new Date(appointmentDate),
+
+        appointmentTime:
+          appointmentTime,
+
         status: {
-          $in: ["Pending", "Confirmed"],
+          $in: [
+            "Pending",
+            "Confirmed",
+          ],
         },
       });
 
@@ -68,6 +92,8 @@ const createAppointment = async (req, res) => {
           `Dr. ${doctorExists.fullName} is already booked on ${appointmentDate} at ${appointmentTime}. Please choose another time.`,
       });
     }
+
+    // Create appointment
     const appointment =
       await Appointment.create({
         patient,
@@ -77,9 +103,85 @@ const createAppointment = async (req, res) => {
         appointmentTime,
         reason: reason || "",
         notes: notes || "",
-        status: status || "Pending",
+        status:
+          status || "Pending",
+      });
+    try {
+      // Get department information
+      const departmentData =
+        await Department.findOne({
+          name: department,
+        });
+
+      const departmentLocation =
+        departmentData?.location ||
+        "Please contact hospital reception";
+
+      // Save in-app notification
+      await createPatientNotification({
+        patientId:
+          patientExists._id,
+
+        type: "Appointment",
+
+        title:
+          "Appointment Created",
+
+        message:
+          `Your appointment with Dr. ${doctorExists.fullName} has been ${appointment.status.toLowerCase()}.`,
+
+        metadata: {
+          appointmentId:
+            appointment._id,
+
+          doctorId:
+            doctorExists._id,
+
+          doctorName:
+            doctorExists.fullName,
+
+          specialization:
+            doctorExists.specialization,
+
+          department:
+            appointment.department,
+
+          location:
+            departmentLocation,
+
+          appointmentDate:
+            appointment.appointmentDate,
+
+          appointmentTime:
+            appointment.appointmentTime,
+        },
       });
 
+      // Send appointment email
+      await sendAppointmentEmail({
+        patient: patientExists,
+
+        doctor: doctorExists,
+
+        appointment,
+
+        departmentLocation,
+      });
+
+      console.log(
+        "APPOINTMENT NOTIFICATION SENT:",
+        patientExists.email
+      );
+    } catch (notificationError) {
+      // Appointment should still be created
+      // even if email/notification fails
+      console.error(
+        "APPOINTMENT NOTIFICATION ERROR:",
+        notificationError.message
+      );
+    }
+
+    // Get populated appointment
     const populatedAppointment =
       await Appointment.findById(
         appointment._id
@@ -96,6 +198,7 @@ const createAppointment = async (req, res) => {
     return res.status(201).json({
       message:
         "Appointment created successfully.",
+
       appointment:
         populatedAppointment,
     });
@@ -112,7 +215,6 @@ const createAppointment = async (req, res) => {
     });
   }
 };
-
 const getAppointments = async (
   req,
   res
@@ -136,6 +238,7 @@ const getAppointments = async (
     return res.status(200).json({
       message:
         "Appointments fetched successfully.",
+
       appointments,
     });
   } catch (error) {
@@ -147,10 +250,12 @@ const getAppointments = async (
     return res.status(500).json({
       message:
         "Unable to fetch appointments.",
+
       error: error.message,
     });
   }
 };
+
 const getAppointmentById = async (
   req,
   res
@@ -188,11 +293,11 @@ const getAppointmentById = async (
     return res.status(500).json({
       message:
         "Unable to fetch appointment.",
+
       error: error.message,
     });
   }
 };
-
 const updateAppointment = async (
   req,
   res
@@ -208,6 +313,7 @@ const updateAppointment = async (
       notes,
       status,
     } = req.body;
+
     const existingAppointment =
       await Appointment.findById(
         req.params.id
@@ -220,8 +326,7 @@ const updateAppointment = async (
       });
     }
 
-    // Use existing values when fields
-    // are not being changed
+    // Use existing values when fields are not changed
     const finalPatient =
       patient !== undefined
         ? patient
@@ -252,9 +357,11 @@ const updateAppointment = async (
         ? status
         : existingAppointment.status;
 
-
+    // Check patient
     const patientExists =
-      await User.findById(finalPatient);
+      await User.findById(
+        finalPatient
+      );
 
     if (!patientExists) {
       return res.status(404).json({
@@ -262,8 +369,12 @@ const updateAppointment = async (
           "Selected patient was not found.",
       });
     }
+
+    // Check doctor
     const doctorExists =
-      await Doctor.findById(finalDoctor);
+      await Doctor.findById(
+        finalDoctor
+      );
 
     if (!doctorExists) {
       return res.status(404).json({
@@ -278,7 +389,8 @@ const updateAppointment = async (
 
     if (
       doctorWasChanged &&
-      doctorExists.status !== "Available"
+      doctorExists.status !==
+        "Available"
     ) {
       return res.status(409).json({
         message:
@@ -286,10 +398,12 @@ const updateAppointment = async (
       });
     }
 
+    // Check conflict
     const conflict =
       await Appointment.findOne({
         _id: {
-          $ne: existingAppointment._id,
+          $ne:
+            existingAppointment._id,
         },
 
         doctor: finalDoctor,
@@ -297,10 +411,14 @@ const updateAppointment = async (
         appointmentDate:
           new Date(finalDate),
 
-        appointmentTime: finalTime,
+        appointmentTime:
+          finalTime,
 
         status: {
-          $in: ["Pending", "Confirmed"],
+          $in: [
+            "Pending",
+            "Confirmed",
+          ],
         },
       });
 
@@ -313,25 +431,37 @@ const updateAppointment = async (
 
     const updateData = {
       patient: finalPatient,
+
       doctor: finalDoctor,
-      department: finalDepartment,
-      appointmentDate: finalDate,
-      appointmentTime: finalTime,
+
+      department:
+        finalDepartment,
+
+      appointmentDate:
+        finalDate,
+
+      appointmentTime:
+        finalTime,
+
       reason:
         reason !== undefined
           ? reason
           : existingAppointment.reason,
+
       notes:
         notes !== undefined
           ? notes
           : existingAppointment.notes,
+
       status: finalStatus,
     };
 
     const appointment =
       await Appointment.findByIdAndUpdate(
         req.params.id,
+
         updateData,
+
         {
           new: true,
           runValidators: true,
@@ -349,6 +479,7 @@ const updateAppointment = async (
     return res.status(200).json({
       message:
         "Appointment updated successfully.",
+
       appointment,
     });
   } catch (error) {
@@ -360,6 +491,7 @@ const updateAppointment = async (
     return res.status(500).json({
       message:
         "Unable to update appointment.",
+
       error: error.message,
     });
   }
@@ -395,6 +527,7 @@ const deleteAppointment = async (
     return res.status(500).json({
       message:
         "Unable to delete appointment.",
+
       error: error.message,
     });
   }

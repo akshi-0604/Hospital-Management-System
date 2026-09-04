@@ -5,6 +5,12 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 
+const {
+    createPatientNotification,
+    sendWelcomeEmail,
+    sendHospitalInformationEmail,
+} = require("../services/patientNotificationService");
+
 async function registerUser(req, res) {
     try {
         console.log("REGISTER REQUEST:", req.body);
@@ -26,7 +32,8 @@ async function registerUser(req, res) {
             });
         }
 
-        const normalizedEmail = email.trim().toLowerCase();
+        const normalizedEmail =
+            email.trim().toLowerCase();
 
         // Check existing account
         const existingUser = await User.findOne({
@@ -63,6 +70,52 @@ async function registerUser(req, res) {
             newUser.email
         );
 
+        // --------------------------------------------------
+        // PATIENT WELCOME NOTIFICATION + EMAIL
+        // --------------------------------------------------
+
+        if (newUser.role === "patient") {
+            try {
+                // Save in-app notification
+                await createPatientNotification({
+                    patientId: newUser._id,
+
+                    type: "Welcome",
+
+                    title:
+                        "Welcome to the Hospital",
+
+                    message:
+                        `Welcome ${newUser.fullName}. Your patient account has been successfully created.`,
+
+                    metadata: {
+                        patientId:
+                            newUser._id,
+                    },
+                });
+
+                // Send welcome email
+                await sendWelcomeEmail(newUser);
+
+                // Send hospital information email
+                await sendHospitalInformationEmail(
+                    newUser
+                );
+
+                console.log(
+                    "PATIENT WELCOME NOTIFICATIONS SENT:",
+                    newUser.email
+                );
+            } catch (notificationError) {
+                // Email/notification failure should
+                // not cancel successful registration
+                console.error(
+                    "PATIENT NOTIFICATION ERROR:",
+                    notificationError.message
+                );
+            }
+        }
+
         return res.status(201).json({
             success: true,
             message: "Registration successful.",
@@ -91,9 +144,12 @@ async function registerUser(req, res) {
 
         // Mongoose validation error
         if (error.name === "ValidationError") {
-            const validationMessages = Object.values(
-                error.errors
-            ).map((item) => item.message);
+            const validationMessages =
+                Object.values(
+                    error.errors
+                ).map(
+                    (item) => item.message
+                );
 
             return res.status(400).json({
                 success: false,
@@ -110,9 +166,13 @@ async function registerUser(req, res) {
         });
     }
 }
+
 async function loginUser(req, res) {
     try {
-        console.log("LOGIN REQUEST:", req.body.email);
+        console.log(
+            "LOGIN REQUEST:",
+            req.body.email
+        );
 
         const {
             email,
@@ -159,7 +219,8 @@ async function loginUser(req, res) {
         if (!passwordMatch) {
             return res.status(401).json({
                 success: false,
-                message: "Incorrect password.",
+                message:
+                    "Incorrect password.",
             });
         }
 
@@ -217,6 +278,7 @@ async function loginUser(req, res) {
         });
     }
 }
+
 async function forgotPassword(req, res) {
     try {
         const { email } = req.body;
@@ -248,7 +310,8 @@ async function forgotPassword(req, res) {
             .randomBytes(32)
             .toString("hex");
 
-        user.resetPasswordToken = resetToken;
+        user.resetPasswordToken =
+            resetToken;
 
         user.resetPasswordExpires =
             Date.now() + 15 * 60 * 1000;
@@ -301,6 +364,7 @@ Hospital Management System`,
         });
     }
 }
+
 async function resetPassword(req, res) {
     try {
         const { token } = req.params;
@@ -309,7 +373,8 @@ async function resetPassword(req, res) {
         if (!token) {
             return res.status(400).json({
                 success: false,
-                message: "Reset token is required.",
+                message:
+                    "Reset token is required.",
             });
         }
 
@@ -371,6 +436,7 @@ async function resetPassword(req, res) {
         });
     }
 }
+
 module.exports = {
     registerUser,
     loginUser,

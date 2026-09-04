@@ -3,6 +3,7 @@ import axios from "axios";
 
 import "./PatientDashboard.css";
 
+import PatientNotifications from "../../components/patients/PatientNotifications";
 const API_BASE_URL =
   "https://hospital-management-system-nvjt.onrender.com/api";
 
@@ -859,6 +860,13 @@ function PatientDashboard() {
 
       </div>
 
+      <PatientNotifications
+        userId={
+          user?.id ||
+          user?._id
+        }
+      />
+
       <div className="patient-booking-banner">
 
         <div>
@@ -1018,11 +1026,11 @@ function PatientDashboard() {
               className={`patient-status-badge ${getAppointmentStatus(
                 upcomingAppointments[0]
               )
-                  .toLowerCase()
-                  .replace(
-                    /\s+/g,
-                    "-"
-                  )
+                .toLowerCase()
+                .replace(
+                  /\s+/g,
+                  "-"
+                )
                 }`}
             >
               {
@@ -1324,11 +1332,11 @@ function PatientDashboard() {
                         className={`patient-status-badge ${getAppointmentStatus(
                           appointment
                         )
-                            .toLowerCase()
-                            .replace(
-                              /\s+/g,
-                              "-"
-                            )
+                          .toLowerCase()
+                          .replace(
+                            /\s+/g,
+                            "-"
+                          )
                           }`}
                       >
                         {

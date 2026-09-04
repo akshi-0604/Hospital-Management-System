@@ -14,6 +14,8 @@ const prescriptionRoutes = require("./routes/prescriptionRoutes");
 const laboratoryRoutes = require("./routes/laboratoryRoutes");
 const billingRoutes = require("./routes/billingRoutes");
 
+const notificationRoutes = require("./routes/notificationRoutes");
+
 const app = express();
 
 const allowedOrigins = [
@@ -114,6 +116,8 @@ app.use(
   "/api/billing",
   billingRoutes
 );
+
+app.use("/api/notifications", notificationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

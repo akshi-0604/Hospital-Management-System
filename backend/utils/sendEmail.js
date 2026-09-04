@@ -2,11 +2,15 @@ const axios = require("axios");
 
 async function sendEmail({ to, subject, message }) {
   try {
+    if (!to || !subject || !message) {
+      throw new Error("Email recipient, subject, and message are required");
+    }
+
     const response = await axios.post(
       "https://api.brevo.com/v3/smtp/email",
       {
         sender: {
-          name: process.env.BREVO_SENDER_NAME,
+          name: process.env.BREVO_SENDER_NAME || "Hospital Management System",
           email: process.env.BREVO_SENDER_EMAIL,
         },
 

@@ -1,0 +1,190 @@
+.patient-notifications {
+  width: 100%;
+  padding: 24px;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.notifications-header h2 {
+  margin: 0;
+  font-size: 26px;
+  color: #1f2937;
+}
+
+.notifications-header p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.notification-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.unread-badge {
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: #eef6ff;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mark-all-button {
+  border: none;
+  background: #2563eb;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.mark-all-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.notification-card {
+  display: flex;
+  gap: 15px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  transition: 0.2s ease;
+}
+
+.notification-card:hover {
+  transform: translateY(-1px);
+}
+
+.notification-unread {
+  border-left: 4px solid #2563eb;
+  background: #f8fbff;
+}
+
+.notification-read {
+  background: #ffffff;
+}
+
+.notification-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  font-size: 21px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notification-title-row h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #111827;
+}
+
+.notification-content p {
+  margin: 8px 0;
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.notification-date {
+  display: block;
+  color: #9ca3af;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.new-badge {
+  font-size: 10px;
+  padding: 4px 7px;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+}
+
+.mark-read-button {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.notification-state {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 50px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.notification-state h3 {
+  margin: 12px 0 5px;
+  color: #374151;
+}
+
+.notification-state p {
+  margin: 0;
+}
+
+.empty-notification-icon {
+  font-size: 40px;
+}
+
+.notification-error {
+  padding: 15px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 768px) {
+  .notifications-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .notification-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .patient-notifications {
+    padding: 15px;
+  }
+}
