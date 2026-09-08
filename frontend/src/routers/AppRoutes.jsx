@@ -85,7 +85,7 @@ function AppRoutes() {
           />
 
           <Route
-            path="/admin/departments"
+            path="departments"
             element={<Departments />}
           />
 
