@@ -4,626 +4,949 @@ import axios from "axios";
 import "./Dashboard.css";
 
 const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
+    "https://hospital-management-system-nvjt.onrender.com/api";
 
-const PATIENTS_URL = `${API_BASE_URL}/patients`;
-const DOCTORS_URL = `${API_BASE_URL}/doctors`;
-const APPOINTMENTS_URL = `${API_BASE_URL}/appointments`;
+const PATIENTS_URL =
+    `${API_BASE_URL}/patients`;
+
+const DOCTORS_URL =
+    `${API_BASE_URL}/doctors`;
+
+const APPOINTMENTS_URL =
+    `${API_BASE_URL}/appointments`;
+
+const BILLING_URL =
+    `${API_BASE_URL}/billing`;
 
 function Dashboard() {
-  const [patients, setPatients] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [appointments, setAppointments] = useState([]);
+    const [patients, setPatients] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [appointments, setAppointments] = useState([]);
+    const [bills, setBills] = useState([]);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+    const [loading, setLoading] =
+        useState(true);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+    const [error, setError] =
+        useState("");
 
-  async function loadDashboardData() {
-    try {
-      setLoading(true);
-      setError("");
+    useEffect(() => {
+        loadDashboardData();
+    }, []);
 
-      const results = await Promise.allSettled([
-        axios.get(PATIENTS_URL),
-        axios.get(DOCTORS_URL),
-        axios.get(APPOINTMENTS_URL),
-      ]);
+    async function loadDashboardData() {
+        try {
+            setLoading(true);
+            setError("");
 
-      let patientsData = [];
-      let doctorsData = [];
-      let appointmentsData = [];
+            const results =
+                await Promise.allSettled([
+                    axios.get(
+                        PATIENTS_URL
+                    ),
 
-      if (results[0].status === "fulfilled") {
-        const data = results[0].value.data;
+                    axios.get(
+                        DOCTORS_URL
+                    ),
 
-        if (Array.isArray(data)) {
-          patientsData = data;
-        } else if (Array.isArray(data?.patients)) {
-          patientsData = data.patients;
-        } else if (Array.isArray(data?.data)) {
-          patientsData = data.data;
+                    axios.get(
+                        APPOINTMENTS_URL
+                    ),
+
+                    axios.get(
+                        BILLING_URL
+                    ),
+                ]);
+
+            if (
+                results[0].status ===
+                "fulfilled"
+            ) {
+                const response =
+                    results[0].value
+                        .data;
+
+                if (
+                    Array.isArray(
+                        response
+                    )
+                ) {
+                    setPatients(
+                        response
+                    );
+                } else if (
+                    Array.isArray(
+                        response?.patients
+                    )
+                ) {
+                    setPatients(
+                        response.patients
+                    );
+                } else if (
+                    Array.isArray(
+                        response?.data
+                    )
+                ) {
+                    setPatients(
+                        response.data
+                    );
+                } else {
+                    setPatients([]);
+                }
+            } else {
+                console.error(
+                    "Patients API error:",
+                    results[0].reason
+                );
+
+                setPatients([]);
+            }
+            if (
+                results[1].status ===
+                "fulfilled"
+            ) {
+                const response =
+                    results[1].value
+                        .data;
+
+                if (
+                    Array.isArray(
+                        response
+                    )
+                ) {
+                    setDoctors(
+                        response
+                    );
+                } else if (
+                    Array.isArray(
+                        response?.doctors
+                    )
+                ) {
+                    setDoctors(
+                        response.doctors
+                    );
+                } else if (
+                    Array.isArray(
+                        response?.data
+                    )
+                ) {
+                    setDoctors(
+                        response.data
+                    );
+                } else {
+                    setDoctors([]);
+                }
+            } else {
+                console.error(
+                    "Doctors API error:",
+                    results[1].reason
+                );
+
+                setDoctors([]);
+            }
+            if (
+                results[2].status ===
+                "fulfilled"
+            ) {
+                const response =
+                    results[2].value
+                        .data;
+
+                if (
+                    Array.isArray(
+                        response
+                    )
+                ) {
+                    setAppointments(
+                        response
+                    );
+                } else if (
+                    Array.isArray(
+                        response?.appointments
+                    )
+                ) {
+                    setAppointments(
+                        response.appointments
+                    );
+                } else if (
+                    Array.isArray(
+                        response?.data
+                    )
+                ) {
+                    setAppointments(
+                        response.data
+                    );
+                } else {
+                    setAppointments([]);
+                }
+            } else {
+                console.error(
+                    "Appointments API error:",
+                    results[2].reason
+                );
+
+                setAppointments([]);
+            }
+
+            if (
+                results[3].status ===
+                "fulfilled"
+            ) {
+                const response =
+                    results[3].value
+                        .data;
+
+                console.log(
+                    "Billing API response:",
+                    response
+                );
+
+                if (
+                    Array.isArray(
+                        response
+                    )
+                ) {
+                    setBills(response);
+                } else if (
+                    Array.isArray(
+                        response?.bills
+                    )
+                ) {
+                    setBills(
+                        response.bills
+                    );
+                } else if (
+                    Array.isArray(
+                        response?.billing
+                    )
+                ) {
+                    setBills(
+                        response.billing
+                    );
+                } else if (
+                    Array.isArray(
+                        response?.data
+                    )
+                ) {
+                    setBills(
+                        response.data
+                    );
+                } else {
+                    setBills([]);
+                }
+            } else {
+                console.error(
+                    "Billing API error:",
+                    results[3].reason
+                );
+
+                setBills([]);
+            }
+
+            const allFailed =
+                results.every(
+                    (result) =>
+                        result.status ===
+                        "rejected"
+                );
+
+            if (allFailed) {
+                setError(
+                    "Unable to load dashboard data. Please check the backend."
+                );
+            }
+        } catch (error) {
+            console.error(
+                "Dashboard loading error:",
+                error
+            );
+
+            setError(
+                "Unable to load dashboard data."
+            );
+        } finally {
+            setLoading(false);
         }
-      } else {
-        console.error(
-          "Patients API error:",
-          results[0].reason
-        );
-      }
-      if (results[1].status === "fulfilled") {
-        const data = results[1].value.data;
-
-        if (Array.isArray(data)) {
-          doctorsData = data;
-        } else if (Array.isArray(data?.doctors)) {
-          doctorsData = data.doctors;
-        } else if (Array.isArray(data?.data)) {
-          doctorsData = data.data;
+    }
+    function isToday(dateValue) {
+        if (!dateValue) {
+            return false;
         }
-      } else {
-        console.error(
-          "Doctors API error:",
-          results[1].reason
-        );
-      }
 
-      if (results[2].status === "fulfilled") {
-        const data = results[2].value.data;
+        const date =
+            new Date(dateValue);
 
-        if (Array.isArray(data)) {
-          appointmentsData = data;
-        } else if (Array.isArray(data?.appointments)) {
-          appointmentsData = data.appointments;
-        } else if (Array.isArray(data?.data)) {
-          appointmentsData = data.data;
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return false;
         }
-      } else {
-        console.error(
-          "Appointments API error:",
-          results[2].reason
+
+        const today =
+            new Date();
+
+        return (
+            date.getDate() ===
+                today.getDate() &&
+            date.getMonth() ===
+                today.getMonth() &&
+            date.getFullYear() ===
+                today.getFullYear()
         );
-      }
-
-      setPatients(patientsData);
-      setDoctors(doctorsData);
-      setAppointments(appointmentsData);
-
-      const allFailed = results.every(
-        (result) => result.status === "rejected"
-      );
-
-      if (allFailed) {
-        setError(
-          "Unable to load dashboard data. Please check the backend."
-        );
-      }
-    } catch (error) {
-      console.error(
-        "Dashboard loading error:",
-        error
-      );
-
-      setError(
-        "Unable to load dashboard data."
-      );
-    } finally {
-      setLoading(false);
     }
-  }
+    const totalDepartments =
+        useMemo(() => {
+            const departmentNames =
+                doctors
+                    .map((doctor) =>
+                        String(
+                            doctor?.department ||
+                                ""
+                        )
+                            .trim()
+                            .toLowerCase()
+                    )
+                    .filter(Boolean);
 
-  const totalDepartments = useMemo(() => {
-    const departments = doctors
-      .map((doctor) =>
-        String(doctor?.department || "")
-          .trim()
-          .toLowerCase()
-      )
-      .filter(Boolean);
+            return new Set(
+                departmentNames
+            ).size;
+        }, [doctors]);
 
-    return new Set(departments).size;
-  }, [doctors]);
+    const todaysAppointments =
+        useMemo(() => {
+            return appointments.filter(
+                (appointment) => {
+                    return (
+                        isToday(
+                            appointment?.appointmentDate
+                        ) ||
+                        isToday(
+                            appointment?.date
+                        ) ||
+                        isToday(
+                            appointment?.scheduledDate
+                        )
+                    );
+                }
+            );
+        }, [appointments]);
 
-  function isToday(value) {
-    if (!value) {
-      return false;
-    }
+    const totalPaidRevenue =
+        useMemo(() => {
+            return bills.reduce(
+                (total, bill) => {
+                    const paymentStatus =
+                        String(
+                            bill?.paymentStatus ||
+                                bill?.status ||
+                                ""
+                        )
+                            .trim()
+                            .toLowerCase();
 
-    const date = new Date(value);
+                    if (
+                        paymentStatus !==
+                        "paid"
+                    ) {
+                        return total;
+                    }
 
-    if (Number.isNaN(date.getTime())) {
-      return false;
-    }
+                    const amount =
+                        Number(
+                            bill?.totalAmount ??
+                                bill?.amount ??
+                                bill?.total ??
+                                0
+                        );
 
-    const today = new Date();
+                    if (
+                        Number.isNaN(
+                            amount
+                        )
+                    ) {
+                        return total;
+                    }
 
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
-  }
+                    return (
+                        total + amount
+                    );
+                },
+                0
+            );
+        }, [bills]);
 
-  const todaysAppointments = useMemo(() => {
-    return appointments.filter((appointment) => {
-      return isToday(
-        appointment?.appointmentDate ||
-          appointment?.date ||
-          appointment?.scheduledDate
-      );
-    });
-  }, [appointments]);
+    const todaysPaidRevenue =
+        useMemo(() => {
+            return bills.reduce(
+                (total, bill) => {
+                    const paymentStatus =
+                        String(
+                            bill?.paymentStatus ||
+                                bill?.status ||
+                                ""
+                        )
+                            .trim()
+                            .toLowerCase();
 
-  const recentAppointments = useMemo(() => {
-    return [...appointments]
-      .sort((a, b) => {
-        const dateA = new Date(
-          a?.appointmentDate ||
-            a?.date ||
-            a?.scheduledDate ||
-            a?.createdAt ||
-            0
-        ).getTime();
+                    if (
+                        paymentStatus !==
+                        "paid"
+                    ) {
+                        return total;
+                    }
 
-        const dateB = new Date(
-          b?.appointmentDate ||
-            b?.date ||
-            b?.scheduledDate ||
-            b?.createdAt ||
-            0
-        ).getTime();
+                    const billDate =
+                        bill?.invoiceDate ||
+                        bill?.createdAt;
 
-        return dateB - dateA;
-      })
-      .slice(0, 5);
-  }, [appointments]);
+                    if (
+                        !isToday(
+                            billDate
+                        )
+                    ) {
+                        return total;
+                    }
 
-  function formatDate(value) {
-    if (!value) {
-      return "-";
-    }
+                    const amount =
+                        Number(
+                            bill?.totalAmount ??
+                                bill?.amount ??
+                                bill?.total ??
+                                0
+                        );
 
-    const date = new Date(value);
+                    if (
+                        Number.isNaN(
+                            amount
+                        )
+                    ) {
+                        return total;
+                    }
 
-    if (Number.isNaN(date.getTime())) {
-      return "-";
-    }
+                    return (
+                        total + amount
+                    );
+                },
+                0
+            );
+        }, [bills]);
+    const recentAppointments =
+        useMemo(() => {
+            const sorted =
+                [...appointments].sort(
+                    (a, b) => {
+                        const dateA =
+                            new Date(
+                                a?.appointmentDate ||
+                                    a?.date ||
+                                    a?.scheduledDate ||
+                                    a?.createdAt ||
+                                    0
+                            ).getTime();
 
-    return date.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  }
+                        const dateB =
+                            new Date(
+                                b?.appointmentDate ||
+                                    b?.date ||
+                                    b?.scheduledDate ||
+                                    b?.createdAt ||
+                                    0
+                            ).getTime();
 
-  function formatTime(value) {
-    if (!value) {
-      return "-";
-    }
+                        return (
+                            dateB - dateA
+                        );
+                    }
+                );
 
-    return value;
-  }
-
-  function getPatientName(appointment) {
-    const patient = appointment?.patient;
-
-    if (
-      patient &&
-      typeof patient === "object"
+            return sorted.slice(
+                0,
+                5
+            );
+        }, [appointments]);
+    function formatDate(
+        dateValue
     ) {
-      return (
-        patient.fullName ||
-        patient.name ||
-        "Unknown Patient"
-      );
+        if (!dateValue) {
+            return "-";
+        }
+
+        const date =
+            new Date(
+                dateValue
+            );
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return "-";
+        }
+
+        return date.toLocaleDateString(
+            "en-IN",
+            {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+            }
+        );
     }
-
-    return (
-      appointment?.patientName ||
-      appointment?.patientFullName ||
-      "Unknown Patient"
-    );
-  }
-
-  function getDoctorName(appointment) {
-    const doctor = appointment?.doctor;
-
-    let name = "";
-
-    if (
-      doctor &&
-      typeof doctor === "object"
+    function getPatientName(
+        appointment
     ) {
-      name =
-        doctor.fullName ||
-        doctor.name ||
-        "";
-    } else {
-      name =
-        appointment?.doctorName ||
-        appointment?.doctorFullName ||
-        "";
+        if (
+            appointment?.patient &&
+            typeof appointment.patient ===
+                "object"
+        ) {
+            return (
+                appointment.patient.fullName ||
+                appointment.patient.name ||
+                "-"
+            );
+        }
+
+        return (
+            appointment?.patientName ||
+            appointment?.patientFullName ||
+            appointment?.patient ||
+            "-"
+        );
+    }
+    function getDoctorName(
+        appointment
+    ) {
+        if (
+            appointment?.doctor &&
+            typeof appointment.doctor ===
+                "object"
+        ) {
+            const name =
+                appointment.doctor.fullName ||
+                appointment.doctor.name ||
+                "-";
+
+            if (
+                String(name)
+                    .toLowerCase()
+                    .startsWith("dr.")
+            ) {
+                return name;
+            }
+
+            return `Dr. ${name}`;
+        }
+
+        const name =
+            appointment?.doctorName ||
+            appointment?.doctorFullName ||
+            appointment?.doctor ||
+            "-";
+
+        if (
+            String(name)
+                .toLowerCase()
+                .startsWith("dr.")
+        ) {
+            return name;
+        }
+
+        return `Dr. ${name}`;
+    }
+    function getDepartment(
+        appointment
+    ) {
+        return (
+            appointment?.department ||
+            appointment?.doctor
+                ?.department ||
+            "-"
+        );
     }
 
-    if (!name) {
-      return "Unknown Doctor";
+    function getAppointmentDate(
+        appointment
+    ) {
+        return (
+            appointment?.appointmentDate ||
+            appointment?.date ||
+            appointment?.scheduledDate ||
+            appointment?.createdAt
+        );
     }
 
-    return name.startsWith("Dr.")
-      ? name
-      : `Dr. ${name}`;
-  }
+    function getAppointmentTime(
+        appointment
+    ) {
+        return (
+            appointment?.appointmentTime ||
+            appointment?.time ||
+            appointment?.scheduledTime ||
+            "-"
+        );
+    }
+    function getAppointmentStatus(
+        appointment
+    ) {
+        return (
+            appointment?.status ||
+            "Pending"
+        );
+    }
 
-  function getDepartment(appointment) {
+    function getStatusClass(
+        status
+    ) {
+        return String(
+            status || ""
+        )
+            .toLowerCase()
+            .replace(
+                /\s+/g,
+                "-"
+            );
+    }
+    function formatCurrency(
+        amount
+    ) {
+        return `₹${Number(
+            amount || 0
+        ).toLocaleString(
+            "en-IN"
+        )}`;
+    }
+    function handleRefresh() {
+        loadDashboardData();
+    }
+
+    if (loading) {
+        return (
+            <div className="dashboard-page">
+                <div className="dashboard-loading">
+                    Loading dashboard...
+                </div>
+            </div>
+        );
+    }
     return (
-      appointment?.department ||
-      appointment?.doctor?.department ||
-      "Not assigned"
-    );
-  }
-
-  function getAppointmentDate(appointment) {
-    return (
-      appointment?.appointmentDate ||
-      appointment?.date ||
-      appointment?.scheduledDate ||
-      ""
-    );
-  }
-
-  function getAppointmentTime(appointment) {
-    return (
-      appointment?.appointmentTime ||
-      appointment?.time ||
-      appointment?.scheduledTime ||
-      "-"
-    );
-  }
-
-  function getAppointmentStatus(appointment) {
-    return (
-      appointment?.status ||
-      "Pending"
-    );
-  }
-
-  function getStatusClass(status) {
-    return String(status)
-      .toLowerCase()
-      .replace(/\s+/g, "-");
-  }
-
-  function handleRefresh() {
-    loadDashboardData();
-  }
-  if (loading) {
-    return (
-      <div className="dashboard-page">
-        <div className="dashboard-header">
-          <div>
-            <h2>Hospital Overview</h2>
-
-            <p>
-              Here is what's happening in your hospital today.
-            </p>
-          </div>
-        </div>
-
-        <div className="dashboard-loading">
-          Loading dashboard data...
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="dashboard-page">
-
-      {/* HEADER */}
-
-      <div className="dashboard-header">
-
-        <div>
-          <h2>Hospital Overview</h2>
-
-          <p>
-            Here is what's happening in your hospital today.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          className="dashboard-refresh-button"
-          onClick={handleRefresh}
-        >
-          ↻ Refresh
-        </button>
-
-      </div>
-
-
-      {/* ERROR */}
-
-      {error && (
-        <div className="dashboard-error">
-          {error}
-        </div>
-      )}
-
-
-      {/* SUMMARY CARDS */}
-
-      <div className="dashboard-cards">
-
-        {/* TOTAL PATIENTS */}
-
-        <div className="dashboard-card">
-
-          <span>
-            Total Patients
-          </span>
-
-          <strong>
-            {patients.length}
-          </strong>
-
-          <p>
-            Registered patients
-          </p>
-
-        </div>
-
-
-        {/* TOTAL DOCTORS */}
-
-        <div className="dashboard-card">
-
-          <span>
-            Total Doctors
-          </span>
-
-          <strong>
-            {doctors.length}
-          </strong>
-
-          <p>
-            Registered doctors
-          </p>
-
-        </div>
-
-
-        {/* TOTAL DEPARTMENTS */}
-
-        <div className="dashboard-card">
-
-          <span>
-            Total Departments
-          </span>
-
-          <strong>
-            {totalDepartments}
-          </strong>
-
-          <p>
-            Hospital departments
-          </p>
-
-        </div>
-
-
-        {/* TOTAL APPOINTMENTS */}
-
-        <div className="dashboard-card">
-
-          <span>
-            Total Appointments
-          </span>
-
-          <strong>
-            {appointments.length}
-          </strong>
-
-          <p>
-            All scheduled appointments
-          </p>
-
-        </div>
-
-        <div className="dashboard-card">
-
-          <span>
-            Today's Appointments
-          </span>
-
-          <strong>
-            {todaysAppointments.length}
-          </strong>
-
-          <p>
-            Appointments scheduled today
-          </p>
-
-        </div>
-
-        <div className="dashboard-card">
-
-          <span>
-            Today's Revenue
-          </span>
-
-          <strong>
-            —
-          </strong>
-
-          <p>
-            Available after billing integration
-          </p>
-
-        </div>
-
-      </div>
-
-
-      {/* RECENT APPOINTMENTS */}
-
-      <div className="dashboard-section">
-
-        <div className="dashboard-section-header">
-
-          <div>
-            <h3>
-              Recent Appointments
-            </h3>
-
-            <p>
-              Latest appointment records from the database.
-            </p>
-          </div>
-
-        </div>
-
-
-        {recentAppointments.length === 0 ? (
-
-          <div className="dashboard-empty">
-
-            <h4>
-              No appointments yet
-            </h4>
-
-            <p>
-              Create an appointment from the Appointments module.
-            </p>
-
-          </div>
-
-        ) : (
-
-          <div className="appointment-table">
-
-            <div className="table-header">
-
-              <span>
-                Patient
-              </span>
-
-              <span>
-                Doctor
-              </span>
-
-              <span>
-                Department
-              </span>
-
-              <span>
-                Date
-              </span>
-
-              <span>
-                Time
-              </span>
-
-              <span>
-                Status
-              </span>
+        <div className="dashboard-page">
+
+            {/* HEADER */}
+            <div className="dashboard-header">
+
+                <div>
+                    <h1>
+                        Hospital Overview
+                    </h1>
+
+                    <p>
+                        Here is what's
+                        happening in your
+                        hospital today.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    className="dashboard-refresh-button"
+                    onClick={
+                        handleRefresh
+                    }
+                >
+                    ↻ Refresh
+                </button>
 
             </div>
 
-            {recentAppointments.map(
-              (appointment) => (
-
-                <div
-                  className="table-row"
-                  key={
-                    appointment?._id ||
-                    `${getPatientName(
-                      appointment
-                    )}-${getAppointmentDate(
-                      appointment
-                    )}`
-                  }
-                >
-
-                  <span>
-                    {
-                      getPatientName(
-                        appointment
-                      )
-                    }
-                  </span>
-
-
-                  <span>
-                    {
-                      getDoctorName(
-                        appointment
-                      )
-                    }
-                  </span>
-
-
-                  <span>
-                    {
-                      getDepartment(
-                        appointment
-                      )
-                    }
-                  </span>
-
-
-                  <span>
-                    {
-                      formatDate(
-                        getAppointmentDate(
-                          appointment
-                        )
-                      )
-                    }
-                  </span>
-
-
-                  <span>
-                    {
-                      formatTime(
-                        getAppointmentTime(
-                          appointment
-                        )
-                      )
-                    }
-                  </span>
-
-
-                  <span>
-
-                    <span
-                      className={`status ${getStatusClass(
-                        getAppointmentStatus(
-                          appointment
-                        )
-                      )}`}
-                    >
-                      {
-                        getAppointmentStatus(
-                          appointment
-                        )
-                      }
-                    </span>
-
-                  </span>
-
+            {/* ERROR */}
+            {error && (
+                <div className="dashboard-error">
+                    {error}
                 </div>
-              )
             )}
 
-          </div>
-        )}
+            {/* SUMMARY CARDS */}
+            <div className="dashboard-summary-grid">
 
-      </div>
+                {/* PATIENTS */}
+                <div className="dashboard-summary-card">
+                    <span>
+                        Total Patients
+                    </span>
 
-    </div>
-  );
+                    <strong>
+                        {patients.length}
+                    </strong>
+
+                    <p>
+                        Registered
+                        patients
+                    </p>
+                </div>
+
+                {/* DOCTORS */}
+                <div className="dashboard-summary-card">
+                    <span>
+                        Total Doctors
+                    </span>
+
+                    <strong>
+                        {doctors.length}
+                    </strong>
+
+                    <p>
+                        Registered
+                        doctors
+                    </p>
+                </div>
+
+                {/* DEPARTMENTS */}
+                <div className="dashboard-summary-card">
+                    <span>
+                        Total Departments
+                    </span>
+
+                    <strong>
+                        {totalDepartments}
+                    </strong>
+
+                    <p>
+                        Hospital
+                        departments
+                    </p>
+                </div>
+
+                {/* APPOINTMENTS */}
+                <div className="dashboard-summary-card">
+                    <span>
+                        Total Appointments
+                    </span>
+
+                    <strong>
+                        {appointments.length}
+                    </strong>
+
+                    <p>
+                        All scheduled
+                        appointments
+                    </p>
+                </div>
+
+                {/* PAID REVENUE */}
+                <div className="dashboard-summary-card">
+                    <span>
+                        Paid Revenue
+                    </span>
+
+                    <strong>
+                        {formatCurrency(
+                            totalPaidRevenue
+                        )}
+                    </strong>
+
+                    <p>
+                        Total collected
+                        from paid bills
+                    </p>
+                </div>
+
+            </div>
+
+            {/* TODAY'S REVENUE */}
+            <div className="dashboard-revenue-row">
+
+                <div className="dashboard-summary-card dashboard-today-revenue-card">
+
+                    <span>
+                        Today's Revenue
+                    </span>
+
+                    <strong>
+                        {formatCurrency(
+                            todaysPaidRevenue
+                        )}
+                    </strong>
+
+                    <p>
+                        Paid bills issued
+                        today
+                    </p>
+
+                </div>
+
+                <div className="dashboard-summary-card">
+
+                    <span>
+                        Today's Appointments
+                    </span>
+
+                    <strong>
+                        {
+                            todaysAppointments.length
+                        }
+                    </strong>
+
+                    <p>
+                        Appointments scheduled
+                        today
+                    </p>
+
+                </div>
+
+            </div>
+
+            {/* RECENT APPOINTMENTS */}
+            <div className="dashboard-section">
+
+                <div className="dashboard-section-header">
+
+                    <div>
+                        <h2>
+                            Recent Appointments
+                        </h2>
+
+                        <p>
+                            Latest appointment
+                            records from the
+                            database.
+                        </p>
+                    </div>
+
+                </div>
+
+                {recentAppointments.length ===
+                0 ? (
+                    <div className="dashboard-empty">
+                        No appointments
+                        available.
+                    </div>
+                ) : (
+                    <div className="dashboard-table-wrapper">
+
+                        <table className="dashboard-table">
+
+                            <thead>
+                                <tr>
+
+                                    <th>
+                                        Patient
+                                    </th>
+
+                                    <th>
+                                        Doctor
+                                    </th>
+
+                                    <th>
+                                        Department
+                                    </th>
+
+                                    <th>
+                                        Date
+                                    </th>
+
+                                    <th>
+                                        Time
+                                    </th>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {recentAppointments.map(
+                                    (
+                                        appointment
+                                    ) => (
+                                        <tr
+                                            key={
+                                                appointment._id
+                                            }
+                                        >
+
+                                            <td>
+                                                {
+                                                    getPatientName(
+                                                        appointment
+                                                    )
+                                                }
+                                            </td>
+
+                                            <td>
+                                                {
+                                                    getDoctorName(
+                                                        appointment
+                                                    )
+                                                }
+                                            </td>
+
+                                            <td>
+                                                {
+                                                    getDepartment(
+                                                        appointment
+                                                    )
+                                                }
+                                            </td>
+
+                                            <td>
+                                                {
+                                                    formatDate(
+                                                        getAppointmentDate(
+                                                            appointment
+                                                        )
+                                                    )
+                                                }
+                                            </td>
+
+                                            <td>
+                                                {
+                                                    getAppointmentTime(
+                                                        appointment
+                                                    )
+                                                }
+                                            </td>
+
+                                            <td>
+
+                                                <span
+                                                    className={`status-badge status-${getStatusClass(
+                                                        getAppointmentStatus(
+                                                            appointment
+                                                        )
+                                                    )}`}
+                                                >
+                                                    {
+                                                        getAppointmentStatus(
+                                                            appointment
+                                                        )
+                                                    }
+                                                </span>
+
+                                            </td>
+
+                                        </tr>
+                                    )
+                                )}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                )}
+
+            </div>
+
+        </div>
+    );
 }
 
 export default Dashboard;
