@@ -137,7 +137,7 @@ function Billing() {
       setError(
         results[0].reason?.response
           ?.data?.message ||
-          "Unable to load billing records."
+        "Unable to load billing records."
       );
     }
 
@@ -267,9 +267,9 @@ function Billing() {
 
           const matchesStatus =
             paymentStatusFilter ===
-              "All" ||
+            "All" ||
             bill.paymentStatus ===
-              paymentStatusFilter;
+            paymentStatusFilter;
 
           return (
             matchesSearch &&
@@ -353,7 +353,7 @@ function Billing() {
     const randomNumber =
       Math.floor(
         1000 +
-          Math.random() * 9000
+        Math.random() * 9000
       );
 
     return `INV-${Date.now()
@@ -368,20 +368,30 @@ function Billing() {
   }
 
   function getBalanceAmount(bill) {
+    if (!bill) {
+      return 0;
+    }
     if (
-      bill?.balanceAmount !==
-      undefined
+      bill.paymentStatus ===
+      "Paid" ||
+      bill.paymentStatus ===
+      "Cancelled"
     ) {
-      return Number(
-        bill.balanceAmount || 0
-      );
+      return 0;
     }
 
-    return Math.max(
+    const totalAmount =
       Number(
-        bill?.totalAmount || 0
-      ) -
-        getAmountPaid(bill),
+        bill.totalAmount || 0
+      );
+
+    const amountPaid =
+      Number(
+        bill.amountPaid || 0
+      );
+    return Math.max(
+      totalAmount -
+      amountPaid,
       0
     );
   }
@@ -407,11 +417,11 @@ function Billing() {
 
     return (
       date.getDate() ===
-        today.getDate() &&
+      today.getDate() &&
       date.getMonth() ===
-        today.getMonth() &&
+      today.getMonth() &&
       date.getFullYear() ===
-        today.getFullYear()
+      today.getFullYear()
     );
   }
 
@@ -438,8 +448,8 @@ function Billing() {
   const calculatedTotal =
     Math.max(
       calculatedSubtotal -
-        calculatedDiscount +
-        calculatedTax,
+      calculatedDiscount +
+      calculatedTax,
       0
     );
   const availableAppointments =
@@ -465,13 +475,13 @@ function Billing() {
 
           return (
             String(patientId) ===
-              String(
-                formData.patient
-              ) &&
+            String(
+              formData.patient
+            ) &&
             String(doctorId) ===
-              String(
-                formData.doctor
-              )
+            String(
+              formData.doctor
+            )
           );
         }
       );
@@ -538,7 +548,7 @@ function Billing() {
                   paymentTotal +
                   Number(
                     payment.amount ||
-                      0
+                    0
                   )
                 );
               }
@@ -627,12 +637,12 @@ function Billing() {
           ];
 
         updatedItems[index] =
-          {
-            ...updatedItems[
-              index
-            ],
-            [field]: value,
-          };
+        {
+          ...updatedItems[
+          index
+          ],
+          [field]: value,
+        };
 
         return {
           ...previous,
@@ -693,7 +703,7 @@ function Billing() {
       !formData.invoiceNumber.trim() ||
       !formData.invoiceDate ||
       validItems.length ===
-        0
+      0
     ) {
       alert(
         "Patient, invoice number, invoice date and at least one billing item are required."
@@ -783,7 +793,7 @@ function Billing() {
       alert(
         error.response?.data
           ?.message ||
-          "Unable to create bill."
+        "Unable to create bill."
       );
     } finally {
       setSaving(false);
@@ -946,7 +956,7 @@ function Billing() {
 
       alert(
         response.data?.message ||
-          "Payment recorded successfully."
+        "Payment recorded successfully."
       );
 
       closePaymentModal();
@@ -961,7 +971,7 @@ function Billing() {
       alert(
         error.response?.data
           ?.message ||
-          "Unable to record payment."
+        "Unable to record payment."
       );
     } finally {
       setSavingPayment(
@@ -1347,7 +1357,7 @@ function Billing() {
                         <span
                           className={`payment-status ${String(
                             bill.paymentStatus ||
-                              ""
+                            ""
                           )
                             .toLowerCase()
                             .replaceAll(
@@ -1390,7 +1400,7 @@ function Billing() {
                           {bill.paymentStatus !==
                             "Paid" &&
                             bill.paymentStatus !==
-                              "Cancelled" && (
+                            "Cancelled" && (
                               <button
                                 type="button"
                                 className="edit-bill-button"
@@ -1727,17 +1737,17 @@ function Billing() {
                         {formData.items
                           .length >
                           1 && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              removeItem(
-                                index
-                              )
-                            }
-                          >
-                            Remove
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeItem(
+                                  index
+                                )
+                              }
+                            >
+                              Remove
+                            </button>
+                          )}
 
                       </div>
 
@@ -2395,7 +2405,7 @@ function Billing() {
                     {selectedBilling.paymentStatus !==
                       "Paid" &&
                       selectedBilling.paymentStatus !==
-                        "Cancelled" && (
+                      "Cancelled" && (
                         <button
                           type="button"
                           className="record-payment-button"
@@ -2526,7 +2536,7 @@ function Billing() {
                 {selectedBilling.paymentStatus !==
                   "Paid" &&
                   selectedBilling.paymentStatus !==
-                    "Cancelled" && (
+                  "Cancelled" && (
                     <button
                       type="button"
                       className="save-bill-button"
@@ -2823,10 +2833,10 @@ function Billing() {
                         getBalanceAmount(
                           selectedBilling
                         ) -
-                          Number(
-                            paymentForm.amount ||
-                              0
-                          ),
+                        Number(
+                          paymentForm.amount ||
+                          0
+                        ),
                         0
                       )
                     )}

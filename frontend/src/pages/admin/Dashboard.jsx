@@ -289,11 +289,11 @@ function Dashboard() {
 
         return (
             date.getDate() ===
-                today.getDate() &&
+            today.getDate() &&
             date.getMonth() ===
-                today.getMonth() &&
+            today.getMonth() &&
             date.getFullYear() ===
-                today.getFullYear()
+            today.getFullYear()
         );
     }
     const totalDepartments =
@@ -303,7 +303,7 @@ function Dashboard() {
                     .map((doctor) =>
                         String(
                             doctor?.department ||
-                                ""
+                            ""
                         )
                             .trim()
                             .toLowerCase()
@@ -341,38 +341,36 @@ function Dashboard() {
                     const paymentStatus =
                         String(
                             bill?.paymentStatus ||
-                                bill?.status ||
-                                ""
+                            ""
                         )
                             .trim()
                             .toLowerCase();
 
-                    if (
-                        paymentStatus !==
-                        "paid"
-                    ) {
-                        return total;
-                    }
-
-                    const amount =
+                    let amount =
                         Number(
-                            bill?.totalAmount ??
-                                bill?.amount ??
-                                bill?.total ??
-                                0
+                            bill?.amountPaid
                         );
 
                     if (
-                        Number.isNaN(
-                            amount
-                        )
+                        (!Number.isFinite(amount) ||
+                            amount <= 0) &&
+                        paymentStatus === "paid"
+                    ) {
+                        amount =
+                            Number(
+                                bill?.totalAmount ||
+                                0
+                            );
+                    }
+
+                    if (
+                        !Number.isFinite(amount) ||
+                        amount <= 0
                     ) {
                         return total;
                     }
 
-                    return (
-                        total + amount
-                    );
+                    return total + amount;
                 },
                 0
             );
@@ -385,8 +383,8 @@ function Dashboard() {
                     const paymentStatus =
                         String(
                             bill?.paymentStatus ||
-                                bill?.status ||
-                                ""
+                            bill?.status ||
+                            ""
                         )
                             .trim()
                             .toLowerCase();
@@ -413,9 +411,9 @@ function Dashboard() {
                     const amount =
                         Number(
                             bill?.totalAmount ??
-                                bill?.amount ??
-                                bill?.total ??
-                                0
+                            bill?.amount ??
+                            bill?.total ??
+                            0
                         );
 
                     if (
@@ -441,19 +439,19 @@ function Dashboard() {
                         const dateA =
                             new Date(
                                 a?.appointmentDate ||
-                                    a?.date ||
-                                    a?.scheduledDate ||
-                                    a?.createdAt ||
-                                    0
+                                a?.date ||
+                                a?.scheduledDate ||
+                                a?.createdAt ||
+                                0
                             ).getTime();
 
                         const dateB =
                             new Date(
                                 b?.appointmentDate ||
-                                    b?.date ||
-                                    b?.scheduledDate ||
-                                    b?.createdAt ||
-                                    0
+                                b?.date ||
+                                b?.scheduledDate ||
+                                b?.createdAt ||
+                                0
                             ).getTime();
 
                         return (
@@ -502,7 +500,7 @@ function Dashboard() {
         if (
             appointment?.patient &&
             typeof appointment.patient ===
-                "object"
+            "object"
         ) {
             return (
                 appointment.patient.fullName ||
@@ -524,7 +522,7 @@ function Dashboard() {
         if (
             appointment?.doctor &&
             typeof appointment.doctor ===
-                "object"
+            "object"
         ) {
             const name =
                 appointment.doctor.fullName ||
@@ -820,7 +818,7 @@ function Dashboard() {
                 </div>
 
                 {recentAppointments.length ===
-                0 ? (
+                    0 ? (
                     <div className="dashboard-empty">
                         No appointments
                         available.

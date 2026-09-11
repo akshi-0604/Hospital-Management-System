@@ -10,8 +10,7 @@ function calculateBillTotals(
 ) {
   const subtotal = items.reduce(
     (total, item) =>
-      total +
-      Number(item.amount || 0),
+      total + Number(item.amount || 0),
     0
   );
 
@@ -67,6 +66,113 @@ function getPaymentStatus(
 
   return "Partially Paid";
 }
+
+async function normalizeBillingRecord(
+  billing
+) {
+  if (!billing) {
+    return billing;
+  }
+
+  const totalAmount =
+    Number(
+      billing.totalAmount || 0
+    );
+
+  let amountPaid =
+    Number(
+      billing.amountPaid || 0
+    );
+  if (
+    billing.paymentStatus ===
+      "Paid" &&
+    amountPaid <= 0
+  ) {
+    amountPaid =
+      totalAmount;
+
+    billing.amountPaid =
+      amountPaid;
+
+    billing.balanceAmount = 0;
+
+    await billing.save();
+
+    return billing;
+  }
+
+  if (
+    billing.paymentStatus ===
+    "Cancelled"
+  ) {
+    billing.balanceAmount =
+      0;
+
+    await billing.save();
+
+    return billing;
+  }
+  if (
+    !Number.isFinite(
+      amountPaid
+    ) ||
+    amountPaid < 0
+  ) {
+    amountPaid = 0;
+    billing.amountPaid = 0;
+  }
+
+  amountPaid =
+    Math.min(
+      amountPaid,
+      totalAmount
+    );
+
+  const balanceAmount =
+    Math.max(
+      totalAmount -
+        amountPaid,
+      0
+    );
+
+  billing.amountPaid =
+    amountPaid;
+
+  billing.balanceAmount =
+    balanceAmount;
+
+  if (
+    billing.paymentStatus !==
+    "Cancelled"
+  ) {
+    billing.paymentStatus =
+      getPaymentStatus(
+        totalAmount,
+        amountPaid
+      );
+  }
+
+  await billing.save();
+
+  return billing;
+}
+function populateBilling(
+  query
+) {
+  return query
+    .populate(
+      "patient",
+      "fullName email phone role"
+    )
+    .populate(
+      "doctor",
+      "fullName doctorId specialization department"
+    )
+    .populate(
+      "appointment",
+      "appointmentDate appointmentTime status department"
+    );
+}
 const createBilling = async (
   req,
   res
@@ -86,7 +192,6 @@ const createBilling = async (
       paymentMethod,
       notes,
     } = req.body;
-
     if (
       !patient ||
       !invoiceNumber ||
@@ -99,10 +204,10 @@ const createBilling = async (
           "Patient, invoice number, invoice date and at least one billing item are required.",
       });
     }
-
-    // Patient validation
     const patientExists =
-      await User.findById(patient);
+      await User.findById(
+        patient
+      );
 
     if (!patientExists) {
       return res.status(404).json({
@@ -110,8 +215,6 @@ const createBilling = async (
           "Selected patient was not found.",
       });
     }
-
-    // Doctor validation
     if (doctor) {
       const doctorExists =
         await Doctor.findById(
@@ -125,8 +228,6 @@ const createBilling = async (
         });
       }
     }
-
-    // Appointment validation
     if (appointment) {
       const appointmentExists =
         await Appointment.findById(
@@ -140,8 +241,6 @@ const createBilling = async (
         });
       }
     }
-
-    // Check duplicate invoice
     const existingBill =
       await Billing.findOne({
         invoiceNumber:
@@ -154,28 +253,35 @@ const createBilling = async (
           "Invoice number already exists.",
       });
     }
-
     const cleanItems =
-      items.map((item) => ({
-        description:
-          String(
-            item.description || ""
-          ).trim(),
+      items.map(
+        (item) => ({
+          description:
+            String(
+              item.description ||
+                ""
+            ).trim(),
 
-        category:
-          String(
-            item.category || "Other"
-          ).trim(),
+          category:
+            String(
+              item.category ||
+                "Other"
+            ).trim(),
 
-        amount:
-          Number(item.amount || 0),
-      }));
+          amount:
+            Number(
+              item.amount || 0
+            ),
+        })
+      );
 
     const invalidItem =
       cleanItems.find(
         (item) =>
           !item.description ||
-          Number.isNaN(item.amount) ||
+          !Number.isFinite(
+            item.amount
+          ) ||
           item.amount < 0
       );
 
@@ -192,8 +298,8 @@ const createBilling = async (
         discount,
         tax
       );
-
-    const initialAmountPaid = 0;
+    const initialAmountPaid =
+      0;
 
     const initialStatus =
       paymentStatus ===
@@ -238,36 +344,29 @@ const createBilling = async (
           initialAmountPaid,
 
         balanceAmount:
-          totals.totalAmount,
+          initialStatus ===
+          "Cancelled"
+            ? 0
+            : totals.totalAmount,
 
         paymentStatus:
           initialStatus,
 
         paymentMethod:
-          paymentMethod || "Cash",
+          paymentMethod ||
+          "Cash",
 
         payments: [],
 
         notes:
           notes || "",
       });
-
     const populatedBilling =
-      await Billing.findById(
-        billing._id
-      )
-        .populate(
-          "patient",
-          "fullName email phone role"
+      await populateBilling(
+        Billing.findById(
+          billing._id
         )
-        .populate(
-          "doctor",
-          "fullName doctorId specialization department"
-        )
-        .populate(
-          "appointment",
-          "appointmentDate appointmentTime status department"
-        );
+      );
 
     return res.status(201).json({
       message:
@@ -300,30 +399,34 @@ const createBilling = async (
     });
   }
 };
-
 const getBillings = async (
   req,
   res
 ) => {
   try {
-    const billings =
-      await Billing.find()
-        .populate(
-          "patient",
-          "fullName email phone role"
-        )
-        .populate(
-          "doctor",
-          "fullName doctorId specialization department"
-        )
-        .populate(
-          "appointment",
-          "appointmentDate appointmentTime status department"
-        )
-        .sort({
+    let billings =
+      await populateBilling(
+        Billing.find().sort({
           invoiceDate: -1,
           createdAt: -1,
-        });
+        })
+      );
+
+    for (
+      const billing of billings
+    ) {
+      await normalizeBillingRecord(
+        billing
+      );
+    }
+
+    billings =
+      await populateBilling(
+        Billing.find().sort({
+          invoiceDate: -1,
+          createdAt: -1,
+        })
+      );
 
     return res.status(200).json({
       message:
@@ -349,22 +452,12 @@ const getBillings = async (
 const getBillingById =
   async (req, res) => {
     try {
-      const billing =
-        await Billing.findById(
-          req.params.id
-        )
-          .populate(
-            "patient",
-            "fullName email phone role"
+      let billing =
+        await populateBilling(
+          Billing.findById(
+            req.params.id
           )
-          .populate(
-            "doctor",
-            "fullName doctorId specialization department"
-          )
-          .populate(
-            "appointment",
-            "appointmentDate appointmentTime status department"
-          );
+        );
 
       if (!billing) {
         return res.status(404).json({
@@ -372,6 +465,19 @@ const getBillingById =
             "Billing record not found.",
         });
       }
+
+      // Correct old record if necessary
+      await normalizeBillingRecord(
+        billing
+      );
+
+      // Read corrected record
+      billing =
+        await populateBilling(
+          Billing.findById(
+            req.params.id
+          )
+        );
 
       return res.status(200).json({
         billing,
@@ -391,6 +497,7 @@ const getBillingById =
       });
     }
   };
+
 const updateBilling =
   async (req, res) => {
     try {
@@ -418,7 +525,6 @@ const updateBilling =
         tax,
         notes,
       } = req.body;
-
       if (
         patient !== undefined
       ) {
@@ -437,7 +543,6 @@ const updateBilling =
         billing.patient =
           patient;
       }
-
       if (
         doctor !== undefined
       ) {
@@ -458,9 +563,9 @@ const updateBilling =
         billing.doctor =
           doctor || null;
       }
-
       if (
-        appointment !== undefined
+        appointment !==
+        undefined
       ) {
         if (appointment) {
           const appointmentExists =
@@ -479,16 +584,19 @@ const updateBilling =
         billing.appointment =
           appointment || null;
       }
-
       if (
-        invoiceNumber !== undefined
+        invoiceNumber !==
+        undefined
       ) {
+        const cleanInvoiceNumber =
+          String(
+            invoiceNumber
+          ).trim();
+
         const duplicate =
           await Billing.findOne({
             invoiceNumber:
-              String(
-                invoiceNumber
-              ).trim(),
+              cleanInvoiceNumber,
 
             _id: {
               $ne:
@@ -504,53 +612,51 @@ const updateBilling =
         }
 
         billing.invoiceNumber =
-          String(
-            invoiceNumber
-          ).trim();
+          cleanInvoiceNumber;
       }
-
       if (
-        invoiceDate !== undefined
+        invoiceDate !==
+        undefined
       ) {
         billing.invoiceDate =
           invoiceDate;
       }
-
       if (
         dueDate !== undefined
       ) {
         billing.dueDate =
           dueDate || null;
       }
-
       if (
         Array.isArray(items)
       ) {
         const cleanItems =
-          items.map((item) => ({
-            description:
-              String(
-                item.description ||
-                  ""
-              ).trim(),
+          items.map(
+            (item) => ({
+              description:
+                String(
+                  item.description ||
+                    ""
+                ).trim(),
 
-            category:
-              String(
-                item.category ||
-                  "Other"
-              ).trim(),
+              category:
+                String(
+                  item.category ||
+                    "Other"
+                ).trim(),
 
-            amount:
-              Number(
-                item.amount || 0
-              ),
-          }));
+              amount:
+                Number(
+                  item.amount || 0
+                ),
+            })
+          );
 
         const invalidItem =
           cleanItems.find(
             (item) =>
               !item.description ||
-              Number.isNaN(
+              !Number.isFinite(
                 item.amount
               ) ||
               item.amount < 0
@@ -566,7 +672,6 @@ const updateBilling =
         billing.items =
           cleanItems;
       }
-
       if (
         discount !== undefined
       ) {
@@ -578,7 +683,6 @@ const updateBilling =
             0
           );
       }
-
       if (
         tax !== undefined
       ) {
@@ -590,14 +694,12 @@ const updateBilling =
             0
           );
       }
-
       if (
         notes !== undefined
       ) {
         billing.notes =
           notes || "";
       }
-
       const totals =
         calculateBillTotals(
           billing.items,
@@ -616,56 +718,66 @@ const updateBilling =
 
       billing.totalAmount =
         totals.totalAmount;
-      const paid =
+      let paid =
         Number(
           billing.amountPaid || 0
         );
 
-      billing.amountPaid =
-        Math.min(
-          Math.max(
-            paid,
-            0
-          ),
-          billing.totalAmount
-        );
+      if (
+        billing.paymentStatus ===
+          "Paid" &&
+        paid <= 0
+      ) {
+        /*
+         * Old Paid bill.
+         */
+        paid =
+          totals.totalAmount;
+      }
 
-      billing.balanceAmount =
+      paid = Math.min(
         Math.max(
-          billing.totalAmount -
-            billing.amountPaid,
+          paid,
           0
-        );
+        ),
+        totals.totalAmount
+      );
 
+      billing.amountPaid =
+        paid;
+      if (
+        billing.paymentStatus ===
+        "Cancelled"
+      ) {
+        billing.balanceAmount =
+          0;
+      } else {
+        billing.balanceAmount =
+          Math.max(
+            totals.totalAmount -
+              paid,
+            0
+          );
+      }
       if (
         billing.paymentStatus !==
         "Cancelled"
       ) {
         billing.paymentStatus =
           getPaymentStatus(
-            billing.totalAmount,
-            billing.amountPaid
+            totals.totalAmount,
+            paid
           );
       }
 
       await billing.save();
 
       const populatedBilling =
-        await Billing.findById(
-          billing._id
-        )
-          .populate(
-            "patient",
-            "fullName email phone role"
+        await populateBilling(
+          Billing.findById(
+            billing._id
           )
-          .populate(
-            "doctor",
-            "fullName doctorId specialization department"
-          )
-          .populate(
-            "appointment",
-            "appointmentDate appointmentTime status department"
-          );
+        );
 
       return res.status(200).json({
         message:
@@ -689,6 +801,7 @@ const updateBilling =
       });
     }
   };
+
 const recordPayment =
   async (req, res) => {
     try {
@@ -711,6 +824,28 @@ const recordPayment =
         return res.status(400).json({
           message:
             "Cancelled bills cannot receive payments.",
+        });
+      }
+      if (
+        billing.paymentStatus ===
+          "Paid" &&
+        Number(
+          billing.amountPaid || 0
+        ) <= 0
+      ) {
+        billing.amountPaid =
+          Number(
+            billing.totalAmount || 0
+          );
+
+        billing.balanceAmount =
+          0;
+
+        await billing.save();
+
+        return res.status(400).json({
+          message:
+            "This bill is already fully paid and has no remaining balance.",
         });
       }
 
@@ -736,17 +871,19 @@ const recordPayment =
             "Please enter a valid payment amount.",
         });
       }
-
       const currentPaid =
         Number(
           billing.amountPaid || 0
         );
 
+      const totalAmount =
+        Number(
+          billing.totalAmount || 0
+        );
+
       const currentBalance =
         Math.max(
-          Number(
-            billing.totalAmount || 0
-          ) -
+          totalAmount -
             currentPaid,
           0
         );
@@ -757,13 +894,16 @@ const recordPayment =
       ) {
         return res.status(400).json({
           message:
-            `Payment cannot exceed the remaining balance of ₹${currentBalance.toLocaleString("en-IN")}.`,
+            `Payment cannot exceed the remaining balance of ₹${currentBalance.toLocaleString(
+              "en-IN"
+            )}.`,
         });
       }
-
       const finalPaymentDate =
         paymentDate
-          ? new Date(paymentDate)
+          ? new Date(
+              paymentDate
+            )
           : new Date();
 
       if (
@@ -789,30 +929,32 @@ const recordPayment =
           "Cash",
 
         referenceNumber:
-          referenceNumber ||
-          "",
+          String(
+            referenceNumber ||
+              ""
+          ).trim(),
 
         notes:
-          notes ||
-          "",
+          String(
+            notes || ""
+          ).trim(),
       });
-
       billing.amountPaid =
         currentPaid +
         paymentAmount;
-
       billing.balanceAmount =
         Math.max(
-          billing.totalAmount -
+          totalAmount -
             billing.amountPaid,
           0
         );
 
       billing.paymentStatus =
         getPaymentStatus(
-          billing.totalAmount,
+          totalAmount,
           billing.amountPaid
         );
+
       billing.paymentMethod =
         paymentMethod ||
         billing.paymentMethod ||
@@ -821,21 +963,11 @@ const recordPayment =
       await billing.save();
 
       const populatedBilling =
-        await Billing.findById(
-          billing._id
-        )
-          .populate(
-            "patient",
-            "fullName email phone role"
+        await populateBilling(
+          Billing.findById(
+            billing._id
           )
-          .populate(
-            "doctor",
-            "fullName doctorId specialization department"
-          )
-          .populate(
-            "appointment",
-            "appointmentDate appointmentTime status department"
-          );
+        );
 
       return res.status(200).json({
         message:
@@ -859,6 +991,7 @@ const recordPayment =
       });
     }
   };
+
 const deleteBilling =
   async (req, res) => {
     try {
@@ -893,8 +1026,6 @@ const deleteBilling =
       });
     }
   };
-
-
 module.exports = {
   createBilling,
   getBillings,
