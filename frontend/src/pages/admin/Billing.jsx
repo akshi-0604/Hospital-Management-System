@@ -22,7 +22,6 @@ const emptyItem = {
   category: "Other",
   amount: "",
 };
-
 const emptyForm = {
   patient: "",
   doctor: "",

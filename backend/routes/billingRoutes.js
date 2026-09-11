@@ -5,15 +5,41 @@ const {
   getBillings,
   getBillingById,
   updateBilling,
+  recordPayment,
   deleteBilling,
 } = require("../controllers/billingController");
 
-const router = express.Router();
+const router =
+  express.Router();
 
-router.post("/", createBilling);
-router.get("/", getBillings);
-router.get("/:id", getBillingById);
-router.put("/:id", updateBilling);
-router.delete("/:id", deleteBilling);
+router.post(
+  "/",
+  createBilling
+);
+
+router.get(
+  "/",
+  getBillings
+);
+
+router.get(
+  "/:id",
+  getBillingById
+);
+
+router.put(
+  "/:id",
+  updateBilling
+);
+
+router.patch(
+  "/:id/payment",
+  recordPayment
+);
+
+router.delete(
+  "/:id",
+  deleteBilling
+);
 
 module.exports = router;

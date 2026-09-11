@@ -1,26 +1,47 @@
 const mongoose = require("mongoose");
 
-const billItemSchema = new mongoose.Schema(
+const paymentSchema = new mongoose.Schema(
   {
-    description: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    category: {
-      type: String,
-      trim: true,
-      default: "Other",
-    },
-
     amount: {
       type: Number,
       required: true,
-      min: 0,
+      min: 0.01,
+    },
+
+    paymentDate: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: [
+        "Cash",
+        "UPI",
+        "Card",
+        "Net Banking",
+        "Insurance",
+        "Other",
+      ],
+      required: true,
+    },
+
+    referenceNumber: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    notes: {
+      type: String,
+      trim: true,
+      default: "",
     },
   },
-  { _id: true }
+  {
+    _id: true,
+  }
 );
 
 const billingSchema = new mongoose.Schema(
@@ -60,34 +81,63 @@ const billingSchema = new mongoose.Schema(
       default: null,
     },
 
-    items: {
-      type: [billItemSchema],
-      required: true,
-      validate: {
-        validator: (value) => value.length > 0,
-        message: "At least one billing item is required",
+    items: [
+      {
+        description: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+
+        category: {
+          type: String,
+          trim: true,
+          default: "Other",
+        },
+
+        amount: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
       },
-    },
+    ],
 
     subtotal: {
       type: Number,
+      required: true,
+      min: 0,
       default: 0,
     },
 
     discount: {
       type: Number,
-      default: 0,
       min: 0,
+      default: 0,
     },
 
     tax: {
       type: Number,
-      default: 0,
       min: 0,
+      default: 0,
     },
 
     totalAmount: {
       type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+
+    amountPaid: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+
+    balanceAmount: {
+      type: Number,
+      min: 0,
       default: 0,
     },
 
@@ -115,6 +165,11 @@ const billingSchema = new mongoose.Schema(
       default: "Cash",
     },
 
+    payments: {
+      type: [paymentSchema],
+      default: [],
+    },
+
     notes: {
       type: String,
       trim: true,
@@ -128,4 +183,7 @@ const billingSchema = new mongoose.Schema(
 
 module.exports =
   mongoose.models.Billing ||
-  mongoose.model("Billing", billingSchema);
+  mongoose.model(
+    "Billing",
+    billingSchema
+  );
