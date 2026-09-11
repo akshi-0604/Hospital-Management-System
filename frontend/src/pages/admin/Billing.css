@@ -3,7 +3,6 @@
   min-height: calc(100vh - 80px);
   background: #f4f8f8;
 }
-
 .billing-header {
   display: flex;
   justify-content: space-between;
@@ -33,15 +32,19 @@
   cursor: pointer;
 }
 
+.add-bill-button:hover {
+  background: #0e746b;
+}
+
 .billing-summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 .billing-summary-card {
-  padding: 18px 20px;
+  padding: 17px 18px;
   background: #fff;
   border: 1px solid #dce5eb;
   border-radius: 10px;
@@ -55,8 +58,16 @@
 }
 
 .billing-summary-card strong {
+  display: block;
   color: #132840;
-  font-size: 24px;
+  font-size: 23px;
+}
+
+.billing-summary-card small {
+  display: block;
+  margin-top: 5px;
+  color: #8998a8;
+  font-size: 11px;
 }
 
 .billing-toolbar {
@@ -78,10 +89,21 @@
   font-size: 14px;
 }
 
+.billing-toolbar input:focus,
+.billing-toolbar select:focus {
+  border-color: #11847a;
+  outline: none;
+}
+
 .billing-toolbar button {
   cursor: pointer;
   font-weight: 700;
   color: #30475e;
+}
+
+.billing-toolbar button:hover {
+  border-color: #11847a;
+  color: #11847a;
 }
 
 .billing-error {
@@ -106,22 +128,23 @@
 
 .billing-table {
   width: 100%;
-  min-width: 1100px;
+  min-width: 1500px;
   border-collapse: collapse;
 }
 
 .billing-table th {
-  padding: 16px 18px;
+  padding: 16px 16px;
   text-align: left;
   background: #f7fafb;
   color: #526a82;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   border-bottom: 1px solid #e1e8ed;
+  white-space: nowrap;
 }
 
 .billing-table td {
-  padding: 17px 18px;
+  padding: 17px 16px;
   border-bottom: 1px solid #edf1f4;
   color: #2a4058;
   font-size: 14px;
@@ -135,12 +158,21 @@
   color: #172b43;
 }
 
+.paid-amount-cell strong {
+  color: #138461;
+}
+
+.balance-amount-cell strong {
+  color: #b16d00;
+}
+
 .payment-status {
   display: inline-flex;
   padding: 5px 11px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .payment-status.paid {
@@ -163,14 +195,39 @@
   color: #b44747;
 }
 
-.view-bill-button {
-  padding: 8px 13px;
-  border: 1px solid #11847a;
+.billing-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.view-bill-button,
+.edit-bill-button {
+  padding: 8px 12px;
   border-radius: 7px;
-  background: #fff;
-  color: #11847a;
   font-weight: 700;
   cursor: pointer;
+  font-size: 12px;
+}
+
+.view-bill-button {
+  border: 1px solid #11847a;
+  background: #fff;
+  color: #11847a;
+}
+
+.view-bill-button:hover {
+  background: #edf8f6;
+}
+
+.edit-bill-button {
+  border: 1px solid #2f6f95;
+  background: #fff;
+  color: #2f6f95;
+}
+
+.edit-bill-button:hover {
+  background: #eef6fb;
 }
 
 .billing-empty {
@@ -188,8 +245,6 @@
   margin-top: 6px;
   font-size: 13px;
 }
-
-/* modal */
 
 .billing-modal-overlay {
   position: fixed;
@@ -212,7 +267,11 @@
 }
 
 .view-billing-modal {
-  width: min(820px, 100%);
+  width: min(850px, 100%);
+}
+
+.payment-modal {
+  width: min(650px, 100%);
 }
 
 .billing-modal-header {
@@ -247,6 +306,10 @@
   color: #42566d;
   font-size: 22px;
   cursor: pointer;
+}
+
+.billing-close-button:hover {
+  background: #e2eaf0;
 }
 
 .billing-form {
@@ -294,6 +357,20 @@
   border-color: #11847a;
 }
 
+.form-group select:disabled {
+  background: #f4f7f8;
+  color: #6d8095;
+  cursor: not-allowed;
+}
+
+.form-help-text {
+  display: block;
+  margin-top: 6px;
+  color: #7f8fa0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .billing-items-heading {
   display: flex;
   justify-content: space-between;
@@ -322,6 +399,10 @@
   color: #11847a;
   font-weight: 700;
   cursor: pointer;
+}
+
+.add-billing-item-button:hover {
+  background: #edf8f6;
 }
 
 .billing-item-card {
@@ -429,18 +510,25 @@
   color: #40546a;
 }
 
+.cancel-bill-button:hover {
+  background: #f7fafb;
+}
+
 .save-bill-button {
   border: 1px solid #11847a;
   background: #11847a;
   color: #fff;
 }
 
-.save-bill-button:disabled {
+.save-bill-button:hover {
+  background: #0e746b;
+}
+
+.save-bill-button:disabled,
+.cancel-bill-button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
-
-/* view invoice */
 
 .billing-details {
   padding: 25px 26px;
@@ -472,8 +560,17 @@
   font-size: 14px;
 }
 
+.view-paid-amount {
+  color: #138461 !important;
+}
+
+.view-balance-amount {
+  color: #b16d00 !important;
+}
+
 .invoice-items h3,
-.billing-view-notes h3 {
+.billing-view-notes h3,
+.payment-history-section h3 {
   margin: 0 0 10px;
   color: #20364d;
   font-size: 15px;
@@ -537,6 +634,163 @@
   font-size: 20px;
 }
 
+.invoice-paid-total strong {
+  color: #138461;
+}
+
+.invoice-balance-total {
+  padding-top: 13px !important;
+  border-top: 1px solid #dce5eb;
+}
+
+.invoice-balance-total strong {
+  color: #b16d00;
+  font-size: 18px;
+}
+.payment-history-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e4eaee;
+}
+
+.payment-history-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 14px;
+}
+
+.payment-history-heading h3 {
+  margin-bottom: 4px;
+}
+
+.payment-history-heading p {
+  margin: 0;
+  color: #8290a0;
+  font-size: 12px;
+}
+
+.record-payment-button {
+  border: 1px solid #11847a;
+  border-radius: 7px;
+  padding: 9px 13px;
+  background: #11847a;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.record-payment-button:hover {
+  background: #0e746b;
+}
+
+.no-payment-history {
+  padding: 20px;
+  border: 1px dashed #d4dfe6;
+  border-radius: 9px;
+  background: #fafcfc;
+  color: #8290a0;
+  text-align: center;
+  font-size: 13px;
+}
+
+.payment-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.payment-history-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 13px 15px;
+  border: 1px solid #dde6eb;
+  border-radius: 9px;
+  background: #f9fbfc;
+}
+
+.payment-history-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-history-card span {
+  color: #7c8c9d;
+  font-size: 11px;
+}
+
+.payment-history-card strong {
+  color: #273c53;
+  font-size: 13px;
+}
+
+.payment-history-card .payment-history-amount {
+  color: #138461;
+  font-size: 16px;
+}
+
+.payment-summary-box {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 14px;
+  border: 1px solid #dce5eb;
+  border-radius: 10px;
+  background: #f8fafb;
+}
+
+.payment-summary-box > div {
+  padding: 10px;
+}
+
+.payment-summary-box span {
+  display: block;
+  margin-bottom: 5px;
+  color: #7c8c9d;
+  font-size: 11px;
+}
+
+.payment-summary-box strong {
+  color: #273c53;
+  font-size: 18px;
+}
+
+.payment-summary-box .summary-paid {
+  color: #138461;
+}
+
+.payment-summary-box .summary-balance {
+  color: #b16d00;
+}
+
+.payment-after-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  padding: 15px 16px;
+  border-radius: 9px;
+  background: #edf8f6;
+  border: 1px solid #d3ece7;
+}
+
+.payment-after-box span {
+  color: #56726f;
+  font-size: 13px;
+}
+
+.payment-after-box strong {
+  color: #11847a;
+  font-size: 20px;
+}
+
 .billing-view-notes {
   margin-bottom: 10px;
 }
@@ -545,6 +799,12 @@
   margin: 0;
   color: #687b8e;
   line-height: 1.6;
+}
+
+@media (max-width: 1200px) {
+  .billing-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 900px) {
@@ -566,17 +826,38 @@
 
   .form-row,
   .billing-item-grid,
-  .billing-detail-grid {
+  .billing-detail-grid,
+  .payment-summary-box {
     grid-template-columns: 1fr;
   }
 
   .billing-calculation {
     width: 100%;
   }
+
+  .payment-history-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 550px) {
   .billing-summary {
     grid-template-columns: 1fr;
+  }
+
+  .billing-page {
+    padding: 15px;
+  }
+
+  .billing-form,
+  .billing-details {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .billing-modal-footer {
+    padding-left: 18px;
+    padding-right: 18px;
   }
 }
