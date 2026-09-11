@@ -3,7 +3,7 @@ import axios from "axios";
 
 import "./PatientDashboard.css";
 
-import PatientNotifications from "../../components/patients/PatientNotifications";
+import PatientNotifications from "../../components/patient/PatientNotifications";
 const API_BASE_URL =
   "https://hospital-management-system-nvjt.onrender.com/api";
 
