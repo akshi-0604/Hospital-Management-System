@@ -2,9 +2,14 @@ import { Outlet } from "react-router-dom";
 
 import Sidebar from "../components/admin/Sidebar";
 
+import { useTheme } from "../context/ThemeContext";
+
 import "./AdminLayout.css";
 
 function AdminLayout() {
+
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="admin-layout">
 
@@ -18,35 +23,67 @@ function AdminLayout() {
         <div className="admin-topbar">
 
           <div className="admin-title-section">
-            <h1>Hospital Management System</h1>
+
+            <h1>
+              Hospital Management System
+            </h1>
 
             <p>
               Admin Panel
             </p>
+
           </div>
 
-          {/* Admin profile */}
-          <div className="admin-profile">
 
-            <div className="profile-avatar">
-              A
-            </div>
+          {/* Right side */}
+          <div className="admin-topbar-right">
 
-            <div className="profile-info">
-
-              <strong>
-                Administrator
-              </strong>
+            {/* Theme Button */}
+            <button
+              type="button"
+              className="theme-toggle-button"
+              onClick={toggleTheme}
+              title={
+                theme === "light"
+                  ? "Switch to Dark Mode"
+                  : "Switch to Light Mode"
+              }
+            >
+              {theme === "light" ? "🌙" : "☀️"}
 
               <span>
-                Admin
+                {theme === "light"
+                  ? "Dark"
+                  : "Light"}
               </span>
+            </button>
+
+
+            {/* Admin Profile */}
+            <div className="admin-profile">
+
+              <div className="profile-avatar">
+                A
+              </div>
+
+              <div className="profile-info">
+
+                <strong>
+                  Administrator
+                </strong>
+
+                <span>
+                  Admin
+                </span>
+
+              </div>
 
             </div>
 
           </div>
 
         </div>
+
 
         {/* Current page */}
         <div className="admin-content">
