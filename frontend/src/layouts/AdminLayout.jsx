@@ -4,7 +4,6 @@ import Sidebar from "../components/admin/Sidebar";
 
 import "./AdminLayout.css";
 
-
 function AdminLayout() {
   return (
     <div className="admin-layout">
@@ -12,13 +11,13 @@ function AdminLayout() {
       {/* Sidebar */}
       <Sidebar />
 
-
       {/* Main area */}
       <main className="admin-main">
 
+        {/* Top bar */}
         <div className="admin-topbar">
 
-          <div>
+          <div className="admin-title-section">
             <h1>Hospital Management System</h1>
 
             <p>
@@ -26,7 +25,7 @@ function AdminLayout() {
             </p>
           </div>
 
-
+          {/* Admin profile */}
           <div className="admin-profile">
 
             <div className="profile-avatar">
@@ -34,6 +33,7 @@ function AdminLayout() {
             </div>
 
             <div className="profile-info">
+
               <strong>
                 Administrator
               </strong>
@@ -41,12 +41,12 @@ function AdminLayout() {
               <span>
                 Admin
               </span>
+
             </div>
 
           </div>
 
         </div>
-
 
         {/* Current page */}
         <div className="admin-content">
@@ -60,6 +60,5 @@ function AdminLayout() {
     </div>
   );
 }
-
 
 export default AdminLayout;

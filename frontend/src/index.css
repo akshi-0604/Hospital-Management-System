@@ -1,3 +1,99 @@
+:root {
+  --hms-primary: #11847a;
+  --hms-primary-dark: #0e746b;
+  --hms-primary-light: #eaf7f5;
+
+  --hms-page-bg: #f4f8fb;
+  --hms-card-bg: #ffffff;
+  --hms-input-bg: #ffffff;
+
+  --hms-text-primary: #132840;
+  --hms-text-secondary: #708299;
+  --hms-text-muted: #8a9aae;
+
+  --hms-border: #dce5eb;
+  --hms-border-light: #edf1f4;
+
+  --hms-table-header: #f7fafb;
+
+  --hms-success-bg: #e8f8f1;
+  --hms-success-text: #138461;
+
+  --hms-warning-bg: #fff5df;
+  --hms-warning-text: #956700;
+
+  --hms-danger-bg: #fff0f0;
+  --hms-danger-text: #b44747;
+
+  --hms-info-bg: #edf4fb;
+  --hms-info-text: #476786;
+
+  --hms-overlay: rgba(
+    20,
+    32,
+    48,
+    0.55
+  );
+
+  --hms-shadow:
+    0 3px 12px rgba(
+      37,
+      60,
+      82,
+      0.06
+    );
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --hms-primary: #20a99c;
+  --hms-primary-dark: #178d82;
+  --hms-primary-light: #173f3c;
+
+  --hms-page-bg: #0f172a;
+  --hms-card-bg: #1e293b;
+  --hms-input-bg: #182334;
+
+  --hms-text-primary: #f8fafc;
+  --hms-text-secondary: #cbd5e1;
+  --hms-text-muted: #94a3b8;
+
+  --hms-border: #334155;
+  --hms-border-light: #293548;
+
+  --hms-table-header: #182334;
+
+  --hms-success-bg: #123d32;
+  --hms-success-text: #6ee7b7;
+
+  --hms-warning-bg: #493914;
+  --hms-warning-text: #fbbf24;
+
+  --hms-danger-bg: #4a2024;
+  --hms-danger-text: #fca5a5;
+
+  --hms-info-bg: #19344c;
+  --hms-info-text: #93c5fd;
+
+  --hms-overlay: rgba(
+    2,
+    6,
+    23,
+    0.72
+  );
+
+  --hms-shadow:
+    0 5px 18px rgba(
+      0,
+      0,
+      0,
+      0.28
+    );
+
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -15,5 +111,153 @@ html {
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #f4f8fb;
+  background: var(--hms-page-bg);
+  color: var(--hms-text-primary);
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+input,
+select,
+textarea {
+  color: var(--hms-text-primary);
+  background: var(--hms-input-bg);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--hms-text-muted);
+}
+
+.dashboard-page,
+.billing-page,
+.patients-page,
+.doctors-page,
+.departments-page,
+.medical-records-page,
+.prescriptions-page,
+.laboratory-page,
+.patient-dashboard-page,
+.doctor-dashboard-page,
+.receptionist-dashboard-page {
+  background: var(--hms-page-bg);
+  color: var(--hms-text-primary);
+}
+
+.dashboard-summary-card,
+.billing-summary-card,
+.billing-table-card,
+.dashboard-section,
+.patient-dashboard-section,
+.patient-profile-card {
+  background: var(--hms-card-bg);
+  border-color: var(--hms-border);
+  box-shadow: var(--hms-shadow);
+}
+
+.dashboard-header h1,
+.billing-header h1,
+.dashboard-section-header h2,
+.billing-modal-header h2,
+.billing-summary-card strong {
+  color: var(--hms-text-primary);
+}
+
+.dashboard-header p,
+.billing-header p,
+.dashboard-section-header p,
+.billing-modal-header p {
+  color: var(--hms-text-secondary);
+}
+.add-bill-button,
+.save-bill-button,
+.dashboard-refresh-button {
+  background: var(--hms-primary);
+  border-color: var(--hms-primary);
+  color: #ffffff;
+}
+
+.add-bill-button:hover,
+.save-bill-button:hover,
+.dashboard-refresh-button:hover {
+  background: var(--hms-primary-dark);
+}
+.dashboard-table th,
+.billing-table th {
+  background: var(--hms-table-header);
+  border-color: var(--hms-border);
+  color: var(--hms-text-secondary);
+}
+
+.dashboard-table td,
+.billing-table td {
+  border-color: var(--hms-border-light);
+  color: var(--hms-text-secondary);
+}
+.form-group input,
+.form-group select,
+.form-group textarea,
+.billing-toolbar input,
+.billing-toolbar select {
+  background: var(--hms-input-bg);
+  border-color: var(--hms-border);
+  color: var(--hms-text-primary);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.billing-toolbar input:focus,
+.billing-toolbar select:focus {
+  border-color: var(--hms-primary);
+}
+.billing-modal,
+.billing-modal-header,
+.billing-modal-footer {
+  background: var(--hms-card-bg);
+  color: var(--hms-text-primary);
+}
+
+.billing-modal-header,
+.billing-modal-footer {
+  border-color: var(--hms-border);
+}
+.payment-status.paid,
+.status-confirmed {
+  background: var(--hms-success-bg);
+  color: var(--hms-success-text);
+}
+
+.payment-status.pending,
+.status-pending {
+  background: var(--hms-warning-bg);
+  color: var(--hms-warning-text);
+}
+
+.payment-status.partially-paid {
+  background: var(--hms-info-bg);
+  color: var(--hms-info-text);
+}
+
+.payment-status.cancelled,
+.status-cancelled {
+  background: var(--hms-danger-bg);
+  color: var(--hms-danger-text);
 }

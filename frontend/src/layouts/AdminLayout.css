@@ -1,20 +1,22 @@
 .admin-layout {
   min-height: 100vh;
+  background: var(--hms-page-bg);
+  color: var(--hms-text-primary);
 
-  background: #f3faf9;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
-
-
-/* Main content */
 
 .admin-main {
   min-height: 100vh;
-
   margin-left: 250px;
+
+  background: var(--hms-page-bg);
+
+  transition:
+    background-color 0.25s ease;
 }
-
-
-/* Top bar */
 
 .admin-topbar {
   height: 75px;
@@ -25,32 +27,45 @@
 
   padding: 0 30px;
 
-  background: #ffffff;
+  background: var(--hms-card-bg);
 
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--hms-border);
+
+  box-shadow: var(--hms-shadow);
+
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.admin-title-section {
+  display: flex;
+  flex-direction: column;
 }
 
 
 .admin-topbar h1 {
   margin: 0;
 
-  color: #1f2937;
+  color: var(--hms-text-primary);
 
   font-size: 18px;
   font-weight: 600;
-}
 
+  transition:
+    color 0.25s ease;
+}
 
 .admin-topbar p {
   margin: 4px 0 0;
 
-  color: #9ca3af;
+  color: var(--hms-text-secondary);
 
   font-size: 12px;
+
+  transition:
+    color 0.25s ease;
 }
-
-
-/* Admin profile */
 
 .admin-profile {
   display: flex;
@@ -58,7 +73,6 @@
 
   gap: 10px;
 }
-
 
 .profile-avatar {
   width: 38px;
@@ -70,14 +84,20 @@
 
   border-radius: 50%;
 
-  background: #ccfbf1;
+  background: var(--hms-primary-light);
 
-  color: #0f766e;
+  color: var(--hms-primary);
 
   font-size: 14px;
   font-weight: 700;
-}
 
+  border: 1px solid var(--hms-border);
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
 
 .profile-info {
   display: flex;
@@ -86,29 +106,44 @@
   gap: 2px;
 }
 
-
 .profile-info strong {
-  color: #374151;
+  color: var(--hms-text-primary);
 
   font-size: 13px;
-}
+  font-weight: 600;
 
+  transition:
+    color 0.25s ease;
+}
 
 .profile-info span {
-  color: #9ca3af;
+  color: var(--hms-text-secondary);
 
   font-size: 11px;
+
+  transition:
+    color 0.25s ease;
 }
-
-
-/* Page content */
 
 .admin-content {
   padding: 30px;
+
+  background: var(--hms-page-bg);
+
+  min-height: calc(100vh - 75px);
+
+  transition:
+    background-color 0.25s ease;
+}
+
+:root[data-theme="dark"] .admin-topbar {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 
-/* Responsive */
+:root[data-theme="dark"] .profile-avatar {
+  border-color: var(--hms-border);
+}
 
 @media (max-width: 800px) {
 
@@ -116,6 +151,13 @@
     margin-left: 220px;
   }
 
+  .admin-topbar {
+    padding: 0 24px;
+  }
+
+  .admin-content {
+    padding: 24px;
+  }
 }
 
 
@@ -127,6 +169,8 @@
 
 
   .admin-topbar {
+    height: 70px;
+
     padding: 0 20px;
   }
 
@@ -136,13 +180,24 @@
   }
 
 
+  .admin-topbar p {
+    font-size: 11px;
+  }
+
+
   .profile-info {
     display: none;
   }
 
 
-  .admin-content {
-    padding: 20px;
+  .profile-avatar {
+    width: 36px;
+    height: 36px;
   }
 
+
+  .admin-content {
+    padding: 20px;
+    min-height: calc(100vh - 70px);
+  }
 }

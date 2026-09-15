@@ -2,278 +2,257 @@ import { NavLink, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
 
 function Sidebar() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    function handleLogout() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-        navigate("/login");
-    }
+    navigate("/login");
+  }
 
-    return (
-        <aside className="admin-sidebar">
-            <div className="sidebar-brand">
+  return (
+    <aside className="admin-sidebar">
 
-                <div className="sidebar-logo">
-                    +
-                </div>
+      {/* Sidebar Brand */}
+      <div className="sidebar-brand">
 
-                <div className="sidebar-brand-text">
+        <div className="sidebar-logo">
+          +
+        </div>
 
-                    <h2>
-                        HMS
-                    </h2>
+        <div className="sidebar-brand-text">
 
-                    <span>
-                        Hospital Management
-                    </span>
+          <h2>
+            HMS
+          </h2>
 
-                </div>
+          <span>
+            Hospital Management
+          </span>
 
-            </div>
-            <nav className="sidebar-navigation">
+        </div>
 
-                {/* MAIN MENU */}
+      </div>
 
-                <p className="navigation-title">
-                    MAIN MENU
-                </p>
+      {/* Navigation */}
+      <nav className="sidebar-navigation">
 
+        {/* MAIN MENU */}
+        <p className="navigation-title">
+          MAIN MENU
+        </p>
 
-                {/* DASHBOARD */}
+        {/* DASHBOARD */}
+        <NavLink
+          to="/admin"
+          end
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ▣
+          </span>
 
-                <NavLink
-                    to="/admin"
-                    end
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ▣
-                    </span>
+          <span>
+            Dashboard
+          </span>
+        </NavLink>
 
-                    <span>
-                        Dashboard
-                    </span>
-                </NavLink>
+        {/* PATIENTS */}
+        <NavLink
+          to="/admin/patients"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ♙
+          </span>
 
+          <span>
+            Patients
+          </span>
+        </NavLink>
 
-                {/* PATIENTS */}
+        {/* DOCTORS */}
+        <NavLink
+          to="/admin/doctors"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ♙
+          </span>
 
-                <NavLink
-                    to="/admin/patients"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ♙
-                    </span>
+          <span>
+            Doctors
+          </span>
+        </NavLink>
 
-                    <span>
-                        Patients
-                    </span>
-                </NavLink>
+        {/* APPOINTMENTS */}
+        <NavLink
+          to="/admin/appointments"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ▣
+          </span>
 
+          <span>
+            Appointments
+          </span>
+        </NavLink>
 
-                {/* DOCTORS */}
+        {/* DEPARTMENTS */}
+        <NavLink
+          to="/admin/departments"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ▦
+          </span>
 
-                <NavLink
-                    to="/admin/doctors"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ♙
-                    </span>
+          <span>
+            Departments
+          </span>
+        </NavLink>
 
-                    <span>
-                        Doctors
-                    </span>
-                </NavLink>
+        {/* HOSPITAL MANAGEMENT */}
+        <p className="navigation-title second-title">
+          HOSPITAL MANAGEMENT
+        </p>
 
+        {/* MEDICAL RECORDS */}
+        <NavLink
+          to="/admin/medical-records"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ▤
+          </span>
 
-                {/* APPOINTMENTS */}
+          <span>
+            Medical Records
+          </span>
+        </NavLink>
 
-                <NavLink
-                    to="/admin/appointments"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ▣
-                    </span>
+        {/* PRESCRIPTIONS */}
+        <NavLink
+          to="/admin/prescriptions"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ▤
+          </span>
 
-                    <span>
-                        Appointments
-                    </span>
-                </NavLink>
+          <span>
+            Prescriptions
+          </span>
+        </NavLink>
 
+        {/* LABORATORY */}
+        <NavLink
+          to="/admin/laboratory"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            +
+          </span>
 
-                {/* DEPARTMENTS */}
+          <span>
+            Laboratory
+          </span>
+        </NavLink>
 
-                <NavLink
-                    to="/admin/departments"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ▦
-                    </span>
+        {/* BILLING */}
+        <NavLink
+          to="/admin/billing"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ₹
+          </span>
 
-                    <span>
-                        Departments
-                    </span>
-                </NavLink>
+          <span>
+            Billing
+          </span>
+        </NavLink>
 
+      </nav>
 
-                {/* HOSPITAL MANAGEMENT */}
+      {/* Bottom Section */}
+      <div className="sidebar-bottom">
 
-                <p className="navigation-title second-title">
-                    HOSPITAL MANAGEMENT
-                </p>
+        {/* SETTINGS */}
+        <NavLink
+          to="/admin/settings"
+          className={({ isActive }) =>
+            isActive
+              ? "sidebar-link active"
+              : "sidebar-link"
+          }
+        >
+          <span className="sidebar-link-icon">
+            ⚙
+          </span>
 
+          <span>
+            Settings
+          </span>
+        </NavLink>
 
-                {/* MEDICAL RECORDS */}
+        {/* LOGOUT */}
+        <button
+          type="button"
+          className="sidebar-logout"
+          onClick={handleLogout}
+        >
+          <span className="sidebar-icon">
+            ↪
+          </span>
 
-                <NavLink
-                    to="/admin/medical-records"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ▤
-                    </span>
+          <span>
+            Logout
+          </span>
+        </button>
 
-                    <span>
-                        Medical Records
-                    </span>
-                </NavLink>
+      </div>
 
-
-                {/* PRESCRIPTIONS */}
-
-                <NavLink
-                    to="/admin/prescriptions"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ▤
-                    </span>
-
-                    <span>
-                        Prescriptions
-                    </span>
-                </NavLink>
-
-
-                {/* LABORATORY */}
-
-                <NavLink
-                    to="/admin/laboratory"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        +
-                    </span>
-
-                    <span>
-                        Laboratory
-                    </span>
-                </NavLink>
-
-
-                {/* BILLING */}
-
-                <NavLink
-                    to="/admin/billing"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ₹
-                    </span>
-
-                    <span>
-                        Billing
-                    </span>
-                </NavLink>
-
-            </nav>
-
-            <div className="sidebar-bottom">
-
-                {/* SETTINGS */}
-
-                <NavLink
-                    to="/admin/settings"
-                    className={({ isActive }) =>
-                        isActive
-                            ? "sidebar-link active"
-                            : "sidebar-link"
-                    }
-                >
-                    <span className="sidebar-link-icon">
-                        ⚙
-                    </span>
-
-                    <span>
-                        Settings
-                    </span>
-                </NavLink>
-
-
-                {/* LOGOUT */}
-
-                <button
-                    type="button"
-                    className="sidebar-logout"
-                    onClick={handleLogout}
-                >
-
-                    <span className="sidebar-icon">
-                        ↪
-                    </span>
-
-                    <span>
-                        Logout
-                    </span>
-
-                </button>
-
-            </div>
-
-        </aside>
-    );
+    </aside>
+  );
 }
 
 export default Sidebar;
