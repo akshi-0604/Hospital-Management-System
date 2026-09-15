@@ -7,7 +7,6 @@ import { useTheme } from "../context/ThemeContext";
 import "./AdminLayout.css";
 
 function AdminLayout() {
-
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -19,7 +18,7 @@ function AdminLayout() {
       {/* Main area */}
       <main className="admin-main">
 
-        {/* Top bar */}
+        {/* Top Bar */}
         <div className="admin-topbar">
 
           <div className="admin-title-section">
@@ -35,10 +34,10 @@ function AdminLayout() {
           </div>
 
 
-          {/* Right side */}
+          {/* Topbar Right Side */}
           <div className="admin-topbar-right">
 
-            {/* Theme Button */}
+            {/* Theme Toggle */}
             <button
               type="button"
               className="theme-toggle-button"
@@ -49,13 +48,17 @@ function AdminLayout() {
                   : "Switch to Light Mode"
               }
             >
-              {theme === "light" ? "🌙" : "☀️"}
 
-              <span>
+              <span className="theme-toggle-icon">
+                {theme === "light" ? "🌙" : "☀️"}
+              </span>
+
+              <span className="theme-toggle-text">
                 {theme === "light"
                   ? "Dark"
                   : "Light"}
               </span>
+
             </button>
 
 
@@ -85,7 +88,7 @@ function AdminLayout() {
         </div>
 
 
-        {/* Current page */}
+        {/* Current Page */}
         <div className="admin-content">
 
           <Outlet />
