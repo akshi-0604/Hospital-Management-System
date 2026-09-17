@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
-import { useTheme } from "../../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext";
 
 function LandingPage() {
   const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="landing-page">
-     
+      {/* NAVBAR */}
       <header className="landing-navbar">
         <div className="landing-logo">
           <div className="logo-icon">+</div>
@@ -26,7 +26,7 @@ function LandingPage() {
         </nav>
 
         <div className="navbar-actions">
-        
+          {/* THEME BUTTON */}
           <button
             type="button"
             className="landing-theme-button"
@@ -46,10 +46,12 @@ function LandingPage() {
             </span>
           </button>
 
+          {/* LOGIN */}
           <Link to="/login" className="login-link">
             Login
           </Link>
 
+          {/* REGISTER */}
           <Link to="/register" className="register-button">
             Register
           </Link>
@@ -57,7 +59,7 @@ function LandingPage() {
       </header>
 
       <main>
-   
+        {/* HERO */}
         <section className="hero-section" id="home">
           <div className="hero-content">
             <p className="hero-label">
@@ -118,6 +120,7 @@ function LandingPage() {
           </div>
         </section>
 
+        {/* ABOUT */}
         <section className="about-section" id="about">
           <div className="section-heading">
             <p>ABOUT OUR SYSTEM</p>
@@ -133,7 +136,6 @@ function LandingPage() {
           </div>
 
           <div className="about-cards">
-           
             <div className="about-card">
               <div className="feature-icon">P</div>
 
@@ -169,6 +171,7 @@ function LandingPage() {
           </div>
         </section>
 
+        {/* SERVICES */}
         <section
           className="services-section"
           id="services"
@@ -187,7 +190,6 @@ function LandingPage() {
           </div>
 
           <div className="services-grid">
-        
             <div className="service-card">
               <div className="service-icon">01</div>
 
@@ -239,6 +241,7 @@ function LandingPage() {
                 information.
               </p>
             </div>
+
             <div className="service-card">
               <div className="service-icon">06</div>
 
@@ -251,6 +254,8 @@ function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* CTA */}
         <section className="cta-section" id="contact">
           <div>
             <p>GET STARTED TODAY</p>
@@ -270,6 +275,8 @@ function LandingPage() {
           </Link>
         </section>
       </main>
+
+      {/* FOOTER */}
       <footer className="landing-footer">
         <div>
           <strong>HMS</strong>

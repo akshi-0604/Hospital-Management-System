@@ -2,7 +2,9 @@
   min-height: 100vh;
   background: var(--hms-page-bg);
   color: var(--hms-text-primary);
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
 .landing-navbar {
@@ -14,7 +16,9 @@
   padding: 12px 7%;
   background: var(--hms-card-bg);
   border-bottom: 1px solid var(--hms-border);
-  transition: background-color 0.25s ease, border-color 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .landing-logo {
@@ -36,11 +40,13 @@
   font-size: 27px;
   font-weight: 700;
 }
+
 .landing-logo h2 {
   margin: 0;
   color: var(--hms-primary);
   font-size: 19px;
 }
+
 .landing-logo span {
   display: block;
   margin-top: 2px;
@@ -109,7 +115,6 @@
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
-  transition: color 0.2s ease;
 }
 
 .login-link:hover {
@@ -133,7 +138,6 @@
   background: var(--hms-primary-dark);
   transform: translateY(-1px);
 }
-
 .hero-section {
   min-height: 600px;
   display: grid;
@@ -156,7 +160,6 @@
   font-weight: 700;
   letter-spacing: 1.5px;
 }
-
 
 .hero-content h1 {
   max-width: 650px;
@@ -208,6 +211,7 @@
   background: var(--hms-primary-dark);
   transform: translateY(-1px);
 }
+
 .secondary-button {
   background: var(--hms-card-bg);
   border: 1px solid var(--hms-primary);
@@ -230,7 +234,6 @@
     border-color 0.25s ease,
     box-shadow 0.25s ease;
 }
-
 .hero-card-icon {
   width: 60px;
   height: 60px;
@@ -244,13 +247,11 @@
   font-size: 40px;
   font-weight: 700;
 }
-
 .hero-card h3 {
   margin: 0 0 12px;
   color: var(--hms-text-primary);
   font-size: 24px;
 }
-
 .hero-card p {
   margin: 0;
   color: var(--hms-text-secondary);
@@ -546,6 +547,7 @@
     margin: 60px 7%;
   }
 }
+
 @media (max-width: 600px) {
   .landing-navbar {
     min-height: 70px;
