@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
+import { useTheme } from "../../context/ThemeContext";
 
 function LandingPage() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="landing-page">
       <header className="landing-navbar">
@@ -22,6 +25,25 @@ function LandingPage() {
         </nav>
 
         <div className="navbar-actions">
+          <button
+            type="button"
+            className="landing-theme-button"
+            onClick={toggleTheme}
+            title={
+              theme === "light"
+                ? "Switch to Dark Mode"
+                : "Switch to Light Mode"
+            }
+          >
+            <span className="landing-theme-icon">
+              {theme === "light" ? "🌙" : "☀️"}
+            </span>
+
+            <span>
+              {theme === "light" ? "Dark Mode" : "Light Mode"}
+            </span>
+          </button>
+
           <Link to="/login" className="login-link">
             Login
           </Link>
@@ -103,7 +125,9 @@ function LandingPage() {
           <div className="about-cards">
             <div className="about-card">
               <div className="feature-icon">P</div>
+
               <h3>Patient Management</h3>
+
               <p>
                 Maintain patient information, medical history, appointments,
                 and records.
@@ -112,7 +136,9 @@ function LandingPage() {
 
             <div className="about-card">
               <div className="feature-icon">D</div>
+
               <h3>Doctor Management</h3>
+
               <p>
                 Manage doctors, departments, schedules, and assigned
                 appointments.
@@ -121,7 +147,9 @@ function LandingPage() {
 
             <div className="about-card">
               <div className="feature-icon">R</div>
+
               <h3>Digital Records</h3>
+
               <p>
                 Keep medical records and prescriptions organized and easily
                 accessible.
@@ -145,7 +173,9 @@ function LandingPage() {
           <div className="services-grid">
             <div className="service-card">
               <div className="service-icon">01</div>
+
               <h3>Appointments</h3>
+
               <p>
                 Schedule and manage patient appointments with doctors.
               </p>
@@ -153,7 +183,9 @@ function LandingPage() {
 
             <div className="service-card">
               <div className="service-icon">02</div>
+
               <h3>Medical Records</h3>
+
               <p>
                 Store and manage patient medical history and treatment
                 information.
@@ -162,7 +194,9 @@ function LandingPage() {
 
             <div className="service-card">
               <div className="service-icon">03</div>
+
               <h3>Prescriptions</h3>
+
               <p>
                 Doctors can create and manage patient prescriptions.
               </p>
@@ -170,7 +204,9 @@ function LandingPage() {
 
             <div className="service-card">
               <div className="service-icon">04</div>
+
               <h3>Laboratory</h3>
+
               <p>
                 Manage laboratory tests and patient laboratory reports.
               </p>
@@ -178,7 +214,9 @@ function LandingPage() {
 
             <div className="service-card">
               <div className="service-icon">05</div>
+
               <h3>Billing</h3>
+
               <p>
                 Track patient bills, payments, and hospital financial
                 information.
@@ -187,7 +225,9 @@ function LandingPage() {
 
             <div className="service-card">
               <div className="service-icon">06</div>
+
               <h3>Admissions</h3>
+
               <p>
                 Manage patient admissions, room allocation, and discharge
                 information.
