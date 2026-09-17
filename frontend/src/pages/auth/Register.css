@@ -1,50 +1,128 @@
 .register-page {
+  position: relative;
+
   min-height: 100vh;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
-  background: #f3faf9;
+
+  padding: 70px 20px 40px;
+
+  background: var(--hms-primary-light);
+  color: var(--hms-text-primary);
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.register-theme-button {
+  position: absolute;
+
+  top: 22px;
+  right: 28px;
+
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 8px 13px;
+
+  border: 1px solid var(--hms-border);
+  border-radius: 8px;
+
+  background: var(--hms-card-bg);
+  color: var(--hms-text-primary);
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.register-theme-button:hover {
+  border-color: var(--hms-primary);
+
+  color: var(--hms-primary);
+
+  transform: translateY(-1px);
+}
+
+.register-theme-icon {
+  font-size: 15px;
+  line-height: 1;
 }
 
 .register-card {
   width: 100%;
   max-width: 520px;
+
   padding: 40px;
-  border: 1px solid #e5e7eb;
+
+  border: 1px solid var(--hms-border);
+
   border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 15px 40px rgba(15, 118, 110, 0.08);
+
+  background: var(--hms-card-bg);
+
+  box-shadow: var(--hms-shadow);
+
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .register-header {
-  text-align: center;
   margin-bottom: 30px;
+
+  text-align: center;
 }
 
 .register-logo {
   width: 48px;
   height: 48px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   margin: 0 auto 18px;
+
   border-radius: 10px;
-  background: #0f766e;
-  color: #fff;
+
+  background: var(--hms-primary);
+  color: #ffffff;
+
   font-size: 30px;
   font-weight: 700;
 }
 
 .register-header h1 {
   margin: 0 0 8px;
-  color: #111827;
+
+  color: var(--hms-text-primary);
+
   font-size: 28px;
+  line-height: 1.2;
 }
 
 .register-header p {
   margin: 0;
-  color: #6b7280;
+
+  color: var(--hms-text-secondary);
+
   font-size: 14px;
   line-height: 1.6;
 }
@@ -52,17 +130,20 @@
 .register-form {
   display: flex;
   flex-direction: column;
+
   gap: 18px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
+
   gap: 7px;
 }
 
 .form-group label {
-  color: #374151;
+  color: var(--hms-text-primary);
+
   font-size: 13px;
   font-weight: 600;
 }
@@ -71,77 +152,180 @@
 .form-group select {
   width: 100%;
   height: 44px;
+
   padding: 0 13px;
-  border: 1px solid #d1d5db;
+
+  border: 1px solid var(--hms-border);
+
   border-radius: 7px;
+
   outline: none;
-  background: #fff;
-  color: #1f2937;
+
+  background: var(--hms-input-bg);
+  color: var(--hms-text-primary);
+
   font-size: 14px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
 .form-group input::placeholder {
-  color: #9ca3af;
+  color: var(--hms-text-muted);
 }
 
 .form-group input:focus,
 .form-group select:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.08);
+  border-color: var(--hms-primary);
+
+  box-shadow:
+    0 0 0 3px rgba(32, 169, 156, 0.12);
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+  opacity: 0.7;
+
+  cursor: not-allowed;
 }
 
 .form-row {
   display: grid;
+
   grid-template-columns: 1fr 1fr;
+
   gap: 15px;
+}
+
+.error-message {
+  margin: 0;
+
+  padding: 11px 13px;
+
+  border: 1px solid var(--hms-danger-text);
+
+  border-radius: 7px;
+
+  background: var(--hms-danger-bg);
+  color: var(--hms-danger-text);
+
+  font-size: 12px;
+
+  line-height: 1.5;
+}
+.success-message {
+  margin: 0;
+
+  padding: 11px 13px;
+
+  border: 1px solid var(--hms-success-text);
+
+  border-radius: 7px;
+
+  background: var(--hms-success-bg);
+  color: var(--hms-success-text);
+
+  font-size: 12px;
+
+  line-height: 1.5;
 }
 
 .register-submit {
   height: 45px;
+
   margin-top: 5px;
+
   border: none;
+
   border-radius: 7px;
-  background: #0f766e;
-  color: #fff;
+
+  background: var(--hms-primary);
+  color: #ffffff;
+
   font-size: 14px;
   font-weight: 600;
+
   cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.register-submit:hover {
-  background: #115e59;
+.register-submit:hover:not(:disabled) {
+  background: var(--hms-primary-dark);
+
+  transform: translateY(-1px);
+}
+
+.register-submit:disabled {
+  opacity: 0.65;
+
+  cursor: not-allowed;
 }
 
 .register-footer {
   display: flex;
+
   justify-content: center;
+
   gap: 5px;
+
   margin-top: 25px;
-  color: #6b7280;
+
+  color: var(--hms-text-secondary);
+
   font-size: 13px;
 }
 
 .register-footer a {
-  color: #0f766e;
+  color: var(--hms-primary);
+
   text-decoration: none;
+
   font-weight: 600;
+}
+
+.register-footer a:hover {
+  color: var(--hms-primary-dark);
+
+  text-decoration: underline;
 }
 
 .back-home {
   display: block;
+
   margin-top: 20px;
-  color: #6b7280;
+
+  color: var(--hms-text-secondary);
+
   text-align: center;
+
   text-decoration: none;
+
   font-size: 13px;
+
+  transition: color 0.2s ease;
 }
 
-.back-home:hover,
-.register-footer a:hover {
-  color: #0f766e;
+.back-home:hover {
+  color: var(--hms-primary);
+}
+
+:root[data-theme="dark"] .register-card {
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.35);
 }
 
 @media (max-width: 600px) {
+  .register-page {
+    padding: 70px 20px 30px;
+  }
+
   .register-card {
     padding: 30px 22px;
   }
@@ -152,5 +336,32 @@
 
   .register-header h1 {
     font-size: 24px;
+  }
+
+  .register-theme-button {
+    top: 15px;
+    right: 15px;
+  }
+
+  .register-theme-button span:last-child {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .register-page {
+    padding: 65px 15px 20px;
+  }
+
+  .register-card {
+    padding: 25px 18px;
+  }
+
+  .register-header h1 {
+    font-size: 22px;
+  }
+
+  .register-header p {
+    font-size: 13px;
   }
 }

@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Register.css";
+import { useTheme } from "../../context/ThemeContext";
 
 function Register() {
   const navigate = useNavigate();
+
+  const { theme, toggleTheme } = useTheme();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -43,7 +46,12 @@ function Register() {
       confirmPassword,
     } = formData;
 
-    if (!fullName || !email || !password || !confirmPassword) {
+    if (
+      !fullName ||
+      !email ||
+      !password ||
+      !confirmPassword
+    ) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -54,7 +62,9 @@ function Register() {
     }
 
     if (password.length < 6) {
-      setError("Password must contain at least 6 characters.");
+      setError(
+        "Password must contain at least 6 characters."
+      );
       return;
     }
 
@@ -73,14 +83,18 @@ function Register() {
       );
 
       setMessage(
-        response.data?.message || "Registration successful."
+        response.data?.message ||
+          "Registration successful."
       );
 
       setTimeout(() => {
         navigate("/login");
       }, 1500);
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error(
+        "Registration error:",
+        error
+      );
 
       if (error.response) {
         setError(
@@ -103,29 +117,51 @@ function Register() {
 
   return (
     <div className="register-page">
+      {/* THEME TOGGLE */}
+      <button
+        type="button"
+        className="register-theme-button"
+        onClick={toggleTheme}
+        title={
+          theme === "light"
+            ? "Switch to Dark Mode"
+            : "Switch to Light Mode"
+        }
+      >
+        <span className="register-theme-icon">
+          {theme === "light" ? "🌙" : "☀️"}
+        </span>
+
+        <span>
+          {theme === "light"
+            ? "Dark Mode"
+            : "Light Mode"}
+        </span>
+      </button>
+
       <div className="register-card">
-
+        {/* HEADER */}
         <div className="register-header">
-
           <div className="register-logo">
             +
           </div>
 
-          <h1>Create your account</h1>
+          <h1>
+            Create your account
+          </h1>
 
           <p>
             Register to access the Hospital Management System.
           </p>
-
         </div>
 
+        {/* FORM */}
         <form
           className="register-form"
           onSubmit={handleRegister}
         >
-
+          {/* FULL NAME */}
           <div className="form-group">
-
             <label htmlFor="fullName">
               Full Name
             </label>
@@ -138,11 +174,10 @@ function Register() {
               onChange={handleChange}
               disabled={loading}
             />
-
           </div>
 
+          {/* EMAIL */}
           <div className="form-group">
-
             <label htmlFor="email">
               Email Address
             </label>
@@ -155,11 +190,10 @@ function Register() {
               onChange={handleChange}
               disabled={loading}
             />
-
           </div>
 
+          {/* PHONE */}
           <div className="form-group">
-
             <label htmlFor="phone">
               Phone Number
             </label>
@@ -172,11 +206,10 @@ function Register() {
               onChange={handleChange}
               disabled={loading}
             />
-
           </div>
 
+          {/* ROLE */}
           <div className="form-group">
-
             <label htmlFor="role">
               Register As
             </label>
@@ -187,8 +220,10 @@ function Register() {
               onChange={handleChange}
               disabled={loading}
             >
-
-              <option value="" disabled>
+              <option
+                value=""
+                disabled
+              >
                 Select your role
               </option>
 
@@ -203,15 +238,13 @@ function Register() {
               <option value="receptionist">
                 Receptionist
               </option>
-
             </select>
-
           </div>
 
+          {/* PASSWORD ROW */}
           <div className="form-row">
-
+            {/* PASSWORD */}
             <div className="form-group">
-
               <label htmlFor="password">
                 Password
               </label>
@@ -224,11 +257,10 @@ function Register() {
                 onChange={handleChange}
                 disabled={loading}
               />
-
             </div>
 
+            {/* CONFIRM PASSWORD */}
             <div className="form-group">
-
               <label htmlFor="confirmPassword">
                 Confirm Password
               </label>
@@ -241,23 +273,24 @@ function Register() {
                 onChange={handleChange}
                 disabled={loading}
               />
-
             </div>
-
           </div>
 
+          {/* ERROR */}
           {error && (
             <p className="error-message">
               {error}
             </p>
           )}
 
+          {/* SUCCESS */}
           {message && (
             <p className="success-message">
               {message}
             </p>
           )}
 
+          {/* SUBMIT */}
           <button
             type="submit"
             className="register-submit"
@@ -267,11 +300,10 @@ function Register() {
               ? "Creating Account..."
               : "Create Account"}
           </button>
-
         </form>
 
+        {/* LOGIN */}
         <div className="register-footer">
-
           <span>
             Already have an account?
           </span>
@@ -279,16 +311,15 @@ function Register() {
           <Link to="/login">
             Login
           </Link>
-
         </div>
 
+        {/* HOME */}
         <Link
           to="/"
           className="back-home"
         >
           ← Back to Home
         </Link>
-
       </div>
     </div>
   );

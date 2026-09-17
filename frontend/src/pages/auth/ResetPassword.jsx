@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 import "./ResetPassword.css";
-
+import { useTheme } from "../../context/ThemeContext";
 
 function EyeIcon() {
   return (
@@ -30,7 +30,6 @@ function EyeIcon() {
     </svg>
   );
 }
-
 
 function EyeOffIcon() {
   return (
@@ -72,21 +71,22 @@ function EyeOffIcon() {
   );
 }
 
-
 function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
+
+  const { theme, toggleTheme } = useTheme();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -99,18 +99,17 @@ function ResetPassword() {
       return;
     }
 
-
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-
     if (password.length < 6) {
-      setError("Password must contain at least 6 characters");
+      setError(
+        "Password must contain at least 6 characters"
+      );
       return;
     }
-
 
     try {
       setLoading(true);
@@ -127,64 +126,89 @@ function ResetPassword() {
       setTimeout(() => {
         navigate("/login");
       }, 2000);
-
     } catch (error) {
       setError(
         error.response?.data?.message ||
-        "Unable to reset your password"
+          "Unable to reset your password"
       );
-
     } finally {
       setLoading(false);
     }
   }
 
-
   return (
     <div className="reset-password-page">
+      {/* THEME TOGGLE */}
+      <button
+        type="button"
+        className="reset-theme-button"
+        onClick={toggleTheme}
+        title={
+          theme === "light"
+            ? "Switch to Dark Mode"
+            : "Switch to Light Mode"
+        }
+      >
+        <span className="reset-theme-icon">
+          {theme === "light" ? "🌙" : "☀️"}
+        </span>
+
+        <span>
+          {theme === "light"
+            ? "Dark Mode"
+            : "Light Mode"}
+        </span>
+      </button>
 
       <div className="reset-password-card">
-
+        {/* ICON */}
         <div className="reset-password-icon">
           🔐
         </div>
 
+        {/* TITLE */}
+        <h1>
+          Reset Password
+        </h1>
 
-        <h1>Reset Password</h1>
-
-
+        {/* DESCRIPTION */}
         <p className="reset-password-description">
           Create a new password for your
           Hospital Management System account.
         </p>
 
-
         <form onSubmit={handleSubmit}>
+          {/* NEW PASSWORD */}
           <div className="form-group">
-
             <label htmlFor="password">
               New Password
             </label>
 
-
             <div className="password-input-wrapper">
-
               <input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 value={password}
                 placeholder="Enter your new password"
                 onChange={(event) =>
-                  setPassword(event.target.value)
+                  setPassword(
+                    event.target.value
+                  )
                 }
+                disabled={loading}
               />
-
 
               <button
                 type="button"
                 className="password-toggle"
                 onClick={() =>
-                  setShowPassword(!showPassword)
+                  setShowPassword(
+                    !showPassword
+                  )
                 }
                 aria-label={
                   showPassword
@@ -198,19 +222,16 @@ function ResetPassword() {
                   <EyeIcon />
                 )}
               </button>
-
             </div>
-
           </div>
-          <div className="form-group">
 
+          {/* CONFIRM PASSWORD */}
+          <div className="form-group">
             <label htmlFor="confirmPassword">
               Confirm New Password
             </label>
 
-
             <div className="password-input-wrapper">
-
               <input
                 id="confirmPassword"
                 type={
@@ -221,10 +242,12 @@ function ResetPassword() {
                 value={confirmPassword}
                 placeholder="Confirm your new password"
                 onChange={(event) =>
-                  setConfirmPassword(event.target.value)
+                  setConfirmPassword(
+                    event.target.value
+                  )
                 }
+                disabled={loading}
               />
-
 
               <button
                 type="button"
@@ -246,23 +269,24 @@ function ResetPassword() {
                   <EyeIcon />
                 )}
               </button>
-
             </div>
-
           </div>
+
+          {/* SUCCESS MESSAGE */}
           {message && (
             <p className="success-message">
               {message}
             </p>
           )}
 
-
+          {/* ERROR MESSAGE */}
           {error && (
             <p className="error-message">
               {error}
             </p>
           )}
 
+          {/* RESET BUTTON */}
           <button
             type="submit"
             className="reset-password-button"
@@ -272,22 +296,18 @@ function ResetPassword() {
               ? "Resetting Password..."
               : "Reset Password"}
           </button>
-
         </form>
 
-
+        {/* BACK TO LOGIN */}
         <Link
           to="/login"
           className="back-to-login"
         >
           ← Back to Login
         </Link>
-
       </div>
-
     </div>
   );
 }
-
 
 export default ResetPassword;

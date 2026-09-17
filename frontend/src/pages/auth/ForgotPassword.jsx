@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+
 import "./ForgotPassword.css";
+import { useTheme } from "../../context/ThemeContext";
 
 function ForgotPassword() {
+  const { theme, toggleTheme } = useTheme();
+
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -36,7 +40,6 @@ function ForgotPassword() {
         response.data?.message ||
           "Password reset link has been sent to your email."
       );
-
     } catch (error) {
       console.error(
         "Forgot password error:",
@@ -57,7 +60,6 @@ function ForgotPassword() {
           "Something went wrong. Please try again."
         );
       }
-
     } finally {
       setLoading(false);
     }
@@ -65,21 +67,47 @@ function ForgotPassword() {
 
   return (
     <div className="forgot-password-page">
-      <div className="forgot-password-card">
+      {/* THEME TOGGLE */}
+      <button
+        type="button"
+        className="forgot-theme-button"
+        onClick={toggleTheme}
+        title={
+          theme === "light"
+            ? "Switch to Dark Mode"
+            : "Switch to Light Mode"
+        }
+      >
+        <span className="forgot-theme-icon">
+          {theme === "light" ? "🌙" : "☀️"}
+        </span>
 
+        <span>
+          {theme === "light"
+            ? "Dark Mode"
+            : "Light Mode"}
+        </span>
+      </button>
+
+      <div className="forgot-password-card">
+        {/* ICON */}
         <div className="forgot-password-icon">
           🔐
         </div>
 
-        <h1>Forgot Password?</h1>
+        {/* TITLE */}
+        <h1>
+          Forgot Password?
+        </h1>
 
+        {/* DESCRIPTION */}
         <p className="forgot-password-description">
           Enter your registered email address and
           we'll send you a link to reset your password.
         </p>
 
         <form onSubmit={handleSubmit}>
-
+          
           <div className="form-group">
             <label htmlFor="email">
               Email Address
@@ -104,12 +132,14 @@ function ForgotPassword() {
             </p>
           )}
 
+          {/* ERROR MESSAGE */}
           {error && (
             <p className="error-message">
               {error}
             </p>
           )}
 
+          {/* SUBMIT */}
           <button
             type="submit"
             disabled={loading}
@@ -118,7 +148,6 @@ function ForgotPassword() {
               ? "Sending..."
               : "Send Reset Link"}
           </button>
-
         </form>
 
         <Link
@@ -127,7 +156,6 @@ function ForgotPassword() {
         >
           ← Back to Login
         </Link>
-
       </div>
     </div>
   );

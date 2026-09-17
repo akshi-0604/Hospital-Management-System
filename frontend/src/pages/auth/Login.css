@@ -1,160 +1,340 @@
 .login-page {
+  position: relative;
   min-height: 100vh;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
-  background: #f4f8fb;
+
+  padding: 70px 20px 40px;
+
+  background: var(--hms-page-bg);
+  color: var(--hms-text-primary);
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+.login-theme-button {
+  position: absolute;
+  top: 22px;
+  right: 28px;
+
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 8px 13px;
+
+  border: 1px solid var(--hms-border);
+  border-radius: 8px;
+
+  background: var(--hms-card-bg);
+  color: var(--hms-text-primary);
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.login-theme-button:hover {
+  border-color: var(--hms-primary);
+  color: var(--hms-primary);
+  transform: translateY(-1px);
+}
+
+.login-theme-icon {
+  font-size: 15px;
+  line-height: 1;
 }
 
 .login-container {
   width: 100%;
   max-width: 1050px;
+
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: #ffffff;
-  border-radius: 18px;
+
   overflow: hidden;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+
+  border: 1px solid var(--hms-border);
+  border-radius: 18px;
+
+  background: var(--hms-card-bg);
+
+  box-shadow: var(--hms-shadow);
+
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
+
 .login-brand {
   display: flex;
   flex-direction: column;
   justify-content: center;
+
   padding: 60px;
-  background: #0f766e;
+
+  background: var(--hms-primary);
   color: #ffffff;
 }
 
 .hospital-icon {
   width: 60px;
   height: 60px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   margin-bottom: 25px;
+
   border-radius: 14px;
+
   background: #ffffff;
-  color: #0f766e;
+  color: var(--hms-primary);
+
   font-size: 42px;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .login-brand h1 {
   margin: 0 0 15px;
+
+  color: #ffffff;
+
   font-size: 36px;
   line-height: 1.2;
 }
 
 .login-brand p {
   max-width: 360px;
+
   margin: 0;
+
+  color: #ffffff;
+
   font-size: 16px;
   line-height: 1.7;
+
   opacity: 0.9;
 }
 
 .login-card {
   padding: 60px;
+
+  background: var(--hms-card-bg);
+
+  transition: background-color 0.25s ease;
 }
 
 .login-card h2 {
   margin: 0;
-  color: #1f2937;
+
+  color: var(--hms-text-primary);
+
   font-size: 30px;
 }
 
 .login-subtitle {
   margin: 10px 0 35px;
-  color: #6b7280;
+
+  color: var(--hms-text-secondary);
+
   font-size: 15px;
 }
+
 .form-group {
   margin-bottom: 22px;
 }
 
 .form-group label {
   display: block;
+
   margin-bottom: 8px;
-  color: #374151;
+
+  color: var(--hms-text-primary);
+
   font-size: 14px;
   font-weight: 600;
 }
 
 .form-group input {
   width: 100%;
+
   padding: 13px 14px;
-  border: 1px solid #d1d5db;
+
+  border: 1px solid var(--hms-border);
   border-radius: 8px;
+
   outline: none;
+
+  background: var(--hms-input-bg);
+  color: var(--hms-text-primary);
+
   font-size: 15px;
-  transition: border-color 0.2s ease;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.form-group input::placeholder {
+  color: var(--hms-text-muted);
 }
 
 .form-group input:focus {
-  border-color: #0f766e;
+  border-color: var(--hms-primary);
+
+  box-shadow:
+    0 0 0 3px rgba(32, 169, 156, 0.12);
 }
+
 .login-options {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   margin-bottom: 25px;
+
   font-size: 13px;
 }
 
 .remember-me {
   display: flex;
   align-items: center;
+
   gap: 7px;
-  color: #4b5563;
+
+  color: var(--hms-text-secondary);
+
+  cursor: pointer;
 }
 
 .remember-me input {
+  accent-color: var(--hms-primary);
   cursor: pointer;
 }
 
 .forgot-password {
-  border: none;
-  background: none;
-  color: #0f766e;
+  color: var(--hms-primary);
+
+  text-decoration: underline;
+
   cursor: pointer;
+
   font-size: 13px;
+  font-weight: 500;
+}
+
+.forgot-password:hover {
+  color: var(--hms-primary-dark);
+}
+
+.error-message {
+  margin: 0 0 18px;
+
+  padding: 11px 13px;
+
+  border: 1px solid var(--hms-danger-text);
+
+  border-radius: 7px;
+
+  background: var(--hms-danger-bg);
+  color: var(--hms-danger-text);
+
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .login-button {
   width: 100%;
+
   padding: 14px;
+
   border: none;
   border-radius: 8px;
-  background: #0f766e;
+
+  background: var(--hms-primary);
   color: #ffffff;
+
   cursor: pointer;
+
   font-size: 16px;
   font-weight: 600;
-  transition: background 0.2s ease;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.login-button:hover {
-  background: #115e59;
+.login-button:hover:not(:disabled) {
+  background: var(--hms-primary-dark);
+  transform: translateY(-1px);
 }
+
+.login-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .register-section {
   display: flex;
   justify-content: center;
+
   gap: 5px;
+
   margin-top: 30px;
-  color: #6b7280;
+
+  color: var(--hms-text-secondary);
+
   font-size: 14px;
 }
 
-.register-section button {
-  border: none;
-  background: none;
-  color: #0f766e;
-  cursor: pointer;
+.register-section a {
+  color: var(--hms-primary);
+
+  text-decoration: none;
+
   font-weight: 600;
 }
 
+.register-section a:hover {
+  color: var(--hms-primary-dark);
+  text-decoration: underline;
+}
+
+:root[data-theme="dark"] .login-container {
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] .hospital-icon {
+  background: #f8fafc;
+  color: var(--hms-primary);
+}
+
 @media (max-width: 768px) {
+  .login-page {
+    padding: 75px 20px 30px;
+  }
+
   .login-container {
     grid-template-columns: 1fr;
   }
@@ -174,7 +354,18 @@
 
 @media (max-width: 480px) {
   .login-page {
-    padding: 20px;
+    padding: 75px 20px 20px;
+  }
+
+  .login-theme-button {
+    top: 15px;
+    right: 15px;
+
+    padding: 8px 10px;
+  }
+
+  .login-theme-button span:last-child {
+    display: none;
   }
 
   .login-brand,
@@ -185,6 +376,15 @@
   .login-options {
     align-items: flex-start;
     flex-direction: column;
+
     gap: 12px;
+  }
+
+  .login-brand h1 {
+    font-size: 25px;
+  }
+
+  .login-card h2 {
+    font-size: 26px;
   }
 }

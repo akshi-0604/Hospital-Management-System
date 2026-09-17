@@ -3,9 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import "./Login.css";
+import { useTheme } from "../../context/ThemeContext";
 
 function Login() {
   const navigate = useNavigate();
+
+  const { theme, toggleTheme } = useTheme();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,14 +65,36 @@ function Login() {
 
   return (
     <div className="login-page">
-      <div className="login-container">
+      {/* THEME TOGGLE */}
+      <button
+        type="button"
+        className="login-theme-button"
+        onClick={toggleTheme}
+        title={
+          theme === "light"
+            ? "Switch to Dark Mode"
+            : "Switch to Light Mode"
+        }
+      >
+        <span className="login-theme-icon">
+          {theme === "light" ? "🌙" : "☀️"}
+        </span>
 
+        <span>
+          {theme === "light" ? "Dark Mode" : "Light Mode"}
+        </span>
+      </button>
+
+      <div className="login-container">
+        {/* LEFT BRAND SECTION */}
         <div className="login-brand">
           <div className="hospital-icon">
             +
           </div>
 
-          <h1>Hospital Management</h1>
+          <h1>
+            Hospital Management
+          </h1>
 
           <p>
             Manage your hospital operations
@@ -77,15 +102,18 @@ function Login() {
           </p>
         </div>
 
+        {/* RIGHT LOGIN CARD */}
         <div className="login-card">
-          <h2>Welcome Back</h2>
+          <h2>
+            Welcome Back
+          </h2>
 
           <p className="login-subtitle">
             Please login to your account
           </p>
 
           <form onSubmit={handleLogin}>
-
+            {/* EMAIL */}
             <div className="form-group">
               <label htmlFor="email">
                 Email Address
@@ -102,6 +130,7 @@ function Login() {
               />
             </div>
 
+            {/* PASSWORD */}
             <div className="form-group">
               <label htmlFor="password">
                 Password
@@ -118,6 +147,7 @@ function Login() {
               />
             </div>
 
+            {/* OPTIONS */}
             <div className="login-options">
               <label className="remember-me">
                 <input type="checkbox" />
@@ -135,21 +165,26 @@ function Login() {
               </Link>
             </div>
 
+            {/* ERROR */}
             {error && (
               <p className="error-message">
                 {error}
               </p>
             )}
 
+            {/* LOGIN BUTTON */}
             <button
               type="submit"
               className="login-button"
               disabled={loading}
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading
+                ? "Logging in..."
+                : "Login"}
             </button>
           </form>
 
+          {/* REGISTER LINK */}
           <div className="register-section">
             <span>
               Don't have an account?
@@ -160,11 +195,9 @@ function Login() {
             </Link>
           </div>
         </div>
-
       </div>
     </div>
   );
 }
 
 export default Login;
-
