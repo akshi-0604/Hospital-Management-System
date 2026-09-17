@@ -17,10 +17,49 @@
     margin-bottom: 22px;
 }
 
+.patient-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.patient-theme-button {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 13px;
+    border: 1px solid var(--hms-border);
+    border-radius: 8px;
+    background: var(--hms-input-bg);
+    color: var(--hms-text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.patient-theme-button:hover {
+    border-color: var(--hms-primary);
+    color: var(--hms-primary);
+    transform: translateY(-1px);
+}
+
+.patient-theme-icon {
+    font-size: 15px;
+    line-height: 1;
+}
+
 .patient-dashboard-header h2 {
     margin: 0;
 
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-size: 28px;
     font-weight: 700;
@@ -29,7 +68,7 @@
 .patient-dashboard-header p {
     margin: 7px 0 0;
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 14px;
 }
@@ -39,12 +78,12 @@
 
     padding: 0 15px;
 
-    border: 1px solid #d5dee7;
+    border: 1px solid var(--hms-border);
     border-radius: 8px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
-    color: #0f766e;
+    color: var(--hms-primary);
 
     font-size: 13px;
     font-weight: 600;
@@ -53,21 +92,21 @@
 }
 
 .patient-refresh-button:hover {
-    background: #f0fdfa;
+    background: var(--hms-primary-light);
 
-    border-color: #0f766e;
+    border-color: var(--hms-primary);
 }
 .patient-dashboard-error {
     margin-bottom: 18px;
 
     padding: 13px 16px;
 
-    border: 1px solid #fecaca;
+    border: 1px solid var(--hms-danger-text);
     border-radius: 8px;
 
-    background: #fff7f7;
+    background: var(--hms-danger-bg);
 
-    color: #b91c1c;
+    color: var(--hms-danger-text);
 
     font-size: 13px;
 }
@@ -82,13 +121,13 @@
 
     padding: 20px;
 
-    border: 1px solid #dbe4ea;
+    border: 1px solid var(--hms-border);
     border-radius: 12px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
     box-shadow:
-        0 2px 8px rgba(15, 23, 42, 0.04);
+        0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .patient-profile-avatar {
@@ -104,9 +143,9 @@
 
     border-radius: 50%;
 
-    background: #e2f7f4;
+    background: var(--hms-primary-light);
 
-    color: #087f78;
+    color: var(--hms-primary);
 
     font-size: 21px;
     font-weight: 700;
@@ -115,7 +154,7 @@
 .patient-profile-info h3 {
     margin: 0;
 
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-size: 19px;
 }
@@ -123,13 +162,13 @@
 .patient-profile-info p {
     margin: 5px 0;
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 13px;
 }
 
 .patient-profile-info span {
-    color: #0f766e;
+    color: var(--hms-primary);
 
     font-size: 12px;
     font-weight: 700;
@@ -148,13 +187,13 @@
 .patient-summary-card {
     padding: 19px;
 
-    border: 1px solid #dbe4ea;
+    border: 1px solid var(--hms-border);
     border-radius: 10px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
     box-shadow:
-        0 2px 8px rgba(15, 23, 42, 0.04);
+        0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .patient-summary-card span {
@@ -162,7 +201,7 @@
 
     margin-bottom: 8px;
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 13px;
 }
@@ -170,7 +209,7 @@
 .patient-summary-card strong {
     display: block;
 
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-size: 28px;
     font-weight: 700;
@@ -179,7 +218,7 @@
 .patient-summary-card p {
     margin: 5px 0 0;
 
-    color: #94a3b8;
+    color: var(--hms-text-muted);
 
     font-size: 12px;
 }
@@ -195,16 +234,16 @@
 
     padding: 20px 22px;
 
-    border: 1px solid #bfe7e2;
+    border: 1px solid var(--hms-primary);
     border-radius: 12px;
 
-    background: #effcf9;
+    background: var(--hms-primary-light);
 }
 
 .patient-booking-banner h3 {
     margin: 0;
 
-    color: #145d58;
+    color: var(--hms-primary-dark);
 
     font-size: 17px;
 }
@@ -212,7 +251,7 @@
 .patient-booking-banner p {
     margin: 5px 0 0;
 
-    color: #5f7f7c;
+    color: var(--hms-text-secondary);
 
     font-size: 13px;
 }
@@ -225,7 +264,7 @@
     border: none;
     border-radius: 8px;
 
-    background: #0f766e;
+    background: var(--hms-primary);
 
     color: #ffffff;
 
@@ -236,20 +275,20 @@
 }
 
 .book-appointment-button:hover {
-    background: #0b625c;
+    background: var(--hms-primary-dark);
 }
 .patient-dashboard-section {
     margin-bottom: 18px;
 
     overflow: hidden;
 
-    border: 1px solid #dbe4ea;
+    border: 1px solid var(--hms-border);
     border-radius: 12px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
     box-shadow:
-        0 2px 8px rgba(15, 23, 42, 0.04);
+        0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .patient-section-header {
@@ -262,13 +301,13 @@
 
     padding: 17px 20px;
 
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--hms-border-light);
 }
 
 .patient-section-header h3 {
     margin: 0;
 
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-size: 17px;
     font-weight: 700;
@@ -277,7 +316,7 @@
 .patient-section-header p {
     margin: 4px 0 0;
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 13px;
 }
@@ -285,12 +324,12 @@
 .section-book-button {
     padding: 8px 13px;
 
-    border: 1px solid #0f766e;
+    border: 1px solid var(--hms-primary);
     border-radius: 7px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
-    color: #0f766e;
+    color: var(--hms-primary);
 
     font-size: 12px;
     font-weight: 700;
@@ -299,7 +338,7 @@
 }
 
 .section-book-button:hover {
-    background: #effcf9;
+    background: var(--hms-primary-light);
 }
 
 .upcoming-appointment-card {
@@ -325,9 +364,9 @@
 
     border-radius: 50%;
 
-    background: #e5f7f4;
+    background: var(--hms-primary-light);
 
-    color: #0f766e;
+    color: var(--hms-primary);
 
     font-size: 18px;
     font-weight: 700;
@@ -342,7 +381,7 @@
 .upcoming-appointment-info h4 {
     margin: 0;
 
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-size: 16px;
 }
@@ -350,13 +389,13 @@
 .upcoming-appointment-info p {
     margin: 4px 0 2px;
 
-    color: #475569;
+    color: var(--hms-text-secondary);
 
     font-size: 13px;
 }
 
 .upcoming-appointment-info .doctor-specialization {
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 12px;
 }
@@ -366,7 +405,7 @@
 
     margin-top: 2px;
 
-    color: #94a3b8;
+    color: var(--hms-text-muted);
 
     font-size: 11px;
 }
@@ -378,7 +417,7 @@
 
     margin-top: 9px;
 
-    color: #475569;
+    color: var(--hms-text-secondary);
 
     font-size: 12px;
     font-weight: 600;
@@ -403,27 +442,27 @@
 }
 
 .patient-status-badge.pending {
-    background: #fff7ed;
+    background: var(--hms-warning-bg);
 
-    color: #c2410c;
+    color: var(--hms-warning-text);
 }
 
 .patient-status-badge.confirmed {
-    background: #ecfdf5;
+    background: var(--hms-success-bg);
 
-    color: #047857;
+    color: var(--hms-success-text);
 }
 
 .patient-status-badge.completed {
-    background: #eff6ff;
+    background: var(--hms-info-bg);
 
-    color: #1d4ed8;
+    color: var(--hms-info-text);
 }
 
 .patient-status-badge.cancelled {
-    background: #fef2f2;
+    background: var(--hms-danger-bg);
 
-    color: #b91c1c;
+    color: var(--hms-danger-text);
 }
 
 .available-doctors-grid {
@@ -450,10 +489,10 @@
 
     padding: 15px;
 
-    border: 1px solid #e3eaf0;
+    border: 1px solid var(--hms-border);
     border-radius: 10px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
     transition:
         border-color 0.2s ease,
@@ -461,10 +500,10 @@
 }
 
 .available-doctor-card:hover {
-    border-color: #b9ddd8;
+    border-color: var(--hms-primary);
 
     box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.06);
+        0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .available-doctor-avatar {
@@ -480,9 +519,9 @@
 
     border-radius: 50%;
 
-    background: #edf8f6;
+    background: var(--hms-primary-light);
 
-    color: #0f766e;
+    color: var(--hms-primary);
 
     font-size: 14px;
     font-weight: 700;
@@ -497,7 +536,7 @@
 .available-doctor-info h4 {
     margin: 0 0 4px;
 
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-size: 14px;
 }
@@ -505,13 +544,13 @@
 .available-doctor-info p {
     margin: 0 0 3px;
 
-    color: #475569;
+    color: var(--hms-text-secondary);
 
     font-size: 12px;
 }
 
 .available-doctor-info span {
-    color: #94a3b8;
+    color: var(--hms-text-muted);
 
     font-size: 11px;
 }
@@ -528,7 +567,7 @@
 
     gap: 4px;
 
-    color: #15803d;
+    color: var(--hms-success-text);
 
     font-size: 10px;
     font-weight: 700;
@@ -540,7 +579,7 @@
 
     border-radius: 50%;
 
-    background: #22c55e;
+    background: var(--hms-success-text);
 }
 
 .doctor-book-button {
@@ -551,12 +590,12 @@
 
     padding: 6px 10px;
 
-    border: 1px solid #0f766e;
+    border: 1px solid var(--hms-primary);
     border-radius: 6px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
-    color: #0f766e;
+    color: var(--hms-primary);
 
     font-size: 11px;
     font-weight: 700;
@@ -565,7 +604,7 @@
 }
 
 .doctor-book-button:hover {
-    background: #effcf9;
+    background: var(--hms-primary-light);
 }
 .patient-appointment-table {
     width: 100%;
@@ -596,11 +635,11 @@
 .patient-table-header {
     min-height: 48px;
 
-    background: #f8fafc;
+    background: var(--hms-table-header);
 
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--hms-border);
 
-    color: #475569;
+    color: var(--hms-text-secondary);
 
     font-size: 10px;
     font-weight: 700;
@@ -613,9 +652,9 @@
 .patient-table-row {
     min-height: 61px;
 
-    border-bottom: 1px solid #eef2f6;
+    border-bottom: 1px solid var(--hms-border-light);
 
-    color: #475569;
+    color: var(--hms-text-secondary);
 
     font-size: 13px;
 }
@@ -625,11 +664,11 @@
 }
 
 .patient-table-row:hover {
-    background: #f8fcfb;
+    background: var(--hms-primary-light);
 }
 
 .patient-table-row > span:first-child {
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-weight: 600;
 }
@@ -655,11 +694,11 @@
 
     padding: 15px 20px;
 
-    border-bottom: 1px solid #eef2f6;
+    border-bottom: 1px solid var(--hms-border-light);
 }
 
 .patient-profile-details label {
-    color: #94a3b8;
+    color: var(--hms-text-muted);
 
     font-size: 10px;
     font-weight: 700;
@@ -668,7 +707,7 @@
 }
 
 .patient-profile-details strong {
-    color: #334155;
+    color: var(--hms-text-primary);
 
     font-size: 14px;
 
@@ -693,7 +732,7 @@
 .patient-empty-state h4 {
     margin: 0 0 7px;
 
-    color: #334155;
+    color: var(--hms-text-primary);
 
     font-size: 15px;
 }
@@ -703,7 +742,7 @@
 
     max-width: 500px;
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 13px;
 }
@@ -713,12 +752,12 @@
 
     padding: 9px 14px;
 
-    border: 1px solid #0f766e;
+    border: 1px solid var(--hms-primary);
     border-radius: 7px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
-    color: #0f766e;
+    color: var(--hms-primary);
 
     font-size: 12px;
     font-weight: 700;
@@ -727,7 +766,7 @@
 }
 
 .empty-book-button:hover {
-    background: #effcf9;
+    background: var(--hms-primary-light);
 }
 
 .patient-dashboard-loading {
@@ -738,7 +777,7 @@
     align-items: center;
     justify-content: center;
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 14px;
 }
@@ -756,7 +795,7 @@
 
     padding: 20px;
 
-    background: rgba(15, 23, 42, 0.48);
+    background: var(--hms-overlay);
 
     overflow-y: auto;
 }
@@ -772,10 +811,10 @@
 
     border-radius: 14px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
     box-shadow:
-        0 20px 50px rgba(15, 23, 42, 0.18);
+        0 20px 50px rgba(0, 0, 0, 0.28);
 }
 
 .appointment-modal-header {
@@ -788,13 +827,13 @@
 
     padding: 20px 22px;
 
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--hms-border-light);
 }
 
 .appointment-modal-header h3 {
     margin: 0;
 
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-size: 19px;
 }
@@ -802,7 +841,7 @@
 .appointment-modal-header p {
     margin: 5px 0 0;
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 12px;
 }
@@ -818,12 +857,12 @@
     width: 32px;
     height: 32px;
 
-    border: 1px solid #dbe4ea;
+    border: 1px solid var(--hms-border);
     border-radius: 7px;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 
     font-size: 21px;
 
@@ -831,9 +870,9 @@
 }
 
 .appointment-modal-close:hover {
-    background: #f8fafc;
+    background: var(--hms-table-header);
 
-    color: #172033;
+    color: var(--hms-text-primary);
 }
 
 .appointment-form {
@@ -855,12 +894,12 @@
 
     padding: 11px 13px;
 
-    border: 1px solid #fecaca;
+    border: 1px solid var(--hms-danger-text);
     border-radius: 7px;
 
-    background: #fff7f7;
+    background: var(--hms-danger-bg);
 
-    color: #b91c1c;
+    color: var(--hms-danger-text);
 
     font-size: 12px;
 }
@@ -870,12 +909,12 @@
 
     padding: 11px 13px;
 
-    border: 1px solid #bbf7d0;
+    border: 1px solid var(--hms-success-text);
     border-radius: 7px;
 
-    background: #f0fdf4;
+    background: var(--hms-success-bg);
 
-    color: #15803d;
+    color: var(--hms-success-text);
 
     font-size: 12px;
 }
@@ -889,7 +928,7 @@
 
     margin-bottom: 7px;
 
-    color: #334155;
+    color: var(--hms-text-primary);
 
     font-size: 12px;
     font-weight: 700;
@@ -904,14 +943,14 @@
 
     padding: 11px 12px;
 
-    border: 1px solid #d5dee7;
+    border: 1px solid var(--hms-border);
     border-radius: 7px;
 
     outline: none;
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
-    color: #334155;
+    color: var(--hms-text-primary);
 
     font-family: inherit;
 
@@ -921,16 +960,16 @@
 .appointment-form-group input:focus,
 .appointment-form-group select:focus,
 .appointment-form-group textarea:focus {
-    border-color: #0f766e;
+    border-color: var(--hms-primary);
 
     box-shadow:
-        0 0 0 3px rgba(15, 118, 110, 0.08);
+        0 0 0 3px rgba(32, 169, 156, 0.12);
 }
 
 .appointment-form-group input[readonly] {
-    background: #f8fafc;
+    background: var(--hms-table-header);
 
-    color: #64748b;
+    color: var(--hms-text-secondary);
 }
 
 .appointment-form-group textarea {
@@ -959,10 +998,10 @@
 
     padding: 13px;
 
-    border: 1px solid #d5ebe7;
+    border: 1px solid var(--hms-primary);
     border-radius: 9px;
 
-    background: #f5fcfb;
+    background: var(--hms-primary-light);
 }
 
 .selected-doctor-avatar {
@@ -978,9 +1017,9 @@
 
     border-radius: 50%;
 
-    background: #dff5f1;
+    background: var(--hms-primary-light);
 
-    color: #0f766e;
+    color: var(--hms-primary);
 
     font-size: 13px;
     font-weight: 700;
@@ -995,19 +1034,19 @@
 }
 
 .selected-doctor-preview strong {
-    color: #172033;
+    color: var(--hms-text-primary);
 
     font-size: 13px;
 }
 
 .selected-doctor-preview span {
-    color: #475569;
+    color: var(--hms-text-secondary);
 
     font-size: 11px;
 }
 
 .selected-doctor-preview small {
-    color: #94a3b8;
+    color: var(--hms-text-muted);
 
     font-size: 10px;
 }
@@ -1020,9 +1059,9 @@
 
     padding: 15px 22px;
 
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--hms-border-light);
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 }
 
 .appointment-cancel-button,
@@ -1038,27 +1077,27 @@
 }
 
 .appointment-cancel-button {
-    border: 1px solid #d5dee7;
+    border: 1px solid var(--hms-border);
 
-    background: #ffffff;
+    background: var(--hms-card-bg);
 
-    color: #475569;
+    color: var(--hms-text-secondary);
 }
 
 .appointment-cancel-button:hover {
-    background: #f8fafc;
+    background: var(--hms-table-header);
 }
 
 .appointment-submit-button {
-    border: 1px solid #0f766e;
+    border: 1px solid var(--hms-primary);
 
-    background: #0f766e;
+    background: var(--hms-primary);
 
     color: #ffffff;
 }
 
 .appointment-submit-button:hover {
-    background: #0b625c;
+    background: var(--hms-primary-dark);
 }
 
 .appointment-cancel-button:disabled,
@@ -1066,6 +1105,30 @@
     opacity: 0.65;
 
     cursor: not-allowed;
+}
+
+.appointment-form-group input,
+.appointment-form-group select,
+.appointment-form-group textarea {
+    background: var(--hms-input-bg);
+    color: var(--hms-text-primary);
+}
+
+.appointment-form-group input::placeholder,
+.appointment-form-group textarea::placeholder {
+    color: var(--hms-text-muted);
+}
+
+.patient-refresh-button,
+.section-book-button,
+.doctor-book-button,
+.empty-book-button,
+.appointment-modal-close,
+.appointment-cancel-button {
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
 }
 
 @media (max-width: 1100px) {
@@ -1089,6 +1152,13 @@
         flex-direction: column;
     }
 
+    .patient-header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .patient-theme-button,
     .patient-refresh-button {
         width: 100%;
     }

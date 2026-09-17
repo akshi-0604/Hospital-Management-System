@@ -4,6 +4,7 @@ import axios from "axios";
 import "./PatientDashboard.css";
 
 import PatientNotifications from "../../components/patient/PatientNotifications";
+import { useTheme } from "../../context/ThemeContext";
 const API_BASE_URL =
   "https://hospital-management-system-nvjt.onrender.com/api";
 
@@ -11,6 +12,8 @@ const DOCTORS_URL = `${API_BASE_URL}/doctors`;
 const APPOINTMENTS_URL = `${API_BASE_URL}/appointments`;
 
 function PatientDashboard() {
+  const { theme, toggleTheme } = useTheme();
+
   const [user, setUser] = useState(null);
 
   const [doctors, setDoctors] = useState([]);
@@ -735,15 +738,36 @@ function PatientDashboard() {
 
         </div>
 
-        <button
-          type="button"
-          className="patient-refresh-button"
-          onClick={
-            handleRefresh
-          }
-        >
-          ↻ Refresh
-        </button>
+        <div className="patient-header-actions">
+          <button
+            type="button"
+            className="patient-theme-button"
+            onClick={toggleTheme}
+            title={
+              theme === "light"
+                ? "Switch to Dark Mode"
+                : "Switch to Light Mode"
+            }
+          >
+            <span className="patient-theme-icon">
+              {theme === "light" ? "🌙" : "☀️"}
+            </span>
+
+            <span>
+              {theme === "light" ? "Dark Mode" : "Light Mode"}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="patient-refresh-button"
+            onClick={
+              handleRefresh
+            }
+          >
+            ↻ Refresh
+          </button>
+        </div>
 
       </div>
       {error &&
