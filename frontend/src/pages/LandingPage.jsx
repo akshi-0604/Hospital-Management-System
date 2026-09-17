@@ -7,6 +7,7 @@ function LandingPage() {
 
   return (
     <div className="landing-page">
+     
       <header className="landing-navbar">
         <div className="landing-logo">
           <div className="logo-icon">+</div>
@@ -25,6 +26,7 @@ function LandingPage() {
         </nav>
 
         <div className="navbar-actions">
+        
           <button
             type="button"
             className="landing-theme-button"
@@ -58,7 +60,9 @@ function LandingPage() {
    
         <section className="hero-section" id="home">
           <div className="hero-content">
-            <p className="hero-label">SMART HEALTHCARE MANAGEMENT</p>
+            <p className="hero-label">
+              SMART HEALTHCARE MANAGEMENT
+            </p>
 
             <h1>
               Better Healthcare,
@@ -76,7 +80,10 @@ function LandingPage() {
                 Get Started
               </Link>
 
-              <a href="#services" className="secondary-button">
+              <a
+                href="#services"
+                className="secondary-button"
+              >
                 Explore Services
               </a>
             </div>
@@ -115,7 +122,9 @@ function LandingPage() {
           <div className="section-heading">
             <p>ABOUT OUR SYSTEM</p>
 
-            <h2>Everything your hospital needs, in one platform.</h2>
+            <h2>
+              Everything your hospital needs, in one platform.
+            </h2>
 
             <span>
               Our Hospital Management System helps hospitals simplify their
@@ -124,6 +133,7 @@ function LandingPage() {
           </div>
 
           <div className="about-cards">
+           
             <div className="about-card">
               <div className="feature-icon">P</div>
 
@@ -158,11 +168,17 @@ function LandingPage() {
             </div>
           </div>
         </section>
-        <section className="services-section" id="services">
+
+        <section
+          className="services-section"
+          id="services"
+        >
           <div className="section-heading">
             <p>OUR FEATURES</p>
 
-            <h2>Powerful hospital management features</h2>
+            <h2>
+              Powerful hospital management features
+            </h2>
 
             <span>
               Designed to connect patients, doctors, receptionists, and
@@ -171,6 +187,7 @@ function LandingPage() {
           </div>
 
           <div className="services-grid">
+        
             <div className="service-card">
               <div className="service-icon">01</div>
 
@@ -222,7 +239,6 @@ function LandingPage() {
                 information.
               </p>
             </div>
-
             <div className="service-card">
               <div className="service-icon">06</div>
 
@@ -235,12 +251,13 @@ function LandingPage() {
             </div>
           </div>
         </section>
-
         <section className="cta-section" id="contact">
           <div>
             <p>GET STARTED TODAY</p>
 
-            <h2>Manage your hospital smarter and faster.</h2>
+            <h2>
+              Manage your hospital smarter and faster.
+            </h2>
 
             <span>
               Bring your hospital operations together with one centralized
@@ -253,14 +270,18 @@ function LandingPage() {
           </Link>
         </section>
       </main>
-
       <footer className="landing-footer">
         <div>
           <strong>HMS</strong>
-          <p>Hospital Management System</p>
+
+          <p>
+            Hospital Management System
+          </p>
         </div>
 
-        <p>© 2026 Hospital Management System. All rights reserved.</p>
+        <p>
+          © 2026 Hospital Management System. All rights reserved.
+        </p>
       </footer>
     </div>
   );
