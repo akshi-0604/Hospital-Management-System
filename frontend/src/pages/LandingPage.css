@@ -2,9 +2,7 @@
   min-height: 100vh;
   background: var(--hms-page-bg);
   color: var(--hms-text-primary);
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .landing-navbar {
@@ -16,9 +14,7 @@
   padding: 12px 7%;
   background: var(--hms-card-bg);
   border-bottom: 1px solid var(--hms-border);
-  transition:
-    background-color 0.25s ease,
-    border-color 0.25s ease;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .landing-logo {
@@ -40,13 +36,11 @@
   font-size: 27px;
   font-weight: 700;
 }
-
 .landing-logo h2 {
   margin: 0;
   color: var(--hms-primary);
   font-size: 19px;
 }
-
 .landing-logo span {
   display: block;
   margin-top: 2px;
@@ -163,6 +157,7 @@
   letter-spacing: 1.5px;
 }
 
+
 .hero-content h1 {
   max-width: 650px;
   margin: 0;
@@ -213,7 +208,6 @@
   background: var(--hms-primary-dark);
   transform: translateY(-1px);
 }
-
 .secondary-button {
   background: var(--hms-card-bg);
   border: 1px solid var(--hms-primary);
@@ -515,31 +509,39 @@
     padding: 30px 7%;
   }
 }
+
 @media (max-width: 900px) {
   .landing-navbar {
     flex-wrap: wrap;
   }
+
   .landing-navigation {
     display: none;
   }
+
   .navbar-actions {
     margin-left: auto;
   }
+
   .hero-section {
     grid-template-columns: 1fr;
     padding: 60px 7%;
   }
+
   .hero-content h1 {
     font-size: 43px;
   }
+
   .about-cards,
   .services-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .about-section,
   .services-section {
     padding: 70px 7%;
   }
+
   .cta-section {
     margin: 60px 7%;
   }
@@ -549,91 +551,116 @@
     min-height: 70px;
     padding: 12px 20px;
   }
+
   .landing-logo {
     gap: 8px;
   }
+
   .logo-icon {
     width: 36px;
     height: 36px;
     font-size: 24px;
   }
+
   .landing-logo h2 {
     font-size: 17px;
   }
+
   .landing-logo span {
     font-size: 9px;
   }
+
   .navbar-actions {
     width: 100%;
     justify-content: flex-end;
     gap: 8px;
   }
+
   .landing-theme-button {
     padding: 8px 10px;
   }
+
   .landing-theme-button span:last-child {
     display: none;
   }
+
   .login-link {
     font-size: 13px;
   }
+
   .register-button {
     padding: 9px 12px;
     font-size: 13px;
   }
+
   .hero-section {
     padding: 50px 20px;
   }
+
   .hero-content h1 {
     font-size: 36px;
   }
+
   .hero-description {
     font-size: 15px;
   }
+
   .hero-buttons {
     flex-direction: column;
   }
+
   .primary-button,
   .secondary-button {
     width: 100%;
     text-align: center;
   }
+
   .hero-card {
     padding: 28px;
   }
+
   .hero-card h3 {
     font-size: 21px;
   }
+
   .about-section,
   .services-section {
     padding: 60px 20px;
   }
+
   .about-cards,
   .services-grid {
     grid-template-columns: 1fr;
   }
+
   .section-heading {
     margin-bottom: 40px;
   }
+
   .section-heading h2 {
     font-size: 27px;
   }
+
   .section-heading span {
     font-size: 14px;
   }
+
   .cta-section {
     align-items: flex-start;
     flex-direction: column;
     margin: 40px 20px;
     padding: 35px 25px;
   }
+
   .cta-section h2 {
     font-size: 27px;
   }
+
   .cta-button {
     width: 100%;
     text-align: center;
   }
+
   .landing-footer {
     align-items: flex-start;
     flex-direction: column;

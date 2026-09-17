@@ -55,6 +55,7 @@ function LandingPage() {
       </header>
 
       <main>
+   
         <section className="hero-section" id="home">
           <div className="hero-content">
             <p className="hero-label">SMART HEALTHCARE MANAGEMENT</p>
@@ -157,7 +158,6 @@ function LandingPage() {
             </div>
           </div>
         </section>
-
         <section className="services-section" id="services">
           <div className="section-heading">
             <p>OUR FEATURES</p>
