@@ -133,10 +133,6 @@ function Settings() {
   return (
     <div className="settings-page">
 
-      {/* =========================
-          PAGE HEADER
-      ========================= */}
-
       <div className="settings-header">
         <div>
           <h2>Settings</h2>
@@ -148,11 +144,6 @@ function Settings() {
           </p>
         </div>
       </div>
-
-
-      {/* =========================
-          ACCOUNT INFORMATION
-      ========================= */}
 
       <section className="settings-card">
 
@@ -249,17 +240,12 @@ function Settings() {
 
       </section>
 
-
-      {/* =========================
-          NOTIFICATION SETTINGS
-      ========================= */}
-
       <section className="settings-card">
 
         <div className="settings-card-header">
 
           <div className="settings-section-icon">
-            🔔
+            
           </div>
 
           <div>
@@ -278,15 +264,9 @@ function Settings() {
 
         <div className="settings-options">
 
-          {/* APPOINTMENTS */}
-
           <div className="settings-option">
 
             <div className="settings-option-content">
-
-              <div className="settings-option-icon">
-                📅
-              </div>
 
               <div>
                 <h4>
@@ -329,10 +309,6 @@ function Settings() {
 
             <div className="settings-option-content">
 
-              <div className="settings-option-icon">
-                ₹
-              </div>
-
               <div>
                 <h4>
                   Billing Updates
@@ -366,16 +342,9 @@ function Settings() {
 
           </div>
 
-
-          {/* MEDICAL RECORDS */}
-
           <div className="settings-option">
 
             <div className="settings-option-content">
-
-              <div className="settings-option-icon">
-                📋
-              </div>
 
               <div>
                 <h4>
@@ -410,17 +379,9 @@ function Settings() {
 
           </div>
 
-
-          {/* LABORATORY */}
-
           <div className="settings-option">
 
             <div className="settings-option-content">
-
-              <div className="settings-option-icon">
-                🧪
-              </div>
-
               <div>
                 <h4>
                   Laboratory Updates
@@ -453,18 +414,9 @@ function Settings() {
             </label>
 
           </div>
-
-
-          {/* HOSPITAL INFORMATION */}
-
           <div className="settings-option">
 
             <div className="settings-option-content">
-
-              <div className="settings-option-icon">
-                🏥
-              </div>
-
               <div>
                 <h4>
                   Hospital Information
@@ -523,20 +475,9 @@ function Settings() {
         </div>
 
       </section>
-
-
-      {/* =========================
-          HOSPITAL INFORMATION
-      ========================= */}
-
       <section className="settings-card">
 
         <div className="settings-card-header">
-
-          <div className="settings-section-icon">
-            🏥
-          </div>
-
           <div>
             <h3>
               Hospital Information
@@ -621,19 +562,9 @@ function Settings() {
         </div>
 
       </section>
-
-
-      {/* =========================
-          SECURITY
-      ========================= */}
-
       <section className="settings-card">
 
         <div className="settings-card-header">
-
-          <div className="settings-section-icon">
-            🔐
-          </div>
 
           <div>
             <h3>
@@ -651,10 +582,6 @@ function Settings() {
         <div className="security-box">
 
           <div className="security-content">
-
-            <div className="security-icon">
-              🔑
-            </div>
 
             <div>
               <h4>
@@ -680,18 +607,9 @@ function Settings() {
 
       </section>
 
-
-      {/* =========================
-          DISPLAY INFORMATION
-      ========================= */}
-
       <section className="settings-card">
 
         <div className="settings-card-header">
-
-          <div className="settings-section-icon">
-            🖥️
-          </div>
 
           <div>
             <h3>
@@ -708,10 +626,6 @@ function Settings() {
 
 
         <div className="display-info">
-
-          <div className="display-icon">
-            🌙
-          </div>
 
           <div>
             <h4>
