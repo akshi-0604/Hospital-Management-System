@@ -260,98 +260,6 @@ function Patients() {
         </button>
 
       </div>
-      <div className="patients-pagination-card">
-
-        <div className="patients-result-info">
-
-          {totalPatients === 0 ? (
-            "Showing 0 patients"
-          ) : (
-            <>
-              Showing{" "}
-              <strong>{startIndex + 1}</strong>
-              {" "}to{" "}
-              <strong>{endIndex}</strong>
-              {" "}of{" "}
-              <strong>{totalPatients}</strong>
-              {" "}patients
-            </>
-          )}
-
-        </div>
-
-
-        <div className="patients-pagination-controls">
-
-          <label htmlFor="rowsPerPage">
-            Show
-          </label>
-
-          <select
-            id="rowsPerPage"
-            value={rowsPerPage}
-            onChange={(event) =>
-              setRowsPerPage(
-                Number(event.target.value)
-              )
-            }
-            className="patients-page-size"
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
-
-
-          <button
-            type="button"
-            className="patients-page-button"
-            disabled={currentPage === 1}
-            onClick={() =>
-              setCurrentPage(
-                (page) => page - 1
-              )
-            }
-          >
-            ‹ Prev
-          </button>
-
-
-          {getPageNumbers().map((page) => (
-            <button
-              type="button"
-              key={page}
-              className={`patients-page-number ${
-                currentPage === page
-                  ? "active"
-                  : ""
-              }`}
-              onClick={() =>
-                setCurrentPage(page)
-              }
-            >
-              {page}
-            </button>
-          ))}
-
-
-          <button
-            type="button"
-            className="patients-page-button"
-            disabled={currentPage === totalPages}
-            onClick={() =>
-              setCurrentPage(
-                (page) => page + 1
-              )
-            }
-          >
-            Next ›
-          </button>
-
-        </div>
-
-      </div>
       <div className="patients-table-card">
 
         {loading && (
@@ -483,6 +391,98 @@ function Patients() {
 
       </div>
 
+      <div className="patients-pagination-card">
+
+        <div className="patients-result-info">
+
+          {totalPatients === 0 ? (
+            "Showing 0 patients"
+          ) : (
+            <>
+              Showing{" "}
+              <strong>{startIndex + 1}</strong>
+              {" "}to{" "}
+              <strong>{endIndex}</strong>
+              {" "}of{" "}
+              <strong>{totalPatients}</strong>
+              {" "}patients
+            </>
+          )}
+
+        </div>
+
+
+        <div className="patients-pagination-controls">
+
+          <label htmlFor="rowsPerPage">
+            Show
+          </label>
+
+          <select
+            id="rowsPerPage"
+            value={rowsPerPage}
+            onChange={(event) =>
+              setRowsPerPage(
+                Number(event.target.value)
+              )
+            }
+            className="patients-page-size"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+
+
+          <button
+            type="button"
+            className="patients-page-button"
+            disabled={currentPage === 1}
+            onClick={() =>
+              setCurrentPage(
+                (page) => page - 1
+              )
+            }
+          >
+            ‹ Prev
+          </button>
+
+
+          {getPageNumbers().map((page) => (
+            <button
+              type="button"
+              key={page}
+              className={`patients-page-number ${
+                currentPage === page
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                setCurrentPage(page)
+              }
+            >
+              {page}
+            </button>
+          ))}
+
+
+          <button
+            type="button"
+            className="patients-page-button"
+            disabled={currentPage === totalPages}
+            onClick={() =>
+              setCurrentPage(
+                (page) => page + 1
+              )
+            }
+          >
+            Next ›
+          </button>
+
+        </div>
+
+      </div>
       {showViewModal &&
         selectedPatient && (
 

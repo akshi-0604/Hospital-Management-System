@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import "./Doctors.css";
-import { useTheme } from "../../context/ThemeContext";
 
 const API_URL =
     "https://hospital-management-system-nvjt.onrender.com/api/doctors";
 
 function Doctors() {
-    const { theme, toggleTheme } = useTheme();
-
     const [doctors, setDoctors] = useState([]);
 
     const [search, setSearch] = useState("");
@@ -570,33 +567,13 @@ function Doctors() {
                     </p>
                 </div>
 
-                <div className="doctors-header-actions">
-                    <button
-                        type="button"
-                        className="doctor-theme-button"
-                        onClick={toggleTheme}
-                        title={
-                            theme === "light"
-                                ? "Switch to Dark Mode"
-                                : "Switch to Light Mode"
-                        }
-                    >
-                        <span>
-                            {theme === "light" ? "🌙" : "☀️"}
-                        </span>
-                        <span>
-                            {theme === "light" ? "Dark Mode" : "Light Mode"}
-                        </span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className="add-doctor-button"
-                        onClick={openAddDoctor}
-                    >
-                        + Add Doctor
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    className="add-doctor-button"
+                    onClick={openAddDoctor}
+                >
+                    + Add Doctor
+                </button>
             </div>
 
             {/* FILTERS */}

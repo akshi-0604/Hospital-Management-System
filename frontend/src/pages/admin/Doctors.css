@@ -27,14 +27,7 @@
     font-size: 13px;
 }
 
-.doctors-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-}
 
-.doctor-theme-button,
 .add-doctor-button,
 .clear-filter-button,
 .pagination-button,
@@ -50,26 +43,6 @@
     font-family: inherit;
 }
 
-.doctor-theme-button {
-    min-height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    padding: 8px 12px;
-    border: 1px solid var(--hms-border);
-    border-radius: 8px;
-    background: var(--hms-card-bg);
-    color: var(--hms-text-primary);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.doctor-theme-button:hover {
-    border-color: var(--hms-primary);
-    color: var(--hms-primary);
-}
 
 .add-doctor-button {
     min-height: 38px;
@@ -313,20 +286,35 @@
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    margin-top: 12px;
-    padding: 2px 2px 0;
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px 18px;
+    box-sizing: border-box;
+    border: 1px solid var(--hms-border);
+    border-radius: 10px;
+    background: var(--hms-card-bg);
+    box-shadow: var(--hms-shadow);
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
 .pagination-result {
     color: var(--hms-text-secondary);
-    font-size: 12px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.pagination-result strong {
+    color: var(--hms-text-primary);
+    font-weight: 600;
 }
 
 .pagination-controls {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    gap: 7px;
 }
 
 .rows-per-page {
@@ -336,51 +324,70 @@
 }
 
 .rows-per-page span {
+    margin-right: 2px;
     color: var(--hms-text-secondary);
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .rows-per-page select {
-    height: 34px;
-    min-width: 62px;
+    width: 64px;
+    height: 38px;
     padding: 0 8px;
     border: 1px solid var(--hms-border);
     border-radius: 7px;
     outline: none;
     background: var(--hms-input-bg);
     color: var(--hms-text-primary);
-    font-size: 12px;
-}
-
-.pagination-button,
-.pagination-page {
-    height: 34px;
-    border: 1px solid var(--hms-border);
-    border-radius: 7px;
-    background: var(--hms-card-bg);
-    color: var(--hms-text-secondary);
-    font-size: 11px;
-    font-weight: 700;
+    font-family: inherit;
+    font-size: 13px;
     cursor: pointer;
 }
 
 .pagination-button {
-    padding: 0 11px;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--hms-border);
+    border-radius: 7px;
+    background: var(--hms-input-bg);
+    color: var(--hms-text-secondary);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
 }
 
-.pagination-page {
-    width: 34px;
-    padding: 0;
+.pagination-button:hover:not(:disabled) {
+    border-color: var(--hms-primary);
+    background: var(--hms-primary-light);
+    color: var(--hms-primary);
+}
+
+.pagination-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 .pagination-pages {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
 }
 
-.pagination-button:hover:not(:disabled),
-.pagination-page:hover:not(.active) {
+.pagination-page {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--hms-border);
+    border-radius: 7px;
+    background: var(--hms-input-bg);
+    color: var(--hms-text-secondary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pagination-page:hover {
     border-color: var(--hms-primary);
     color: var(--hms-primary);
 }
@@ -388,12 +395,7 @@
 .pagination-page.active {
     border-color: var(--hms-primary);
     background: var(--hms-primary);
-    color: #fff;
-}
-
-.pagination-button:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+    color: #ffffff;
 }
 
 /* MODAL */
@@ -763,10 +765,6 @@
         flex-direction: column;
     }
 
-    .doctors-header-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
 
     .doctor-filters {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -793,13 +791,6 @@
 }
 
 @media (max-width: 600px) {
-    .doctors-header-actions {
-        width: 100%;
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .doctor-theme-button,
     .add-doctor-button {
         width: 100%;
     }
