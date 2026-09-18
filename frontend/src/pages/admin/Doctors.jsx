@@ -790,109 +790,7 @@ function Doctors() {
 
                 </div>
 
-                <div className="pagination-right">
-
-                    <div className="rows-per-page">
-
-                        <span>
-                            Show
-                        </span>
-
-                        <select
-                            value={rowsPerPage}
-                            onChange={(event) =>
-                                setRowsPerPage(
-                                    Number(
-                                        event.target.value
-                                    )
-                                )
-                            }
-                        >
-                            <option value="5">
-                                5
-                            </option>
-
-                            <option value="10">
-                                10
-                            </option>
-
-                            <option value="20">
-                                20
-                            </option>
-
-                            <option value="50">
-                                50
-                            </option>
-                        </select>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        className="pagination-button"
-                        disabled={
-                            currentPage === 1
-                        }
-                        onClick={() =>
-                            setCurrentPage(
-                                (page) =>
-                                    page - 1
-                            )
-                        }
-                    >
-                        ‹ Prev
-                    </button>
-
-                    <div className="pagination-pages">
-
-                        {getPageNumbers().map(
-                            (page) => (
-                                <button
-                                    type="button"
-                                    key={page}
-                                    className={`pagination-page ${
-                                        currentPage ===
-                                        page
-                                            ? "active"
-                                            : ""
-                                    }`}
-                                    onClick={() =>
-                                        setCurrentPage(
-                                            page
-                                        )
-                                    }
-                                >
-                                    {page}
-                                </button>
-                            )
-                        )}
-
-                    </div>
-
-                    <button
-                        type="button"
-                        className="pagination-button"
-                        disabled={
-                            currentPage ===
-                            totalPages
-                        }
-                        onClick={() =>
-                            setCurrentPage(
-                                (page) =>
-                                    page + 1
-                            )
-                        }
-                    >
-                        Next ›
-                    </button>
-
-                </div>
-
-            </div>
-
-            {/* TABLE */}
-
-            <div className="doctors-table-card">
+                <div className="doctors-table-card">
 
                 <div className="doctors-table-wrapper">
 
@@ -1133,6 +1031,109 @@ function Doctors() {
                 </div>
 
             </div>
+
+            </div>
+
+            {/* TABLE */}
+
+             <div className="pagination-right">
+
+                    <div className="rows-per-page">
+
+                        <span>
+                            Show
+                        </span>
+
+                        <select
+                            value={rowsPerPage}
+                            onChange={(event) =>
+                                setRowsPerPage(
+                                    Number(
+                                        event.target.value
+                                    )
+                                )
+                            }
+                        >
+                            <option value="5">
+                                5
+                            </option>
+
+                            <option value="10">
+                                10
+                            </option>
+
+                            <option value="20">
+                                20
+                            </option>
+
+                            <option value="50">
+                                50
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        className="pagination-button"
+                        disabled={
+                            currentPage === 1
+                        }
+                        onClick={() =>
+                            setCurrentPage(
+                                (page) =>
+                                    page - 1
+                            )
+                        }
+                    >
+                        ‹ Prev
+                    </button>
+
+                    <div className="pagination-pages">
+
+                        {getPageNumbers().map(
+                            (page) => (
+                                <button
+                                    type="button"
+                                    key={page}
+                                    className={`pagination-page ${
+                                        currentPage ===
+                                        page
+                                            ? "active"
+                                            : ""
+                                    }`}
+                                    onClick={() =>
+                                        setCurrentPage(
+                                            page
+                                        )
+                                    }
+                                >
+                                    {page}
+                                </button>
+                            )
+                        )}
+
+                    </div>
+
+                    <button
+                        type="button"
+                        className="pagination-button"
+                        disabled={
+                            currentPage ===
+                            totalPages
+                        }
+                        onClick={() =>
+                            setCurrentPage(
+                                (page) =>
+                                    page + 1
+                            )
+                        }
+                    >
+                        Next ›
+                    </button>
+
+                </div>
+
             {showAddDoctor && (
 
                 <div
