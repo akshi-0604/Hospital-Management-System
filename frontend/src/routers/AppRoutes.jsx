@@ -21,6 +21,7 @@ import PatientDashboard from "../pages/patient/PatientDashboard";
 import AddDoctor from "../components/admin/AddDoctor";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
+import Settings from "../pages/admin/Settings";
 
 function AppRoutes() {
   return (
@@ -109,6 +110,10 @@ function AppRoutes() {
             element={<Billing />}
           />
 
+          <Route
+            path="/admin/settings"
+            element={<Settings />}
+          />
 
         </Route>
 
