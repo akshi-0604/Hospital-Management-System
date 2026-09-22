@@ -8,6 +8,8 @@ import { useTheme } from "../../context/ThemeContext";
 function EyeIcon() {
   return (
     <svg
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -34,6 +36,8 @@ function EyeIcon() {
 function EyeOffIcon() {
   return (
     <svg
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +77,6 @@ function EyeOffIcon() {
 
 function ResetPassword() {
   const navigate = useNavigate();
-
   const { theme, toggleTheme } = useTheme();
 
   const [email, setEmail] = useState("");
@@ -81,9 +84,7 @@ function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showPassword, setShowPassword] =
-    useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
 
@@ -92,10 +93,9 @@ function ResetPassword() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const savedEmail =
-      sessionStorage.getItem(
-        "passwordResetEmail"
-      );
+    const savedEmail = sessionStorage.getItem(
+      "passwordResetEmail"
+    );
 
     if (savedEmail) {
       setEmail(savedEmail);
@@ -103,11 +103,7 @@ function ResetPassword() {
   }, []);
 
   function handleOtpChange(event) {
-    const value =
-      event.target.value.replace(
-        /\D/g,
-        ""
-      );
+    const value = event.target.value.replace(/\D/g, "");
 
     if (value.length <= 6) {
       setOtp(value);
@@ -119,15 +115,11 @@ function ResetPassword() {
     setMessage("");
     setError("");
 
-    const trimmedEmail =
-      email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedOtp = otp.trim();
 
-    const trimmedOtp =
-      otp.trim();
     if (!trimmedEmail) {
-      setError(
-        "Please enter your email address."
-      );
+      setError("Please enter your email address.");
       return;
     }
 
@@ -144,6 +136,7 @@ function ResetPassword() {
       );
       return;
     }
+
     if (!password || !confirmPassword) {
       setError(
         "Please fill in both password fields."
@@ -152,9 +145,7 @@ function ResetPassword() {
     }
 
     if (password !== confirmPassword) {
-      setError(
-        "Passwords do not match."
-      );
+      setError("Passwords do not match.");
       return;
     }
 
@@ -168,23 +159,24 @@ function ResetPassword() {
     try {
       setLoading(true);
 
-      const response =
-        await axios.post(
-          "https://hospital-management-system-nvjt.onrender.com/api/auth/reset-password",
-          {
-            email: trimmedEmail,
-            otp: trimmedOtp,
-            password,
-          }
-        );
+      const response = await axios.post(
+        "https://hospital-management-system-nvjt.onrender.com/api/auth/reset-password",
+        {
+          email: trimmedEmail,
+          otp: trimmedOtp,
+          password: password,
+        }
+      );
 
       setMessage(
         response.data?.message ||
           "Password has been reset successfully."
       );
+
       sessionStorage.removeItem(
         "passwordResetEmail"
       );
+
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -241,7 +233,6 @@ function ResetPassword() {
 
       <div className="reset-password-card">
 
-        {/* ICON */}
         <div className="reset-password-icon">
           🔐
         </div>
@@ -249,15 +240,14 @@ function ResetPassword() {
         <h1>
           Reset Password
         </h1>
+
         <p className="reset-password-description">
-          Enter the 6-digit OTP sent to your email
-          and create a new password for your
-          Hospital Management System account.
+          Enter the 6-digit OTP sent to your email,
+          then create and confirm your new password.
         </p>
 
         <form onSubmit={handleSubmit}>
 
-          {/* EMAIL */}
           <div className="form-group">
             <label htmlFor="email">
               Email Address
@@ -270,16 +260,18 @@ function ResetPassword() {
               placeholder="Enter your email"
               autoComplete="email"
               onChange={(event) =>
-                setEmail(
-                  event.target.value
-                )
+                setEmail(event.target.value)
               }
               disabled={loading}
               required
             />
+
+            <small>
+              Your registered email address is
+              automatically filled here.
+            </small>
           </div>
 
-          {/* OTP */}
           <div className="form-group">
             <label htmlFor="otp">
               Verification OTP
@@ -293,24 +285,24 @@ function ResetPassword() {
               inputMode="numeric"
               maxLength={6}
               autoComplete="one-time-code"
-              onChange={
-                handleOtpChange
-              }
+              onChange={handleOtpChange}
               disabled={loading}
               required
             />
 
             <small>
-              Enter the 6-digit OTP sent to
-              your registered email address.
+              Check your email and enter the
+              6-digit OTP here.
             </small>
           </div>
+
           <div className="form-group">
             <label htmlFor="password">
               New Password
             </label>
 
             <div className="password-input-wrapper">
+
               <input
                 id="password"
                 type={
@@ -350,6 +342,7 @@ function ResetPassword() {
                   <EyeIcon />
                 )}
               </button>
+
             </div>
           </div>
 
@@ -359,6 +352,7 @@ function ResetPassword() {
             </label>
 
             <div className="password-input-wrapper">
+
               <input
                 id="confirmPassword"
                 type={
@@ -366,9 +360,7 @@ function ResetPassword() {
                     ? "text"
                     : "password"
                 }
-                value={
-                  confirmPassword
-                }
+                value={confirmPassword}
                 placeholder="Confirm your new password"
                 autoComplete="new-password"
                 onChange={(event) =>
@@ -400,6 +392,7 @@ function ResetPassword() {
                   <EyeIcon />
                 )}
               </button>
+
             </div>
           </div>
 
@@ -408,6 +401,7 @@ function ResetPassword() {
               {message}
             </p>
           )}
+
           {error && (
             <p className="error-message">
               {error}
@@ -423,6 +417,7 @@ function ResetPassword() {
               ? "Resetting Password..."
               : "Reset Password"}
           </button>
+
         </form>
 
         <Link
@@ -431,6 +426,7 @@ function ResetPassword() {
         >
           ← Change Email
         </Link>
+
         <Link
           to="/login"
           className="back-to-login"
