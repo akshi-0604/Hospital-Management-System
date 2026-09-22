@@ -46,10 +46,8 @@ function ForgotPassword() {
         "passwordResetEmail",
         trimmedEmail.toLowerCase()
       );
-
-      setTimeout(() => {
         navigate("/reset-password");
-      }, 700);
+        
     } catch (error) {
       console.error(
         "Forgot password error:",
