@@ -1,4 +1,9 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 
 import LandingPage from "../pages/LandingPage";
 import Login from "../pages/auth/Login";
@@ -6,30 +11,31 @@ import Register from "../pages/auth/Register";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 
+
 import AdminLayout from "../layouts/AdminLayout";
+
 import Dashboard from "../pages/admin/Dashboard";
 import Patients from "../pages/admin/Patients";
 import Doctors from "../pages/admin/Doctors";
+import AddDoctor from "../pages/admin/AddDoctor";
 import Appointments from "../pages/admin/Appointments";
 import Departments from "../pages/admin/Departments";
 import MedicalRecords from "../pages/admin/MedicalRecords";
 import Prescriptions from "../pages/admin/Prescriptions";
 import Laboratory from "../pages/admin/Laboratory";
 import Billing from "../pages/admin/Billing";
+import Settings from "../pages/admin/Settings";
 
 import PatientDashboard from "../pages/patient/PatientDashboard";
-import AddDoctor from "../components/admin/AddDoctor";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
-import Settings from "../pages/admin/Settings";
+
+import ProtectedRoute from "../components/ProtectedRoute";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* Public Pages */}
-
         <Route
           path="/"
           element={<LandingPage />}
@@ -51,86 +57,128 @@ function AppRoutes() {
         />
 
         <Route
-          path="/reset-password/:token"
+          path="/reset-password"
           element={<ResetPassword />}
         />
-
-
-        {/* Admin Pages */}
-
-        <Route path="/admin" element={<AdminLayout />} >
-
-          <Route
-            index
-            element={<Dashboard />}
-          />
+        <Route
+          element={
+            <ProtectedRoute
+              allowedRoles={["admin"]}
+            />
+          }
+        >
 
           <Route
-            path="patients"
-            element={<Patients />}
-          />
+            path="/admin"
+            element={<AdminLayout />}
+          >
+
+            <Route
+              index
+              element={<Dashboard />}
+            />
+
+            <Route
+              path="patients"
+              element={<Patients />}
+            />
+
+            <Route
+              path="doctors"
+              element={<Doctors />}
+            />
+
+            <Route
+              path="doctors/add"
+              element={<AddDoctor />}
+            />
+
+            <Route
+              path="appointments"
+              element={<Appointments />}
+            />
+
+            <Route
+              path="departments"
+              element={<Departments />}
+            />
+
+            <Route
+              path="medical-records"
+              element={<MedicalRecords />}
+            />
+
+            <Route
+              path="prescriptions"
+              element={<Prescriptions />}
+            />
+
+            <Route
+              path="laboratory"
+              element={<Laboratory />}
+            />
+
+            <Route
+              path="billing"
+              element={<Billing />}
+            />
+
+            <Route
+              path="settings"
+              element={<Settings />}
+            />
+
+          </Route>
+
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              allowedRoles={["patient"]}
+            />
+          }
+        >
 
           <Route
-            path="doctors"
-            element={<Doctors />}
-          />
-
-          <Route
-            path="doctors/add"
-            element={<AddDoctor />}
-          />
-
-          <Route
-            path="appointments"
-            element={<Appointments />}
-          />
-
-          <Route
-            path="departments"
-            element={<Departments />}
-          />
-
-          <Route
-            path="/admin/medical-records"
-            element={<MedicalRecords />}
-          />
-
-          <Route
-            path="/admin/prescriptions"
-            element={<Prescriptions />}
-          />
-
-          <Route
-            path="/admin/laboratory"
-            element={<Laboratory />}
-          />
-
-          <Route
-            path="/admin/billing"
-            element={<Billing />}
-          />
-
-          <Route
-            path="/admin/settings"
-            element={<Settings />}
+            path="/patient"
+            element={<PatientDashboard />}
           />
 
         </Route>
 
+        <Route
+          element={
+            <ProtectedRoute
+              allowedRoles={["doctor"]}
+            />
+          }
+        >
+
+          <Route
+            path="/doctor"
+            element={<DoctorDashboard />}
+          />
+
+        </Route>
 
         <Route
-          path="/patient"
-          element={<PatientDashboard />}
-        />
+          element={
+            <ProtectedRoute
+              allowedRoles={["receptionist"]}
+            />
+          }
+        >
 
-        <Route
-          path="/doctor"
-          element={<DoctorDashboard />}
-        />
+          <Route
+            path="/receptionist"
+            element={<ReceptionistDashboard />}
+          />
 
+        </Route>
         <Route
-          path="/receptionist"
-          element={<ReceptionistDashboard />}
+          path="*"
+          element={<Navigate to="/" replace />}
         />
 
       </Routes>
@@ -138,6 +186,4 @@ function AppRoutes() {
   );
 }
 
-
 export default AppRoutes;
-

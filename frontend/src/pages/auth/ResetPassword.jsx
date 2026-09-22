@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import "./ResetPassword.css";
@@ -72,15 +72,18 @@ function EyeOffIcon() {
 }
 
 function ResetPassword() {
-  const { token } = useParams();
   const navigate = useNavigate();
 
   const { theme, toggleTheme } = useTheme();
 
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] =
+    useState(false);
+
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
 
@@ -88,25 +91,76 @@ function ResetPassword() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const savedEmail =
+      sessionStorage.getItem(
+        "passwordResetEmail"
+      );
+
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, []);
+
+  function handleOtpChange(event) {
+    const value =
+      event.target.value.replace(
+        /\D/g,
+        ""
+      );
+
+    if (value.length <= 6) {
+      setOtp(value);
+    }
+  }
   async function handleSubmit(event) {
     event.preventDefault();
 
     setMessage("");
     setError("");
 
+    const trimmedEmail =
+      email.trim();
+
+    const trimmedOtp =
+      otp.trim();
+    if (!trimmedEmail) {
+      setError(
+        "Please enter your email address."
+      );
+      return;
+    }
+
+    if (!trimmedOtp) {
+      setError(
+        "Please enter the OTP sent to your email."
+      );
+      return;
+    }
+
+    if (!/^\d{6}$/.test(trimmedOtp)) {
+      setError(
+        "OTP must contain exactly 6 digits."
+      );
+      return;
+    }
     if (!password || !confirmPassword) {
-      setError("Please fill in both password fields");
+      setError(
+        "Please fill in both password fields."
+      );
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(
+        "Passwords do not match."
+      );
       return;
     }
 
     if (password.length < 6) {
       setError(
-        "Password must contain at least 6 characters"
+        "Password must contain at least 6 characters."
       );
       return;
     }
@@ -114,23 +168,46 @@ function ResetPassword() {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        `https://hospital-management-system-nvjt.onrender.com/api/auth/reset-password/${token}`,
-        {
-          password,
-        }
+      const response =
+        await axios.post(
+          "https://hospital-management-system-nvjt.onrender.com/api/auth/reset-password",
+          {
+            email: trimmedEmail,
+            otp: trimmedOtp,
+            password,
+          }
+        );
+
+      setMessage(
+        response.data?.message ||
+          "Password has been reset successfully."
       );
-
-      setMessage(response.data.message);
-
+      sessionStorage.removeItem(
+        "passwordResetEmail"
+      );
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "Unable to reset your password"
+      console.error(
+        "Reset password error:",
+        error
       );
+
+      if (error.response) {
+        setError(
+          error.response.data?.message ||
+            `Server error (${error.response.status})`
+        );
+      } else if (error.request) {
+        setError(
+          "Unable to connect to the server. Please try again."
+        );
+      } else {
+        setError(
+          "Something went wrong. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -138,7 +215,7 @@ function ResetPassword() {
 
   return (
     <div className="reset-password-page">
-      {/* THEME TOGGLE */}
+
       <button
         type="button"
         className="reset-theme-button"
@@ -150,7 +227,9 @@ function ResetPassword() {
         }
       >
         <span className="reset-theme-icon">
-          {theme === "light" ? "🌙" : "☀️"}
+          {theme === "light"
+            ? "🌙"
+            : "☀️"}
         </span>
 
         <span>
@@ -161,24 +240,71 @@ function ResetPassword() {
       </button>
 
       <div className="reset-password-card">
+
         {/* ICON */}
         <div className="reset-password-icon">
           🔐
         </div>
 
-        {/* TITLE */}
         <h1>
           Reset Password
         </h1>
-
-        {/* DESCRIPTION */}
         <p className="reset-password-description">
-          Create a new password for your
+          Enter the 6-digit OTP sent to your email
+          and create a new password for your
           Hospital Management System account.
         </p>
 
         <form onSubmit={handleSubmit}>
-          {/* NEW PASSWORD */}
+
+          {/* EMAIL */}
+          <div className="form-group">
+            <label htmlFor="email">
+              Email Address
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              value={email}
+              placeholder="Enter your email"
+              autoComplete="email"
+              onChange={(event) =>
+                setEmail(
+                  event.target.value
+                )
+              }
+              disabled={loading}
+              required
+            />
+          </div>
+
+          {/* OTP */}
+          <div className="form-group">
+            <label htmlFor="otp">
+              Verification OTP
+            </label>
+
+            <input
+              id="otp"
+              type="text"
+              value={otp}
+              placeholder="Enter 6-digit OTP"
+              inputMode="numeric"
+              maxLength={6}
+              autoComplete="one-time-code"
+              onChange={
+                handleOtpChange
+              }
+              disabled={loading}
+              required
+            />
+
+            <small>
+              Enter the 6-digit OTP sent to
+              your registered email address.
+            </small>
+          </div>
           <div className="form-group">
             <label htmlFor="password">
               New Password
@@ -194,12 +320,14 @@ function ResetPassword() {
                 }
                 value={password}
                 placeholder="Enter your new password"
+                autoComplete="new-password"
                 onChange={(event) =>
                   setPassword(
                     event.target.value
                   )
                 }
                 disabled={loading}
+                required
               />
 
               <button
@@ -225,7 +353,6 @@ function ResetPassword() {
             </div>
           </div>
 
-          {/* CONFIRM PASSWORD */}
           <div className="form-group">
             <label htmlFor="confirmPassword">
               Confirm New Password
@@ -239,14 +366,18 @@ function ResetPassword() {
                     ? "text"
                     : "password"
                 }
-                value={confirmPassword}
+                value={
+                  confirmPassword
+                }
                 placeholder="Confirm your new password"
+                autoComplete="new-password"
                 onChange={(event) =>
                   setConfirmPassword(
                     event.target.value
                   )
                 }
                 disabled={loading}
+                required
               />
 
               <button
@@ -272,21 +403,17 @@ function ResetPassword() {
             </div>
           </div>
 
-          {/* SUCCESS MESSAGE */}
           {message && (
             <p className="success-message">
               {message}
             </p>
           )}
-
-          {/* ERROR MESSAGE */}
           {error && (
             <p className="error-message">
               {error}
             </p>
           )}
 
-          {/* RESET BUTTON */}
           <button
             type="submit"
             className="reset-password-button"
@@ -298,13 +425,19 @@ function ResetPassword() {
           </button>
         </form>
 
-        {/* BACK TO LOGIN */}
+        <Link
+          to="/forgot-password"
+          className="back-to-login"
+        >
+          ← Change Email
+        </Link>
         <Link
           to="/login"
           className="back-to-login"
         >
           ← Back to Login
         </Link>
+
       </div>
     </div>
   );

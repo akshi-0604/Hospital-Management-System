@@ -10,7 +10,6 @@ const {
     sendWelcomeEmail,
     sendHospitalInformationEmail,
 } = require("../services/patientNotificationService");
-
 async function registerUser(req, res) {
     try {
         console.log("REGISTER REQUEST:", req.body);
@@ -22,8 +21,6 @@ async function registerUser(req, res) {
             password,
             role,
         } = req.body;
-
-        // Basic validation
         if (!fullName || !email || !password) {
             return res.status(400).json({
                 success: false,
@@ -35,10 +32,10 @@ async function registerUser(req, res) {
         const normalizedEmail =
             email.trim().toLowerCase();
 
-        // Check existing account
-        const existingUser = await User.findOne({
-            email: normalizedEmail,
-        });
+        const existingUser =
+            await User.findOne({
+                email: normalizedEmail,
+            });
 
         if (existingUser) {
             return res.status(409).json({
@@ -48,19 +45,28 @@ async function registerUser(req, res) {
             });
         }
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(
-            password,
-            10
-        );
-
-        // Create user
+        const hashedPassword =
+            await bcrypt.hash(
+                password,
+                10
+            );
         const newUser = new User({
-            fullName: fullName.trim(),
-            email: normalizedEmail,
-            phone: phone ? phone.trim() : "",
-            password: hashedPassword,
-            role: role || "patient",
+            fullName:
+                fullName.trim(),
+
+            email:
+                normalizedEmail,
+
+            phone:
+                phone
+                    ? phone.trim()
+                    : "",
+
+            password:
+                hashedPassword,
+
+            role:
+                role || "patient",
         });
 
         await newUser.save();
@@ -69,18 +75,14 @@ async function registerUser(req, res) {
             "USER REGISTERED SUCCESSFULLY:",
             newUser.email
         );
-
-        // --------------------------------------------------
-        // PATIENT WELCOME NOTIFICATION + EMAIL
-        // --------------------------------------------------
-
         if (newUser.role === "patient") {
             try {
-                // Save in-app notification
                 await createPatientNotification({
-                    patientId: newUser._id,
+                    patientId:
+                        newUser._id,
 
-                    type: "Welcome",
+                    type:
+                        "Welcome",
 
                     title:
                         "Welcome to the Hospital",
@@ -94,10 +96,9 @@ async function registerUser(req, res) {
                     },
                 });
 
-                // Send welcome email
-                await sendWelcomeEmail(newUser);
-
-                // Send hospital information email
+                await sendWelcomeEmail(
+                    newUser
+                );
                 await sendHospitalInformationEmail(
                     newUser
                 );
@@ -107,8 +108,7 @@ async function registerUser(req, res) {
                     newUser.email
                 );
             } catch (notificationError) {
-                // Email/notification failure should
-                // not cancel successful registration
+
                 console.error(
                     "PATIENT NOTIFICATION ERROR:",
                     notificationError.message
@@ -118,13 +118,24 @@ async function registerUser(req, res) {
 
         return res.status(201).json({
             success: true,
-            message: "Registration successful.",
+            message:
+                "Registration successful.",
+
             user: {
-                id: newUser._id,
-                fullName: newUser.fullName,
-                email: newUser.email,
-                phone: newUser.phone,
-                role: newUser.role,
+                id:
+                    newUser._id,
+
+                fullName:
+                    newUser.fullName,
+
+                email:
+                    newUser.email,
+
+                phone:
+                    newUser.phone,
+
+                role:
+                    newUser.role,
             },
         });
     } catch (error) {
@@ -133,7 +144,6 @@ async function registerUser(req, res) {
             error
         );
 
-        // Duplicate MongoDB key
         if (error.code === 11000) {
             return res.status(409).json({
                 success: false,
@@ -141,20 +151,24 @@ async function registerUser(req, res) {
                     "An account with this email already exists.",
             });
         }
-
-        // Mongoose validation error
-        if (error.name === "ValidationError") {
+        if (
+            error.name ===
+            "ValidationError"
+        ) {
             const validationMessages =
                 Object.values(
                     error.errors
                 ).map(
-                    (item) => item.message
+                    (item) =>
+                        item.message
                 );
 
             return res.status(400).json({
                 success: false,
                 message:
-                    validationMessages.join(", "),
+                    validationMessages.join(
+                        ", "
+                    ),
             });
         }
 
@@ -190,9 +204,10 @@ async function loginUser(req, res) {
         const normalizedEmail =
             email.trim().toLowerCase();
 
-        const user = await User.findOne({
-            email: normalizedEmail,
-        });
+        const user =
+            await User.findOne({
+                email: normalizedEmail,
+            });
 
         if (!user) {
             return res.status(404).json({
@@ -236,16 +251,23 @@ async function loginUser(req, res) {
             });
         }
 
-        const token = jwt.sign(
-            {
-                userId: user._id,
-                role: user.role,
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "1d",
-            }
-        );
+        const token =
+            jwt.sign(
+                {
+                    userId:
+                        user._id,
+
+                    role:
+                        user.role,
+                },
+
+                process.env.JWT_SECRET,
+
+                {
+                    expiresIn:
+                        "1d",
+                }
+            );
 
         console.log(
             "LOGIN SUCCESS:",
@@ -254,14 +276,26 @@ async function loginUser(req, res) {
 
         return res.status(200).json({
             success: true,
-            message: "Login successful.",
+            message:
+                "Login successful.",
+
             token,
+
             user: {
-                id: user._id,
-                fullName: user.fullName,
-                email: user.email,
-                phone: user.phone,
-                role: user.role,
+                id:
+                    user._id,
+
+                fullName:
+                    user.fullName,
+
+                email:
+                    user.email,
+
+                phone:
+                    user.phone,
+
+                role:
+                    user.role,
             },
         });
     } catch (error) {
@@ -278,10 +312,10 @@ async function loginUser(req, res) {
         });
     }
 }
-
 async function forgotPassword(req, res) {
     try {
-        const { email } = req.body;
+        const { email } =
+            req.body;
 
         if (!email) {
             return res.status(400).json({
@@ -294,9 +328,10 @@ async function forgotPassword(req, res) {
         const normalizedEmail =
             email.trim().toLowerCase();
 
-        const user = await User.findOne({
-            email: normalizedEmail,
-        });
+        const user =
+            await User.findOne({
+                email: normalizedEmail,
+            });
 
         if (!user) {
             return res.status(404).json({
@@ -306,49 +341,80 @@ async function forgotPassword(req, res) {
             });
         }
 
-        const resetToken = crypto
-            .randomBytes(32)
-            .toString("hex");
+        const otp =
+            crypto
+                .randomInt(
+                    100000,
+                    1000000
+                )
+                .toString();
+        const hashedOtp =
+            crypto
+                .createHash("sha256")
+                .update(otp)
+                .digest("hex");
 
         user.resetPasswordToken =
-            resetToken;
+            hashedOtp;
 
         user.resetPasswordExpires =
-            Date.now() + 15 * 60 * 1000;
+            Date.now() +
+            10 * 60 * 1000;
 
         await user.save();
+        try {
+            await sendEmail({
+                to:
+                    user.email,
 
-        const frontendUrl =
-            process.env.FRONTEND_URL ||
-            "https://hospital-management-system-five-theta.vercel.app";
+                subject:
+                    "Hospital Management System - Password Reset OTP",
 
-        const resetLink =
-            `${frontendUrl}/reset-password/${resetToken}`;
-
-        await sendEmail({
-            to: user.email,
-            subject:
-                "Hospital Management System - Password Reset",
-            message: `Hello ${user.fullName},
+                message: `Hello ${user.fullName},
 
 We received a request to reset your Hospital Management System password.
 
-Click the link below to create a new password:
+Your password reset OTP is:
 
-${resetLink}
+${otp}
 
-This password reset link will expire in 15 minutes.
+This OTP is valid for 10 minutes.
 
-If you did not request this password reset, you can safely ignore this email.
+Please enter this OTP in the Hospital Management System to create your new password.
+
+If you did not request a password reset, you can safely ignore this email.
 
 Regards,
 Hospital Management System`,
-        });
+            });
+
+            console.log(
+                "PASSWORD RESET OTP SENT:",
+                user.email
+            );
+        } catch (emailError) {
+            // Clear OTP if email could not be sent
+            user.resetPasswordToken = null;
+            user.resetPasswordExpires = null;
+
+            await user.save();
+
+            console.error(
+                "PASSWORD RESET EMAIL ERROR:",
+                emailError.message
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to send password reset OTP. Please try again.",
+            });
+        }
 
         return res.status(200).json({
             success: true,
             message:
-                "Password reset link has been sent to your email.",
+                "Password reset OTP has been sent to your email.",
         });
     } catch (error) {
         console.error(
@@ -360,21 +426,31 @@ Hospital Management System`,
             success: false,
             message:
                 error.message ||
-                "Unable to send password reset email.",
+                "Unable to send password reset OTP.",
         });
     }
 }
-
 async function resetPassword(req, res) {
     try {
-        const { token } = req.params;
-        const { password } = req.body;
+        const {
+            email,
+            otp,
+            password,
+        } = req.body;
 
-        if (!token) {
+        if (!email) {
             return res.status(400).json({
                 success: false,
                 message:
-                    "Reset token is required.",
+                    "Please enter your email address.",
+            });
+        }
+
+        if (!otp) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Please enter the OTP.",
             });
         }
 
@@ -394,28 +470,63 @@ async function resetPassword(req, res) {
             });
         }
 
-        const user = await User.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpires: {
-                $gt: Date.now(),
-            },
-        });
+        if (!/^\d{6}$/.test(otp)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "OTP must contain exactly 6 digits.",
+            });
+        }
+
+        const normalizedEmail =
+            email.trim().toLowerCase();
+
+        // Hash entered OTP
+        const hashedOtp =
+            crypto
+                .createHash("sha256")
+                .update(otp)
+                .digest("hex");
+
+        const user =
+            await User.findOne({
+                email:
+                    normalizedEmail,
+
+                resetPasswordToken:
+                    hashedOtp,
+
+                resetPasswordExpires: {
+                    $gt:
+                        Date.now(),
+                },
+            });
 
         if (!user) {
             return res.status(400).json({
                 success: false,
                 message:
-                    "Reset link is invalid or has expired.",
+                    "Invalid or expired OTP.",
             });
         }
-
         user.password =
-            await bcrypt.hash(password, 10);
+            await bcrypt.hash(
+                password,
+                10
+            );
 
-        user.resetPasswordToken = null;
-        user.resetPasswordExpires = null;
+        user.resetPasswordToken =
+            null;
+
+        user.resetPasswordExpires =
+            null;
 
         await user.save();
+
+        console.log(
+            "PASSWORD RESET SUCCESS:",
+            user.email
+        );
 
         return res.status(200).json({
             success: true,
@@ -436,7 +547,6 @@ async function resetPassword(req, res) {
         });
     }
 }
-
 module.exports = {
     registerUser,
     loginUser,

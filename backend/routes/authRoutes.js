@@ -33,7 +33,7 @@ router.post(
 
 // Reset Password
 router.post(
-  "/reset-password/:token",
+  "/reset-password",
   resetPassword
 );
 
