@@ -7,7 +7,6 @@ import { useTheme } from "../../context/ThemeContext";
 
 function ForgotPassword() {
   const { theme, toggleTheme } = useTheme();
-
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -38,16 +37,19 @@ function ForgotPassword() {
         }
       );
 
-      setMessage(
-        response.data?.message ||
-          "Password reset OTP has been sent to your email."
-      );
+      // Save email so ResetPassword.jsx can automatically use it
       sessionStorage.setItem(
         "passwordResetEmail",
         trimmedEmail.toLowerCase()
       );
-        navigate("/reset-password");
-        
+
+      setMessage(
+        response.data?.message ||
+          "Password reset OTP has been sent to your email."
+      );
+
+      // Immediately open Reset Password page
+      navigate("/reset-password");
     } catch (error) {
       console.error(
         "Forgot password error:",
@@ -75,6 +77,8 @@ function ForgotPassword() {
 
   return (
     <div className="forgot-password-page">
+
+      {/* THEME BUTTON */}
       <button
         type="button"
         className="forgot-theme-button"
@@ -96,14 +100,13 @@ function ForgotPassword() {
         </span>
       </button>
 
+      {/* CARD */}
       <div className="forgot-password-card">
 
-        <div className="forgot-password-icon">
-          🔐
-        </div>
         <h1>
           Forgot Password?
         </h1>
+
         <p className="forgot-password-description">
           Enter your registered email address and
           we'll send you a 6-digit OTP to reset
@@ -112,6 +115,7 @@ function ForgotPassword() {
 
         <form onSubmit={handleSubmit}>
 
+          {/* EMAIL */}
           <div className="form-group">
             <label htmlFor="email">
               Email Address
@@ -131,20 +135,21 @@ function ForgotPassword() {
             />
           </div>
 
+          {/* SUCCESS */}
           {message && (
             <p className="success-message">
               {message}
             </p>
           )}
 
-          {/* ERROR MESSAGE */}
+          {/* ERROR */}
           {error && (
             <p className="error-message">
               {error}
             </p>
           )}
 
-          {/* SUBMIT */}
+          {/* BUTTON */}
           <button
             type="submit"
             disabled={loading}
@@ -153,6 +158,7 @@ function ForgotPassword() {
               ? "Sending OTP..."
               : "Send OTP"}
           </button>
+
         </form>
 
         <Link

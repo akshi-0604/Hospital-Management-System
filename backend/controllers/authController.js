@@ -393,7 +393,6 @@ Hospital Management System`,
                 user.email
             );
         } catch (emailError) {
-            // Clear OTP if email could not be sent
             user.resetPasswordToken = null;
             user.resetPasswordExpires = null;
 
@@ -430,112 +429,79 @@ Hospital Management System`,
         });
     }
 }
-async function resetPassword(req, res) {
+async function forgotPassword(req, res) {
     try {
-        const {
-            email,
-            otp,
-            password,
-        } = req.body;
+        const { email } = req.body;
 
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message:
-                    "Please enter your email address.",
-            });
-        }
-
-        if (!otp) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Please enter the OTP.",
-            });
-        }
-
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Please enter a new password.",
-            });
-        }
-
-        if (password.length < 6) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Password must contain at least 6 characters.",
-            });
-        }
-
-        if (!/^\d{6}$/.test(otp)) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    "OTP must contain exactly 6 digits.",
+                message: "Please enter your email address.",
             });
         }
 
         const normalizedEmail =
             email.trim().toLowerCase();
 
-        // Hash entered OTP
-        const hashedOtp =
-            crypto
-                .createHash("sha256")
-                .update(otp)
-                .digest("hex");
-
-        const user =
-            await User.findOne({
-                email:
-                    normalizedEmail,
-
-                resetPasswordToken:
-                    hashedOtp,
-
-                resetPasswordExpires: {
-                    $gt:
-                        Date.now(),
-                },
-            });
+        const user = await User.findOne({
+            email: normalizedEmail,
+        });
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
                 message:
-                    "Invalid or expired OTP.",
+                    "No account found with this email address.",
             });
         }
-        user.password =
-            await bcrypt.hash(
-                password,
-                10
-            );
 
-        user.resetPasswordToken =
-            null;
+        const otp = crypto
+            .randomInt(100000, 1000000)
+            .toString();
+
+        const hashedOtp = crypto
+            .createHash("sha256")
+            .update(otp)
+            .digest("hex");
+
+        user.resetPasswordToken = hashedOtp;
 
         user.resetPasswordExpires =
-            null;
+            Date.now() + 10 * 60 * 1000;
 
         await user.save();
 
-        console.log(
-            "PASSWORD RESET SUCCESS:",
-            user.email
-        );
+        await sendEmail({
+            to: user.email,
+            subject:
+                "Hospital Management System - Password Reset OTP",
+            message: `Hello ${user.fullName},
+
+We received a request to reset your Hospital Management System password.
+
+Your password reset OTP is:
+
+${otp}
+
+This OTP is valid for 10 minutes.
+
+Please enter this OTP in the Hospital Management System to create your new password.
+
+If you did not request a password reset, you can safely ignore this email.
+
+Regards,
+Hospital Management System`,
+        });
 
         return res.status(200).json({
             success: true,
             message:
-                "Password has been reset successfully.",
+                "Password reset OTP has been sent to your email.",
         });
+
     } catch (error) {
         console.error(
-            "RESET PASSWORD ERROR:",
+            "FORGOT PASSWORD ERROR:",
             error
         );
 
@@ -543,7 +509,7 @@ async function resetPassword(req, res) {
             success: false,
             message:
                 error.message ||
-                "Something went wrong while resetting the password.",
+                "Unable to send password reset OTP.",
         });
     }
 }

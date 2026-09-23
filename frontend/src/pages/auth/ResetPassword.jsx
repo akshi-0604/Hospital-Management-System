@@ -82,9 +82,12 @@ function ResetPassword() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] =
+    useState(false);
+
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
 
@@ -103,23 +106,30 @@ function ResetPassword() {
   }, []);
 
   function handleOtpChange(event) {
-    const value = event.target.value.replace(/\D/g, "");
+    const value =
+      event.target.value.replace(/\D/g, "");
 
     if (value.length <= 6) {
       setOtp(value);
     }
   }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
     setMessage("");
     setError("");
 
-    const trimmedEmail = email.trim().toLowerCase();
-    const trimmedOtp = otp.trim();
+    const trimmedEmail =
+      email.trim().toLowerCase();
+
+    const trimmedOtp =
+      otp.trim();
 
     if (!trimmedEmail) {
-      setError("Please enter your email address.");
+      setError(
+        "Please enter your email address."
+      );
       return;
     }
 
@@ -173,13 +183,16 @@ function ResetPassword() {
           "Password has been reset successfully."
       );
 
+      // Remove reset email after successful reset
       sessionStorage.removeItem(
         "passwordResetEmail"
       );
 
+      // Go to login
       setTimeout(() => {
         navigate("/login");
-      }, 2000);
+      }, 1500);
+
     } catch (error) {
       console.error(
         "Reset password error:",
@@ -208,6 +221,7 @@ function ResetPassword() {
   return (
     <div className="reset-password-page">
 
+      {/* THEME BUTTON */}
       <button
         type="button"
         className="reset-theme-button"
@@ -231,23 +245,21 @@ function ResetPassword() {
         </span>
       </button>
 
+      {/* CARD */}
       <div className="reset-password-card">
-
-        <div className="reset-password-icon">
-          🔐
-        </div>
 
         <h1>
           Reset Password
         </h1>
 
         <p className="reset-password-description">
-          Enter the 6-digit OTP sent to your email,
-          then create and confirm your new password.
+          Enter the 6-digit OTP sent to your email
+          and create your new password.
         </p>
 
         <form onSubmit={handleSubmit}>
 
+          {/* EMAIL */}
           <div className="form-group">
             <label htmlFor="email">
               Email Address
@@ -265,13 +277,9 @@ function ResetPassword() {
               disabled={loading}
               required
             />
-
-            <small>
-              Your registered email address is
-              automatically filled here.
-            </small>
           </div>
 
+          {/* OTP */}
           <div className="form-group">
             <label htmlFor="otp">
               Verification OTP
@@ -291,11 +299,12 @@ function ResetPassword() {
             />
 
             <small>
-              Check your email and enter the
-              6-digit OTP here.
+              Enter the 6-digit OTP sent to your
+              registered email address.
             </small>
           </div>
 
+          {/* NEW PASSWORD */}
           <div className="form-group">
             <label htmlFor="password">
               New Password
@@ -346,6 +355,7 @@ function ResetPassword() {
             </div>
           </div>
 
+          {/* CONFIRM PASSWORD */}
           <div className="form-group">
             <label htmlFor="confirmPassword">
               Confirm New Password
@@ -396,18 +406,21 @@ function ResetPassword() {
             </div>
           </div>
 
+          {/* SUCCESS */}
           {message && (
             <p className="success-message">
               {message}
             </p>
           )}
 
+          {/* ERROR */}
           {error && (
             <p className="error-message">
               {error}
             </p>
           )}
 
+          {/* BUTTON */}
           <button
             type="submit"
             className="reset-password-button"
