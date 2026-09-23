@@ -1,6 +1,11 @@
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
+
+const googleClient = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID
+);
 
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
@@ -351,6 +356,239 @@ async function loginUser(req, res) {
         });
     }
 }
+
+async function googleLogin(req, res) {
+    try {
+        const { credential } = req.body;
+
+        if (!credential) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Google credential is required.",
+            });
+        }
+
+        if (!process.env.GOOGLE_CLIENT_ID) {
+            console.error(
+                "GOOGLE_CLIENT_ID is missing from environment variables."
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Google authentication configuration is missing.",
+            });
+        }
+
+        const ticket =
+            await googleClient.verifyIdToken({
+                idToken: credential,
+                audience:
+                    process.env.GOOGLE_CLIENT_ID,
+            });
+
+        const payload =
+            ticket.getPayload();
+
+        if (!payload) {
+            return res.status(401).json({
+                success: false,
+                message:
+                    "Invalid Google authentication response.",
+            });
+        }
+
+        const {
+            sub,
+            email,
+            email_verified,
+            name,
+            picture,
+        } = payload;
+
+        if (!email || !email_verified) {
+            return res.status(401).json({
+                success: false,
+                message:
+                    "Google account email could not be verified.",
+            });
+        }
+
+        const normalizedEmail =
+            email.trim().toLowerCase();
+
+        let user =
+            await User.findOne({
+                email: normalizedEmail,
+            });
+
+        let newGoogleUser = false;
+
+        if (!user) {
+            const temporaryPassword =
+                crypto
+                    .randomBytes(32)
+                    .toString("hex");
+
+            const hashedPassword =
+                await bcrypt.hash(
+                    temporaryPassword,
+                    10
+                );
+
+            user = new User({
+                fullName:
+                    name?.trim() ||
+                    normalizedEmail
+                        .split("@")[0],
+
+                email:
+                    normalizedEmail,
+
+                phone: "",
+
+                password:
+                    hashedPassword,
+
+                role: "patient",
+            });
+
+            await user.save();
+
+            newGoogleUser = true;
+
+            console.log(
+                "GOOGLE USER CREATED:",
+                normalizedEmail,
+                "Google ID:",
+                sub
+            );
+        }
+
+        if (!process.env.JWT_SECRET) {
+            console.error(
+                "JWT_SECRET is missing from environment variables."
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Server authentication configuration is missing.",
+            });
+        }
+
+        const token =
+            jwt.sign(
+                {
+                    userId:
+                        user._id,
+
+                    role:
+                        user.role,
+                },
+
+                process.env.JWT_SECRET,
+
+                {
+                    expiresIn:
+                        "1d",
+                }
+            );
+
+        if (
+            newGoogleUser &&
+            user.role === "patient"
+        ) {
+            try {
+                await createPatientNotification({
+                    patientId:
+                        user._id,
+
+                    type:
+                        "Welcome",
+
+                    title:
+                        "Welcome to the Hospital",
+
+                    message:
+                        `Welcome ${user.fullName}. Your patient account has been successfully created using Google authentication.`,
+
+                    metadata: {
+                        patientId:
+                            user._id,
+                    },
+                });
+
+                await sendWelcomeEmail(
+                    user
+                );
+
+                await sendHospitalInformationEmail(
+                    user
+                );
+
+                console.log(
+                    "GOOGLE PATIENT WELCOME NOTIFICATIONS SENT:",
+                    user.email
+                );
+            } catch (notificationError) {
+                console.error(
+                    "GOOGLE PATIENT NOTIFICATION ERROR:",
+                    notificationError.message
+                );
+            }
+        }
+
+        console.log(
+            "GOOGLE LOGIN SUCCESS:",
+            user.email
+        );
+
+        return res.status(200).json({
+            success: true,
+
+            message:
+                "Google login successful.",
+
+            token,
+
+            user: {
+                id:
+                    user._id,
+
+                fullName:
+                    user.fullName,
+
+                email:
+                    user.email,
+
+                phone:
+                    user.phone,
+
+                role:
+                    user.role,
+
+                picture:
+                    picture || null,
+            },
+        });
+
+    } catch (error) {
+        console.error(
+            "GOOGLE LOGIN ERROR:",
+            error
+        );
+
+        return res.status(401).json({
+            success: false,
+
+            message:
+                "Unable to authenticate with Google.",
+        });
+    }
+}
+
 async function forgotPassword(
     req,
     res
@@ -621,6 +859,7 @@ async function resetPassword(
 module.exports = {
     registerUser,
     loginUser,
+    googleLogin,
     forgotPassword,
     resetPassword,
 };
