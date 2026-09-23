@@ -17,7 +17,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import Dashboard from "../pages/admin/Dashboard";
 import Patients from "../pages/admin/Patients";
 import Doctors from "../pages/admin/Doctors";
-import AddDoctor from "../pages/admin/AddDoctor";
+import AddDoctor from "../components/admin/AddDoctor";
 import Appointments from "../pages/admin/Appointments";
 import Departments from "../pages/admin/Departments";
 import MedicalRecords from "../pages/admin/MedicalRecords";
