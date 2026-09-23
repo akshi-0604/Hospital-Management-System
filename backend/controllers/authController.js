@@ -513,6 +513,104 @@ Hospital Management System`,
         });
     }
 }
+async function resetPassword(req, res) {
+    try {
+        const {
+            email,
+            otp,
+            password,
+        } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Please enter your email address.",
+            });
+        }
+
+        if (!otp) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Please enter the OTP.",
+            });
+        }
+
+        if (!/^\d{6}$/.test(otp)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "OTP must contain exactly 6 digits.",
+            });
+        }
+
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Please enter a new password.",
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Password must contain at least 6 characters.",
+            });
+        }
+
+        const normalizedEmail =
+            email.trim().toLowerCase();
+        const hashedOtp = crypto
+            .createHash("sha256")
+            .update(otp)
+            .digest("hex");
+
+        const user = await User.findOne({
+            email: normalizedEmail,
+            resetPasswordToken: hashedOtp,
+            resetPasswordExpires: {
+                $gt: Date.now(),
+            },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Invalid or expired OTP.",
+            });
+        }
+
+        user.password =
+            await bcrypt.hash(password, 10);
+
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message:
+                "Password has been reset successfully.",
+        });
+    } catch (error) {
+        console.error(
+            "RESET PASSWORD ERROR:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                error.message ||
+                "Something went wrong while resetting the password.",
+        });
+    }
+}
 module.exports = {
     registerUser,
     loginUser,
