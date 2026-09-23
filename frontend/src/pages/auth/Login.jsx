@@ -157,7 +157,7 @@ function Login() {
             </h2>
 
             <p className="login-subtitle">
-              Please login to your account
+              Please log in to your account
             </p>
 
             <form onSubmit={handleLogin}>
