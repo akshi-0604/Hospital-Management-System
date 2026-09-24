@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hospital-management-system-five-theta.vercel.app/sitemap.xml
