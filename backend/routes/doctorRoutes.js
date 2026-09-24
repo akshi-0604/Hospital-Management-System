@@ -8,19 +8,57 @@ const {
   deleteDoctor,
 } = require("../controllers/doctorController");
 
+const {
+  protectRoute,
+  allowRoles,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 
-router.post("/", addDoctor);
+// Add doctor
+router.post(
+  "/",
+  protectRoute,
+  allowRoles("admin"),
+  addDoctor
+);
 
-router.get("/", getDoctors);
 
-router.get("/:id", getDoctorById);
+// Get all doctors
+router.get(
+  "/",
+  protectRoute,
+  allowRoles("admin"),
+  getDoctors
+);
 
-router.put("/:id", updateDoctor);
 
-router.delete("/:id", deleteDoctor);
+// Get one doctor
+router.get(
+  "/:id",
+  protectRoute,
+  allowRoles("admin"),
+  getDoctorById
+);
+
+
+// Update doctor
+router.put(
+  "/:id",
+  protectRoute,
+  allowRoles("admin"),
+  updateDoctor
+);
+
+
+// Delete doctor
+router.delete(
+  "/:id",
+  protectRoute,
+  allowRoles("admin"),
+  deleteDoctor
+);
 
 
 module.exports = router;

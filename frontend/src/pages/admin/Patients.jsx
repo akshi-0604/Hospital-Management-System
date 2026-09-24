@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import "./Patients.css";
 
@@ -30,7 +30,7 @@ function Patients() {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(API_URL);
+      const response = await api.get("/patients");
 
       console.log("Patients API response:", response.data);
 

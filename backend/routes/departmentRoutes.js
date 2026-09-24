@@ -8,43 +8,45 @@ const {
   deleteDepartment,
 } = require("../controllers/departmentController");
 
-const router =
-  express.Router();
+const {
+  protectRoute,
+  allowRoles,
+} = require("../middleware/authMiddleware");
 
+const router = express.Router();
 
-// Create department
 router.post(
   "/",
+  protectRoute,
+  allowRoles("admin"),
   createDepartment
 );
 
-
-// Get all departments
 router.get(
   "/",
+  protectRoute,
+  allowRoles("admin"),
   getDepartments
 );
 
-
-// Get one department
 router.get(
   "/:id",
+  protectRoute,
+  allowRoles("admin"),
   getDepartmentById
 );
 
-
-// Update department
 router.put(
   "/:id",
+  protectRoute,
+  allowRoles("admin"),
   updateDepartment
 );
 
-
-// Delete department
 router.delete(
   "/:id",
+  protectRoute,
+  allowRoles("admin"),
   deleteDepartment
 );
-
-
 module.exports = router;

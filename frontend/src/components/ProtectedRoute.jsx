@@ -1,68 +1,26 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-
-function getDashboardPath(role) {
-  if (role === "admin") {
-    return "/admin";
-  }
-
-  if (role === "patient") {
-    return "/patient";
-  }
-
-  if (role === "doctor") {
-    return "/doctor";
-  }
-
-  if (role === "receptionist") {
-    return "/receptionist";
-  }
-
-  return "/";
-}
+import { Navigate, Outlet } from "react-router-dom";
 
 function ProtectedRoute({ allowedRoles }) {
-  const location = useLocation();
-
   const token = localStorage.getItem("token");
-  const storedUser = localStorage.getItem("user");
+  const savedUser = localStorage.getItem("user");
 
   let user = null;
 
-  try {
-    if (storedUser) {
-      user = JSON.parse(storedUser);
-    }
-  } catch (error) {
-    console.error(
-      "Unable to read logged-in user:",
-      error
-    );
+  if (savedUser) {
+    user = JSON.parse(savedUser);
+  }
 
-    localStorage.removeItem("user");
-  }
+  // User is not logged in
   if (!token || !user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{
-          from: location.pathname,
-        }}
-      />
-    );
+    return <Navigate to="/login" replace />;
   }
-  if (
-    Array.isArray(allowedRoles) &&
-    allowedRoles.length > 0 &&
-    !allowedRoles.includes(user.role)
-  ) {
-    return (
-      <Navigate
-        to={getDashboardPath(user.role)}
-        replace
-      />
-    );
+
+  // User is logged in, but does not have permission
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/login" replace />;
   }
+
+  // User is allowed to access the page
   return <Outlet />;
 }
 

@@ -5,6 +5,10 @@ const {
   getPatientById,
 } = require("../controllers/patientController");
 
+const {
+  protectRoute,
+  allowRoles,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -12,6 +16,8 @@ const router = express.Router();
 // Get all patients
 router.get(
   "/",
+  protectRoute,
+  allowRoles("admin"),
   getPatients
 );
 
@@ -19,6 +25,8 @@ router.get(
 // Get one patient
 router.get(
   "/:id",
+  protectRoute,
+  allowRoles("admin"),
   getPatientById
 );
 

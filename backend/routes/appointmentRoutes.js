@@ -8,21 +8,39 @@ const {
   deleteAppointment,
 } = require("../controllers/appointmentController");
 
+const {
+  protectRoute,
+} = require("../middleware/authMiddleware");
+
 const router = express.Router();
-
 // Create appointment
-router.post("/", createAppointment);
+router.post(
+  "/",
+  protectRoute,
+  createAppointment
+);
 
-// Get all appointments
-router.get("/", getAppointments);
+router.get(
+  "/",
+  protectRoute,
+  getAppointments
+);
 
-// Get one appointment
-router.get("/:id", getAppointmentById);
+router.get(
+  "/:id",
+  protectRoute,
+  getAppointmentById
+);
 
-// Update appointment
-router.put("/:id", updateAppointment);
+router.put(
+  "/:id",
+  protectRoute,
+  updateAppointment
+);
 
-// Delete appointment
-router.delete("/:id", deleteAppointment);
-
+router.delete(
+  "/:id",
+  protectRoute,
+  deleteAppointment
+);
 module.exports = router;

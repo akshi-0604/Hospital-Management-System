@@ -8,12 +8,39 @@ const {
   deleteLaboratory,
 } = require("../controllers/laboratoryController");
 
+const {
+  protectRoute,
+} = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.post("/", createLaboratory);
-router.get("/", getLaboratories);
-router.get("/:id", getLaboratoryById);
-router.put("/:id", updateLaboratory);
-router.delete("/:id", deleteLaboratory);
+router.post(
+  "/",
+  protectRoute,
+  createLaboratory
+);
 
+router.get(
+  "/",
+  protectRoute,
+  getLaboratories
+);
+
+router.get(
+  "/:id",
+  protectRoute,
+  getLaboratoryById
+);
+
+router.put(
+  "/:id",
+  protectRoute,
+  updateLaboratory
+);
+
+router.delete(
+  "/:id",
+  protectRoute,
+  deleteLaboratory
+);
 module.exports = router;
