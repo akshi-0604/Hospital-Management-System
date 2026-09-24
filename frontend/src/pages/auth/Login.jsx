@@ -58,7 +58,7 @@ function Login() {
     } catch (error) {
       setError(
         error.response?.data?.message ||
-          "Unable to login. Please try again."
+        "Unable to login. Please try again."
       );
     } finally {
       setLoading(false);
@@ -66,15 +66,27 @@ function Login() {
   }
 
   async function handleGoogleLogin(response) {
+    console.log("GOOGLE RESPONSE RECEIVED:", response);
+
     setError("");
 
     if (!response?.credential) {
-      setError("Google authentication failed. Please try again.");
+      console.error(
+        "GOOGLE CREDENTIAL IS MISSING:",
+        response
+      );
+
+      setError(
+        "Google authentication did not return a credential."
+      );
+
       return;
     }
 
     try {
       setGoogleLoading(true);
+
+      console.log("SENDING GOOGLE CREDENTIAL TO BACKEND");
 
       const result = await axios.post(
         "https://hospital-management-system-nvjt.onrender.com/api/auth/google",
@@ -83,10 +95,18 @@ function Login() {
         }
       );
 
+      console.log(
+        "GOOGLE BACKEND RESPONSE:",
+        result.data
+      );
+
       const { token, user } = result.data;
 
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
 
       if (user.role === "admin") {
         navigate("/admin");
@@ -100,9 +120,14 @@ function Login() {
         navigate("/");
       }
     } catch (error) {
+      console.error(
+        "GOOGLE LOGIN BACKEND ERROR:",
+        error.response?.data || error.message
+      );
+
       setError(
         error.response?.data?.message ||
-          "Unable to login with Google. Please try again."
+        "Unable to login with Google. Please try again."
       );
     } finally {
       setGoogleLoading(false);
@@ -114,7 +139,7 @@ function Login() {
       clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
     >
       <div className="login-page">
-       
+
         <button
           type="button"
           className="login-theme-button"
@@ -161,7 +186,7 @@ function Login() {
             </p>
 
             <form onSubmit={handleLogin}>
-            
+
               <div className="form-group">
                 <label htmlFor="email">
                   Email Address
