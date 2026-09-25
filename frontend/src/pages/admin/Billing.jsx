@@ -1,22 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";``
 
 import "./Billing.css";
-
-const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
-
-const BILLING_URL =
-  `${API_BASE_URL}/billing`;
-
-const PATIENTS_URL =
-  `${API_BASE_URL}/patients`;
-
-const DOCTORS_URL =
-  `${API_BASE_URL}/doctors`;
-
-const APPOINTMENTS_URL =
-  `${API_BASE_URL}/appointments`;
 
 const emptyItem = {
   description: "",
@@ -94,10 +79,10 @@ function Billing() {
 
     const results =
       await Promise.allSettled([
-        axios.get(BILLING_URL),
-        axios.get(PATIENTS_URL),
-        axios.get(DOCTORS_URL),
-        axios.get(APPOINTMENTS_URL),
+        api.get("/billing"),
+        api.get("/patients"),
+        api.get("/doctors"),
+        api.get("/appointments"),
       ]);
 
     // Billing
@@ -773,10 +758,10 @@ function Billing() {
           formData.notes.trim(),
       };
 
-      await axios.post(
-        BILLING_URL,
-        payload
-      );
+      await api.post(
+  "/billing",
+  payload
+);
 
       alert(
         "Bill created successfully. You can record the patient's payment using Edit."
@@ -934,9 +919,9 @@ function Billing() {
       );
 
       const response =
-        await axios.patch(
-          `${BILLING_URL}/${selectedBilling._id}/payment`,
-          {
+  await api.patch(
+    `/billing/${selectedBilling._id}/payment`,
+    {
             amount:
               paymentAmount,
 
@@ -1006,8 +991,6 @@ function Billing() {
   return (
     <div className="billing-page">
 
-      {/* HEADER */}
-
       <div className="billing-header">
 
         <div>
@@ -1033,9 +1016,6 @@ function Billing() {
         </button>
 
       </div>
-
-
-      {/* SUMMARY */}
 
       <div className="billing-summary">
 
@@ -1133,9 +1113,6 @@ function Billing() {
         </div>
 
       </div>
-
-
-      {/* TOOLBAR */}
 
       <div className="billing-toolbar">
 

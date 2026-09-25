@@ -1,12 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "./Departments.css";
-
-const API_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api/departments";
-
-const DOCTORS_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api/doctors";
 
 const emptyForm = {
   name: "",
@@ -41,7 +35,7 @@ function Departments() {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(API_URL);
+      const response = await api.get("/departments")
 
       setDepartments(response.data.departments || []);
     } catch (err) {
@@ -49,7 +43,7 @@ function Departments() {
 
       setError(
         err.response?.data?.message ||
-          "Failed to load departments"
+        "Failed to load departments"
       );
     } finally {
       setLoading(false);
@@ -57,7 +51,7 @@ function Departments() {
   };
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get(DOCTORS_URL);
+      const response = await api.get("/doctors")
 
       setDoctors(response.data.doctors || []);
     } catch (err) {
@@ -130,11 +124,9 @@ function Departments() {
         ];
       }
 
-      // If the head doctor is removed,
-      // clear the head doctor as well.
       const updatedHeadDoctor =
         prev.headDoctor &&
-        !updatedDoctors.includes(prev.headDoctor)
+          !updatedDoctors.includes(prev.headDoctor)
           ? ""
           : prev.headDoctor;
 
@@ -152,8 +144,6 @@ function Departments() {
       ...prev,
       headDoctor: doctorId,
 
-      // Automatically add head doctor
-      // to assigned doctors.
       doctors:
         doctorId && !prev.doctors.includes(doctorId)
           ? [...prev.doctors, doctorId]
@@ -223,14 +213,14 @@ function Departments() {
       };
 
       if (showEditModal && selectedDepartment) {
-        await axios.put(
-          `${API_URL}/${selectedDepartment._id}`,
+        await api.put(
+          `/departments/${selectedDepartment._id}`,
           payload
         );
 
         alert("Department updated successfully");
       } else {
-        await axios.post(API_URL, payload);
+        await api.post("/departments", payload);
 
         alert("Department created successfully");
       }
@@ -243,7 +233,7 @@ function Departments() {
 
       alert(
         err.response?.data?.message ||
-          "Failed to save department"
+        "Failed to save department"
       );
     } finally {
       setSaving(false);
@@ -589,11 +579,10 @@ function Departments() {
                       return (
                         <label
                           key={doctor._id}
-                          className={`doctor-selection-item ${
-                            isSelected
+                          className={`doctor-selection-item ${isSelected
                               ? "selected"
                               : ""
-                          }`}
+                            }`}
                         >
                           <input
                             type="checkbox"
@@ -672,8 +661,8 @@ function Departments() {
                   {saving
                     ? "Saving..."
                     : showEditModal
-                    ? "Update Department"
-                    : "Save Department"}
+                      ? "Update Department"
+                      : "Save Department"}
                 </button>
               </div>
             </form>
@@ -766,7 +755,7 @@ function Departments() {
                 </h3>
 
                 {selectedDepartment.doctors?.length >
-                0 ? (
+                  0 ? (
                   <div className="assigned-doctors-list">
                     {selectedDepartment.doctors.map(
                       (doctor) => (
@@ -787,10 +776,10 @@ function Departments() {
 
                           {selectedDepartment.headDoctor
                             ?._id === doctor._id && (
-                            <span className="head-badge">
-                              Head
-                            </span>
-                          )}
+                              <span className="head-badge">
+                                Head
+                              </span>
+                            )}
                         </div>
                       )
                     )}

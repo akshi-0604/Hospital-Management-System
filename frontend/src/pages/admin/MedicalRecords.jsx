@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "./MedicalRecords.css";
 
-const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
-
-const RECORDS_URL = `${API_BASE_URL}/medical-records`;
-const PATIENTS_URL = `${API_BASE_URL}/patients`;
-const DOCTORS_URL = `${API_BASE_URL}/doctors`;
-const APPOINTMENTS_URL = `${API_BASE_URL}/appointments`;
+const results = await Promise.allSettled([
+  api.get("/medical-records"),
+  api.get("/patients"),
+  api.get("/doctors"),
+  api.get("/appointments"),
+]);
 
 const emptyForm = {
   patient: "",
@@ -54,12 +53,11 @@ function MedicalRecords() {
     setError("");
 
     const results = await Promise.allSettled([
-      axios.get(RECORDS_URL),
-      axios.get(PATIENTS_URL),
-      axios.get(DOCTORS_URL),
-      axios.get(APPOINTMENTS_URL),
+      api.get("/medical-records"),
+      api.get("/patients"),
+      api.get("/doctors"),
+      api.get("/appointments"),
     ]);
-
     const recordResult = results[0];
     const patientResult = results[1];
     const doctorResult = results[2];
@@ -73,7 +71,7 @@ function MedicalRecords() {
       setRecords([]);
       setError(
         recordResult.reason?.response?.data?.message ||
-          "Unable to load medical records."
+        "Unable to load medical records."
       );
     }
 
@@ -270,8 +268,8 @@ function MedicalRecords() {
         status: formData.status,
       };
 
-      const response = await axios.post(
-        RECORDS_URL,
+      const response = await api.post(
+        "/medical-records",
         payload
       );
 
@@ -292,7 +290,7 @@ function MedicalRecords() {
 
       alert(
         err.response?.data?.message ||
-          "Unable to add medical record."
+        "Unable to add medical record."
       );
     } finally {
       setSaving(false);

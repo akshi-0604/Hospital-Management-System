@@ -1,21 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "./Prescriptions.css";
-
-const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
-
-const PRESCRIPTIONS_URL =
-  `${API_BASE_URL}/prescriptions`;
-
-const PATIENTS_URL =
-  `${API_BASE_URL}/patients`;
-
-const DOCTORS_URL =
-  `${API_BASE_URL}/doctors`;
-
-const APPOINTMENTS_URL =
-  `${API_BASE_URL}/appointments`;
 
 const emptyMedicine = {
   medicineName: "",
@@ -71,10 +56,10 @@ function Prescriptions() {
     setError("");
 
     const results = await Promise.allSettled([
-      axios.get(PRESCRIPTIONS_URL),
-      axios.get(PATIENTS_URL),
-      axios.get(DOCTORS_URL),
-      axios.get(APPOINTMENTS_URL),
+      api.get("/prescriptions"),
+      api.get("/patients"),
+      api.get("/doctors"),
+      api.get("/appointments"),
     ]);
 
     if (results[0].status === "fulfilled") {
@@ -85,7 +70,7 @@ function Prescriptions() {
       setPrescriptions([]);
       setError(
         results[0].reason?.response?.data?.message ||
-          "Unable to load prescriptions."
+        "Unable to load prescriptions."
       );
     }
 
@@ -345,8 +330,8 @@ function Prescriptions() {
         status: formData.status,
       };
 
-      await axios.post(
-        PRESCRIPTIONS_URL,
+      await api.post(
+        "/prescriptions",
         payload
       );
 
@@ -364,7 +349,7 @@ function Prescriptions() {
 
       alert(
         error.response?.data?.message ||
-          "Unable to add prescription."
+        "Unable to add prescription."
       );
     } finally {
       setSaving(false);
@@ -738,7 +723,7 @@ function Prescriptions() {
                     {formData.medications.length}{" "}
                     medicine
                     {formData.medications.length !==
-                    1
+                      1
                       ? "s"
                       : ""}
                   </span>
@@ -767,17 +752,17 @@ function Prescriptions() {
 
                         {formData.medications
                           .length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              removeMedicine(
-                                index
-                              )
-                            }
-                          >
-                            Remove
-                          </button>
-                        )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeMedicine(
+                                  index
+                                )
+                              }
+                            >
+                              Remove
+                            </button>
+                          )}
                       </div>
 
                       <div className="medicine-grid">

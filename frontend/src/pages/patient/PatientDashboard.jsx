@@ -1,15 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import "./PatientDashboard.css";
 
 import PatientNotifications from "../../components/patient/PatientNotifications";
 import { useTheme } from "../../context/ThemeContext";
-const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
-
-const DOCTORS_URL = `${API_BASE_URL}/doctors`;
-const APPOINTMENTS_URL = `${API_BASE_URL}/appointments`;
 
 function PatientDashboard() {
   const { theme, toggleTheme } = useTheme();
@@ -78,7 +73,7 @@ function PatientDashboard() {
       setLoadingDoctors(true);
 
       const response =
-        await axios.get(DOCTORS_URL);
+        await api.get("/doctors");
 
       console.log(
         "Patient dashboard doctors:",
@@ -127,8 +122,8 @@ function PatientDashboard() {
       setLoadingAppointments(true);
 
       const response =
-        await axios.get(
-          APPOINTMENTS_URL
+        await api.get(
+          "/appointments"
         );
 
       console.log(
@@ -617,8 +612,8 @@ function PatientDashboard() {
       setLoadingBooking(true);
 
       const response =
-        await axios.post(
-          APPOINTMENTS_URL,
+        await api.post(
+          "/appointments",
           {
             patient:
               patientId,

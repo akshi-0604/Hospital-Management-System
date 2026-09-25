@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import "./PatientNotifications.css";
-
-const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
-
-const NOTIFICATIONS_URL =
-  `${API_BASE_URL}/notifications`;
 
 function PatientNotifications({ userId }) {
   const [notifications, setNotifications] =
@@ -31,8 +25,8 @@ function PatientNotifications({ userId }) {
     try {
       setError("");
 
-      const response = await axios.get(
-        `${NOTIFICATIONS_URL}/user/${userId}`
+      const response = await api.get(
+        `/notifications/user/${userId}`
       );
 
       setNotifications(
@@ -50,7 +44,7 @@ function PatientNotifications({ userId }) {
 
       setError(
         error.response?.data?.message ||
-          "Unable to load notifications."
+        "Unable to load notifications."
       );
     } finally {
       setLoading(false);
@@ -74,20 +68,19 @@ function PatientNotifications({ userId }) {
     notificationId
   ) {
     try {
-      await axios.patch(
-        `${NOTIFICATIONS_URL}/${notificationId}/read`
+      await api.patch(
+        `/notifications/${notificationId}/read`
       );
-
       setNotifications(
         (previous) =>
           previous.map(
             (notification) =>
               notification._id ===
-              notificationId
+                notificationId
                 ? {
-                    ...notification,
-                    read: true,
-                  }
+                  ...notification,
+                  read: true,
+                }
                 : notification
           )
       );
@@ -113,8 +106,8 @@ function PatientNotifications({ userId }) {
     }
 
     try {
-      await axios.patch(
-        `${NOTIFICATIONS_URL}/user/${userId}/read-all`
+      await api.patch(
+        `/notifications/user/${userId}/read-all`
       );
 
       setNotifications(
@@ -260,11 +253,10 @@ function PatientNotifications({ userId }) {
                 key={
                   notification._id
                 }
-                className={`notification-card ${
-                  notification.read
-                    ? "notification-read"
-                    : "notification-unread"
-                }`}
+                className={`notification-card ${notification.read
+                  ? "notification-read"
+                  : "notification-unread"
+                  }`}
               >
                 <div className="notification-icon">
                   {getNotificationIcon(

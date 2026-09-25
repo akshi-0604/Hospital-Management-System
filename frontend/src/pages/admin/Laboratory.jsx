@@ -1,21 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "./Laboratory.css";
-
-const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
-
-const LABORATORY_URL =
-  `${API_BASE_URL}/laboratory`;
-
-const PATIENTS_URL =
-  `${API_BASE_URL}/patients`;
-
-const DOCTORS_URL =
-  `${API_BASE_URL}/doctors`;
-
-const APPOINTMENTS_URL =
-  `${API_BASE_URL}/appointments`;
 
 const emptyForm = {
   patient: "",
@@ -73,10 +58,10 @@ function Laboratory() {
     setError("");
 
     const results = await Promise.allSettled([
-      axios.get(LABORATORY_URL),
-      axios.get(PATIENTS_URL),
-      axios.get(DOCTORS_URL),
-      axios.get(APPOINTMENTS_URL),
+      api.get("/laboratory"),
+      api.get("/patients"),
+      api.get("/doctors"),
+      api.get("/appointments"),
     ]);
 
     if (results[0].status === "fulfilled") {
@@ -87,7 +72,7 @@ function Laboratory() {
       setLaboratories([]);
       setError(
         results[0].reason?.response?.data?.message ||
-          "Unable to load laboratory records."
+        "Unable to load laboratory records."
       );
     }
 
@@ -286,8 +271,8 @@ function Laboratory() {
         status: formData.status,
       };
 
-      await axios.post(
-        LABORATORY_URL,
+      await api.post(
+        "/laboratory",
         payload
       );
 
@@ -305,7 +290,7 @@ function Laboratory() {
 
       alert(
         error.response?.data?.message ||
-          "Unable to add laboratory record."
+        "Unable to add laboratory record."
       );
     } finally {
       setSaving(false);

@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "./Doctors.css";
-
-const API_URL =
-    "https://hospital-management-system-nvjt.onrender.com/api/doctors";
 
 function Doctors() {
     const [doctors, setDoctors] = useState([]);
@@ -62,7 +59,7 @@ function Doctors() {
         try {
             setLoading(true);
 
-            const response = await axios.get(API_URL);
+            const response = await api.get("/doctors");
 
             console.log("Doctors API response:", response.data);
 
@@ -342,11 +339,11 @@ function Doctors() {
         try {
             setSavingDoctor(true);
 
-            const response = await axios.post(API_URL, {
-                ...doctorForm,
-                experience: Number(doctorForm.experience),
-                consultationFee: Number(doctorForm.consultationFee),
-            });
+            const response = await api.post("/doctors", {
+    ...doctorForm,
+    experience: Number(doctorForm.experience),
+    consultationFee: Number(doctorForm.consultationFee),
+});
 
             console.log("Add doctor response:", response.data);
 
@@ -449,10 +446,10 @@ function Doctors() {
                 updateData.password = editingDoctor.password;
             }
 
-            const response = await axios.put(
-                `${API_URL}/${editingDoctor._id}`,
-                updateData
-            );
+            const response = await api.put(
+    `/doctors/${editingDoctor._id}`,
+    updateData
+);
 
             console.log("Update doctor response:", response.data);
 
@@ -492,9 +489,9 @@ function Doctors() {
         try {
             setDeleting(true);
 
-            await axios.delete(
-                `${API_URL}/${deletingDoctor._id}`
-            );
+            await api.delete(
+    `/doctors/${deletingDoctor._id}`
+);
 
             await fetchDoctors();
             setDeletingDoctor(null);

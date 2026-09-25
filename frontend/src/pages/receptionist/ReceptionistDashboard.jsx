@@ -1,14 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import "./ReceptionistDashboard.css";
-
-const API_BASE_URL =
-    "https://hospital-management-system-nvjt.onrender.com/api";
-
-const DOCTORS_URL = `${API_BASE_URL}/doctors`;
-const PATIENTS_URL = `${API_BASE_URL}/patients`;
-const APPOINTMENTS_URL = `${API_BASE_URL}/appointments`;
 
 const EMPTY_APPOINTMENT = {
     patient: "",
@@ -96,7 +89,7 @@ function ReceptionistDashboard() {
     }
     async function fetchDoctors() {
         try {
-            const response = await axios.get(DOCTORS_URL);
+            const response = await api.get("/doctors");
 
             console.log(
                 "Receptionist doctors:",
@@ -128,14 +121,14 @@ function ReceptionistDashboard() {
             setDoctors([]);
             setError(
                 error.response?.data?.message ||
-                    "Unable to load doctor information."
+                "Unable to load doctor information."
             );
         }
     }
 
     async function fetchPatients() {
         try {
-            const response = await axios.get(PATIENTS_URL);
+            const response = await api.get("/patients");
 
             console.log(
                 "Receptionist patients:",
@@ -170,7 +163,7 @@ function ReceptionistDashboard() {
     async function fetchAppointments() {
         try {
             const response =
-                await axios.get(APPOINTMENTS_URL);
+                await api.get("/appointments");
 
             console.log(
                 "Receptionist appointments:",
@@ -211,7 +204,7 @@ function ReceptionistDashboard() {
 
             setError(
                 error.response?.data?.message ||
-                    "Unable to load appointment information."
+                "Unable to load appointment information."
             );
         }
     }
@@ -271,7 +264,7 @@ function ReceptionistDashboard() {
         if (
             appointment?.patient &&
             typeof appointment.patient ===
-                "object"
+            "object"
         ) {
             return (
                 appointment.patient.fullName ||
@@ -292,7 +285,7 @@ function ReceptionistDashboard() {
         if (
             appointment?.doctor &&
             typeof appointment.doctor ===
-                "object"
+            "object"
         ) {
             return getDoctorDisplayName(
                 appointment.doctor
@@ -436,11 +429,11 @@ function ReceptionistDashboard() {
 
         return (
             date.getFullYear() ===
-                today.getFullYear() &&
+            today.getFullYear() &&
             date.getMonth() ===
-                today.getMonth() &&
+            today.getMonth() &&
             date.getDate() ===
-                today.getDate()
+            today.getDate()
         );
     }
     const availableDoctors =
@@ -449,7 +442,7 @@ function ReceptionistDashboard() {
                 (doctor) =>
                     String(
                         doctor?.status ||
-                            ""
+                        ""
                     )
                         .toLowerCase()
                         .trim() ===
@@ -462,7 +455,7 @@ function ReceptionistDashboard() {
                 (doctor) =>
                     String(
                         doctor?.status ||
-                            ""
+                        ""
                     )
                         .toLowerCase()
                         .trim() ===
@@ -531,7 +524,7 @@ function ReceptionistDashboard() {
                 if (
                     appointmentDoctor &&
                     typeof appointmentDoctor ===
-                        "object"
+                    "object"
                 ) {
                     return (
                         String(
@@ -544,14 +537,14 @@ function ReceptionistDashboard() {
                 return (
                     String(
                         appointmentDoctor ||
-                            ""
+                        ""
                     ) ===
-                        String(doctorId) ||
+                    String(doctorId) ||
                     String(
                         appointment?.doctorId ||
-                            ""
+                        ""
                     ) ===
-                        String(doctorId)
+                    String(doctorId)
                 );
             }
         );
@@ -600,7 +593,7 @@ function ReceptionistDashboard() {
                     const matchesStatus =
                         statusFilter === "all" ||
                         currentStatus ===
-                            statusFilter;
+                        statusFilter;
 
                     const matchesDate =
                         !dateFilter ||
@@ -609,7 +602,7 @@ function ReceptionistDashboard() {
                                 appointment
                             )
                         ) ===
-                            dateFilter;
+                        dateFilter;
 
                     return (
                         matchesSearch &&
@@ -709,11 +702,10 @@ function ReceptionistDashboard() {
             setSavingAppointment(true);
 
             const response =
-                await axios.post(
-                    APPOINTMENTS_URL,
+                await api.post(
+                    "/appointments",
                     appointmentForm
                 );
-
             console.log(
                 "Appointment created:",
                 response.data
@@ -742,7 +734,7 @@ function ReceptionistDashboard() {
 
             setFormError(
                 error.response?.data?.message ||
-                    "Unable to create appointment."
+                "Unable to create appointment."
             );
         } finally {
             setSavingAppointment(false);
@@ -775,17 +767,17 @@ function ReceptionistDashboard() {
                 typeof appointment.patient ===
                     "object"
                     ? appointment.patient?._id ||
-                      ""
+                    ""
                     : appointment.patient ||
-                      "",
+                    "",
 
             doctor:
                 typeof appointment.doctor ===
                     "object"
                     ? appointment.doctor?._id ||
-                      ""
+                    ""
                     : appointment.doctor ||
-                      "",
+                    "",
 
             department:
                 appointment.department ||
@@ -931,8 +923,8 @@ function ReceptionistDashboard() {
             };
 
             const response =
-                await axios.put(
-                    `${APPOINTMENTS_URL}/${editingAppointment._id}`,
+                await api.put(
+                    `/appointments/${editingAppointment._id}`,
                     updateData
                 );
 
@@ -960,7 +952,7 @@ function ReceptionistDashboard() {
 
             setFormError(
                 error.response?.data?.message ||
-                    "Unable to update appointment."
+                "Unable to update appointment."
             );
         } finally {
             setUpdatingAppointment(
@@ -1205,7 +1197,7 @@ function ReceptionistDashboard() {
                                 const status =
                                     String(
                                         doctor?.status ||
-                                            ""
+                                        ""
                                     )
                                         .toLowerCase()
                                         .trim();
@@ -1292,13 +1284,12 @@ function ReceptionistDashboard() {
                                         <div className="receptionist-doctor-status-row">
 
                                             <span
-                                                className={`receptionist-doctor-status ${
-                                                    isAvailable
+                                                className={`receptionist-doctor-status ${isAvailable
                                                         ? "available"
                                                         : isOnLeave
-                                                        ? "on-leave"
-                                                        : "unavailable"
-                                                }`}
+                                                            ? "on-leave"
+                                                            : "unavailable"
+                                                    }`}
                                             >
 
                                                 <span className="status-dot"></span>
@@ -1313,11 +1304,10 @@ function ReceptionistDashboard() {
 
                                             {isAvailable && (
                                                 <span
-                                                    className={`today-work-status ${
-                                                        bookedToday
+                                                    className={`today-work-status ${bookedToday
                                                             ? "busy"
                                                             : "free"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {bookedToday
                                                         ? "Booked today"
@@ -1368,7 +1358,7 @@ function ReceptionistDashboard() {
 
 
                     {pendingAppointments.length ===
-                    0 ? (
+                        0 ? (
 
                         <div className="receptionist-empty-state">
 
@@ -1500,7 +1490,7 @@ function ReceptionistDashboard() {
 
 
                     {doctorsOnLeave.length ===
-                    0 ? (
+                        0 ? (
 
                         <div className="receptionist-empty-state">
 
@@ -1604,7 +1594,7 @@ function ReceptionistDashboard() {
 
 
                 {todaysAppointments.length ===
-                0 ? (
+                    0 ? (
 
                     <div className="receptionist-empty-state">
 
@@ -1840,7 +1830,7 @@ function ReceptionistDashboard() {
                 {/* APPOINTMENT TABLE */}
 
                 {filteredAppointments.length ===
-                0 ? (
+                    0 ? (
 
                     <div className="receptionist-empty-state">
 

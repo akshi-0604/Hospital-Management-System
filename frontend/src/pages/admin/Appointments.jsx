@@ -1,19 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import "./Appointments.css";
-
-const API_BASE_URL =
-    "https://hospital-management-system-nvjt.onrender.com/api";
-
-const APPOINTMENTS_URL =
-    `${API_BASE_URL}/appointments`;
-
-const PATIENTS_URL =
-    `${API_BASE_URL}/patients`;
-
-const DOCTORS_URL =
-    `${API_BASE_URL}/doctors`;
 
 function Appointments() {
     const [appointments, setAppointments] =
@@ -91,9 +79,7 @@ function Appointments() {
             setError("");
 
             const response =
-                await axios.get(
-                    APPOINTMENTS_URL
-                );
+                await api.get("/appointments");
 
             console.log(
                 "Appointments API response:",
@@ -136,7 +122,7 @@ function Appointments() {
 
             setError(
                 error.response?.data?.message ||
-                    "Unable to load appointment records."
+                "Unable to load appointment records."
             );
         } finally {
             setLoading(false);
@@ -145,9 +131,7 @@ function Appointments() {
     async function fetchPatients() {
         try {
             const response =
-                await axios.get(
-                    PATIENTS_URL
-                );
+                await api.get("/patients");
 
             console.log(
                 "Patients API response:",
@@ -192,9 +176,7 @@ function Appointments() {
     async function fetchDoctors() {
         try {
             const response =
-                await axios.get(
-                    DOCTORS_URL
-                );
+                await api.get("/doctors");
 
             console.log(
                 "Doctors API response:",
@@ -235,7 +217,7 @@ function Appointments() {
 
             setDoctors([]);
         }
-      }
+    }
     function formatDate(value) {
         if (!value) {
             return "N/A";
@@ -300,7 +282,7 @@ function Appointments() {
         if (
             appointment?.patient &&
             typeof appointment.patient ===
-                "object"
+            "object"
         ) {
             return (
                 appointment.patient.fullName ||
@@ -320,7 +302,7 @@ function Appointments() {
         if (
             appointment?.doctor &&
             typeof appointment.doctor ===
-                "object"
+            "object"
         ) {
             const name =
                 appointment.doctor.fullName ||
@@ -445,9 +427,9 @@ function Appointments() {
 
                     const matchesStatus =
                         status ===
-                            "all" ||
+                        "all" ||
                         appointmentStatus ===
-                            status.toLowerCase();
+                        status.toLowerCase();
 
                     const appointmentDate =
                         getAppointmentDate(
@@ -572,8 +554,8 @@ function Appointments() {
             setSavingAppointment(true);
 
             const response =
-                await axios.post(
-                    APPOINTMENTS_URL,
+                await api.post(
+                    "/appointments",
                     appointmentForm
                 );
 
@@ -605,7 +587,7 @@ function Appointments() {
 
             setFormError(
                 error.response?.data?.message ||
-                    "Unable to create appointment."
+                "Unable to create appointment."
             );
         } finally {
             setSavingAppointment(false);
@@ -639,17 +621,17 @@ function Appointments() {
                 typeof appointment.patient ===
                     "object"
                     ? appointment.patient?._id ||
-                      ""
+                    ""
                     : appointment.patient ||
-                      "",
+                    "",
 
             doctor:
                 typeof appointment.doctor ===
                     "object"
                     ? appointment.doctor?._id ||
-                      ""
+                    ""
                     : appointment.doctor ||
-                      "",
+                    "",
 
             department:
                 appointment.department ||
@@ -797,8 +779,8 @@ function Appointments() {
             };
 
             const response =
-                await axios.put(
-                    `${APPOINTMENTS_URL}/${editingAppointment._id}`,
+                await api.put(
+                    `/appointments/${editingAppointment._id}`,
                     updateData
                 );
 
@@ -828,7 +810,7 @@ function Appointments() {
 
             setFormError(
                 error.response?.data?.message ||
-                    "Unable to update appointment."
+                "Unable to update appointment."
             );
         } finally {
             setUpdatingAppointment(false);
@@ -998,7 +980,7 @@ function Appointments() {
                 </div>
 
             ) : filteredAppointments.length ===
-              0 ? (
+                0 ? (
 
                 <div className="appointments-empty-card">
 

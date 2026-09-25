@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import "./AddDoctor.css";
 
 function AddDoctor({ onDoctorAdded, onCancel }) {
@@ -48,8 +48,8 @@ function AddDoctor({ onDoctorAdded, onCancel }) {
 
             setLoading(true);
 
-            const response = await axios.post(
-                "http://https://hospital-management-system-nvjt.onrender.com/api/doctors",
+            const response = await api.post(
+                "/doctors",
                 formData
             );
 

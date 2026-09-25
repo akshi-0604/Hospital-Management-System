@@ -3,9 +3,6 @@ import api from "../../api/axios";
 
 import "./Patients.css";
 
-const API_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api/patients";
-
 function Patients() {
   const [patients, setPatients] = useState([]);
 

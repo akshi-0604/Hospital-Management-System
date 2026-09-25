@@ -1,22 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import "./Dashboard.css";
-
-const API_BASE_URL =
-    "https://hospital-management-system-nvjt.onrender.com/api";
-
-const PATIENTS_URL =
-    `${API_BASE_URL}/patients`;
-
-const DOCTORS_URL =
-    `${API_BASE_URL}/doctors`;
-
-const APPOINTMENTS_URL =
-    `${API_BASE_URL}/appointments`;
-
-const BILLING_URL =
-    `${API_BASE_URL}/billing`;
 
 function Dashboard() {
     const [patients, setPatients] = useState([]);
@@ -41,21 +26,13 @@ function Dashboard() {
 
             const results =
                 await Promise.allSettled([
-                    axios.get(
-                        PATIENTS_URL
-                    ),
+                    api.get("/patients"),
 
-                    axios.get(
-                        DOCTORS_URL
-                    ),
+                    api.get("/doctors"),
 
-                    axios.get(
-                        APPOINTMENTS_URL
-                    ),
+                    api.get("/appointments"),
 
-                    axios.get(
-                        BILLING_URL
-                    ),
+                    api.get("/billing"),
                 ]);
 
             if (

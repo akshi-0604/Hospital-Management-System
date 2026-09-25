@@ -1,13 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 
 import "./DoctorDashboard.css";
-
-const API_BASE_URL =
-  "https://hospital-management-system-nvjt.onrender.com/api";
-
-const DOCTORS_URL = `${API_BASE_URL}/doctors`;
-const APPOINTMENTS_URL = `${API_BASE_URL}/appointments`;
 
 function DoctorDashboard() {
   const [user, setUser] = useState(null);
@@ -79,7 +73,7 @@ function DoctorDashboard() {
       setLoadingDoctor(true);
 
       const response =
-        await axios.get(DOCTORS_URL);
+        await api.get("/doctors");
 
       console.log(
         "Doctor Dashboard - Doctors API:",
@@ -153,7 +147,7 @@ function DoctorDashboard() {
 
       setError(
         error.response?.data?.message ||
-          "Unable to load doctor information."
+        "Unable to load doctor information."
       );
     } finally {
       setLoadingDoctor(false);
@@ -164,8 +158,8 @@ function DoctorDashboard() {
       setLoadingAppointments(true);
 
       const response =
-        await axios.get(
-          APPOINTMENTS_URL
+        await api.get(
+          "/appointments"
         );
 
       console.log(
@@ -208,7 +202,7 @@ function DoctorDashboard() {
               if (
                 appointmentDoctor &&
                 typeof appointmentDoctor ===
-                  "object"
+                "object"
               ) {
                 return (
                   String(
@@ -223,7 +217,7 @@ function DoctorDashboard() {
                 ) === doctorId ||
                 String(
                   appointment?.doctorId ||
-                    ""
+                  ""
                 ) === doctorId
               );
             }
@@ -243,7 +237,7 @@ function DoctorDashboard() {
 
       setError(
         error.response?.data?.message ||
-          "Unable to load appointment information."
+        "Unable to load appointment information."
       );
     } finally {
       setLoadingAppointments(false);
@@ -327,11 +321,11 @@ function DoctorDashboard() {
 
     return (
       date.getDate() ===
-        today.getDate() &&
+      today.getDate() &&
       date.getMonth() ===
-        today.getMonth() &&
+      today.getMonth() &&
       date.getFullYear() ===
-        today.getFullYear()
+      today.getFullYear()
     );
   }
 
@@ -344,7 +338,7 @@ function DoctorDashboard() {
     if (
       patient &&
       typeof patient ===
-        "object"
+      "object"
     ) {
       return (
         patient.fullName ||
@@ -493,7 +487,7 @@ function DoctorDashboard() {
       );
   const nextAppointment =
     upcomingAppointments.length >
-    0
+      0
       ? upcomingAppointments[0]
       : null;
 
@@ -895,10 +889,10 @@ function DoctorDashboard() {
                   nextAppointment
                 )
                   ? formatDate(
-                      getAppointmentDate(
-                        nextAppointment
-                      )
+                    getAppointmentDate(
+                      nextAppointment
                     )
+                  )
                   : "-"}
 
                 {" • "}
@@ -969,7 +963,7 @@ function DoctorDashboard() {
 
 
         {todaysAppointments.length ===
-        0 ? (
+          0 ? (
 
           <div className="doctor-empty-state">
 
@@ -1097,7 +1091,7 @@ function DoctorDashboard() {
 
 
         {upcomingAppointments.length ===
-        0 ? (
+          0 ? (
 
           <div className="doctor-empty-state">
 
@@ -1233,15 +1227,15 @@ function DoctorDashboard() {
 
               <p>
                 {doctorStatus ===
-                "Available"
+                  "Available"
                   ? todaysAppointments.length ===
                     0
                     ? "You currently have no appointments scheduled today."
                     : `You have ${todaysAppointments.length} appointment${todaysAppointments.length === 1 ? "" : "s"} scheduled today.`
                   : doctorStatus ===
                     "On Leave"
-                  ? "You are currently marked as on leave."
-                  : "You are currently marked as unavailable."}
+                    ? "You are currently marked as on leave."
+                    : "You are currently marked as unavailable."}
               </p>
 
             </div>
@@ -1273,8 +1267,8 @@ function DoctorDashboard() {
               <strong>
                 {nextAppointment
                   ? getAppointmentTime(
-                      nextAppointment
-                    )
+                    nextAppointment
+                  )
                   : "Free"}
               </strong>
 
