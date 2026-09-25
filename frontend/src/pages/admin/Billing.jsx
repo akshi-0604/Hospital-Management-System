@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import api from "../../api/axios";``
-
+import api from "../../api/axios";
 import "./Billing.css";
 
 const emptyItem = {
@@ -44,31 +43,30 @@ function Billing() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [savingPayment, setSavingPayment] =
-    useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
 
   const [error, setError] = useState("");
 
-  // Create bill
-  const [showAddModal, setShowAddModal] =
-    useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
 
-  // View bill
-  const [showViewModal, setShowViewModal] =
-    useState(false);
+  // View bill modal
+  const [showViewModal, setShowViewModal] = useState(false);
 
-  // Record payment
+  // Record payment modal
   const [showPaymentModal, setShowPaymentModal] =
     useState(false);
 
+  // Selected bill
   const [selectedBilling, setSelectedBilling] =
     useState(null);
 
-  const [formData, setFormData] =
-    useState(emptyForm);
+  // Form
+  const [formData, setFormData] = useState(emptyForm);
 
+  // Payment form
   const [paymentForm, setPaymentForm] =
     useState(emptyPaymentForm);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -77,42 +75,23 @@ function Billing() {
     setLoading(true);
     setError("");
 
-    const results =
-      await Promise.allSettled([
-        api.get("/billing"),
-        api.get("/patients"),
-        api.get("/doctors"),
-        api.get("/appointments"),
-      ]);
+    const results = await Promise.allSettled([
+      api.get("/billing"),
+      api.get("/patients"),
+      api.get("/doctors"),
+      api.get("/appointments"),
+    ]);
 
     // Billing
-    if (
-      results[0].status ===
-      "fulfilled"
-    ) {
-      const response =
-        results[0].value.data;
+    if (results[0].status === "fulfilled") {
+      const response = results[0].value.data;
 
-      if (
-        Array.isArray(response)
-      ) {
+      if (Array.isArray(response)) {
         setBillings(response);
-      } else if (
-        Array.isArray(
-          response?.billings
-        )
-      ) {
-        setBillings(
-          response.billings
-        );
-      } else if (
-        Array.isArray(
-          response?.data
-        )
-      ) {
-        setBillings(
-          response.data
-        );
+      } else if (Array.isArray(response?.billings)) {
+        setBillings(response.billings);
+      } else if (Array.isArray(response?.data)) {
+        setBillings(response.data);
       } else {
         setBillings([]);
       }
@@ -120,178 +99,100 @@ function Billing() {
       setBillings([]);
 
       setError(
-        results[0].reason?.response
-          ?.data?.message ||
-        "Unable to load billing records."
+        results[0].reason?.response?.data?.message ||
+          "Unable to load billing records."
       );
     }
 
     // Patients
-    if (
-      results[1].status ===
-      "fulfilled"
-    ) {
-      const response =
-        results[1].value.data;
+    if (results[1].status === "fulfilled") {
+      const response = results[1].value.data;
 
-      if (
-        Array.isArray(response)
-      ) {
+      if (Array.isArray(response)) {
         setPatients(response);
-      } else if (
-        Array.isArray(
-          response?.patients
-        )
-      ) {
-        setPatients(
-          response.patients
-        );
-      } else if (
-        Array.isArray(
-          response?.data
-        )
-      ) {
-        setPatients(
-          response.data
-        );
+      } else if (Array.isArray(response?.patients)) {
+        setPatients(response.patients);
+      } else if (Array.isArray(response?.data)) {
+        setPatients(response.data);
       }
     }
 
     // Doctors
-    if (
-      results[2].status ===
-      "fulfilled"
-    ) {
-      const response =
-        results[2].value.data;
+    if (results[2].status === "fulfilled") {
+      const response = results[2].value.data;
 
-      if (
-        Array.isArray(response)
-      ) {
+      if (Array.isArray(response)) {
         setDoctors(response);
-      } else if (
-        Array.isArray(
-          response?.doctors
-        )
-      ) {
-        setDoctors(
-          response.doctors
-        );
-      } else if (
-        Array.isArray(
-          response?.data
-        )
-      ) {
-        setDoctors(
-          response.data
-        );
+      } else if (Array.isArray(response?.doctors)) {
+        setDoctors(response.doctors);
+      } else if (Array.isArray(response?.data)) {
+        setDoctors(response.data);
       }
     }
 
     // Appointments
-    if (
-      results[3].status ===
-      "fulfilled"
-    ) {
-      const response =
-        results[3].value.data;
+    if (results[3].status === "fulfilled") {
+      const response = results[3].value.data;
 
-      if (
-        Array.isArray(response)
-      ) {
+      if (Array.isArray(response)) {
         setAppointments(response);
-      } else if (
-        Array.isArray(
-          response?.appointments
-        )
-      ) {
-        setAppointments(
-          response.appointments
-        );
-      } else if (
-        Array.isArray(
-          response?.data
-        )
-      ) {
-        setAppointments(
-          response.data
-        );
+      } else if (Array.isArray(response?.appointments)) {
+        setAppointments(response.appointments);
+      } else if (Array.isArray(response?.data)) {
+        setAppointments(response.data);
       }
     }
 
     setLoading(false);
   }
 
-  const filteredBillings =
-    useMemo(() => {
-      const searchText =
-        search.trim().toLowerCase();
+  const filteredBillings = useMemo(() => {
+    const searchText = search.trim().toLowerCase();
 
-      return billings.filter(
-        (bill) => {
-          const patientName =
-            bill.patient
-              ?.fullName || "";
+    return billings.filter((bill) => {
+      const patientName =
+        bill.patient?.fullName || "";
 
-          const invoiceNumber =
-            bill.invoiceNumber ||
-            "";
+      const invoiceNumber =
+        bill.invoiceNumber || "";
 
-          const matchesSearch =
-            !searchText ||
-            patientName
-              .toLowerCase()
-              .includes(
-                searchText
-              ) ||
-            invoiceNumber
-              .toLowerCase()
-              .includes(
-                searchText
-              );
+      const matchesSearch =
+        !searchText ||
+        patientName
+          .toLowerCase()
+          .includes(searchText) ||
+        invoiceNumber
+          .toLowerCase()
+          .includes(searchText);
 
-          const matchesStatus =
-            paymentStatusFilter ===
-            "All" ||
-            bill.paymentStatus ===
-            paymentStatusFilter;
+      const matchesStatus =
+        paymentStatusFilter === "All" ||
+        bill.paymentStatus === paymentStatusFilter;
 
-          return (
-            matchesSearch &&
-            matchesStatus
-          );
-        }
-      );
-    }, [
-      billings,
-      search,
-      paymentStatusFilter,
-    ]);
+      return matchesSearch && matchesStatus;
+    });
+  }, [
+    billings,
+    search,
+    paymentStatusFilter,
+  ]);
 
   function formatDate(value) {
     if (!value) {
       return "-";
     }
 
-    const date =
-      new Date(value);
+    const date = new Date(value);
 
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
+    if (Number.isNaN(date.getTime())) {
       return "-";
     }
 
-    return date.toLocaleDateString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   }
 
   function formatDateTime(value) {
@@ -299,27 +200,19 @@ function Billing() {
       return "-";
     }
 
-    const date =
-      new Date(value);
+    const date = new Date(value);
 
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
+    if (Number.isNaN(date.getTime())) {
       return "-";
     }
 
-    return date.toLocaleString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }
-    );
+    return date.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
   function formatCurrency(value) {
@@ -334,49 +227,68 @@ function Billing() {
       .split("T")[0];
   }
 
+  function formatDateForInput(value) {
+    if (!value) {
+      return "";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    return date.toISOString().split("T")[0];
+  }
+
   function generateInvoiceNumber() {
-    const randomNumber =
-      Math.floor(
-        1000 +
-        Math.random() * 9000
-      );
+    const randomNumber = Math.floor(
+      1000 + Math.random() * 9000
+    );
 
     return `INV-${Date.now()
       .toString()
       .slice(-6)}-${randomNumber}`;
   }
 
+  function getId(value) {
+    if (!value) {
+      return "";
+    }
+
+    if (typeof value === "object") {
+      return value._id || value.id || "";
+    }
+
+    return value;
+  }
+
   function getAmountPaid(bill) {
-    return Number(
-      bill?.amountPaid || 0
-    );
+    return Number(bill?.amountPaid || 0);
   }
 
   function getBalanceAmount(bill) {
     if (!bill) {
       return 0;
     }
+
     if (
-      bill.paymentStatus ===
-      "Paid" ||
-      bill.paymentStatus ===
-      "Cancelled"
+      bill.paymentStatus === "Paid" ||
+      bill.paymentStatus === "Cancelled"
     ) {
       return 0;
     }
 
-    const totalAmount =
-      Number(
-        bill.totalAmount || 0
-      );
+    const totalAmount = Number(
+      bill.totalAmount || 0
+    );
 
-    const amountPaid =
-      Number(
-        bill.amountPaid || 0
-      );
+    const amountPaid = Number(
+      bill.amountPaid || 0
+    );
+
     return Math.max(
-      totalAmount -
-      amountPaid,
+      totalAmount - amountPaid,
       0
     );
   }
@@ -386,104 +298,107 @@ function Billing() {
       return false;
     }
 
-    const date =
-      new Date(value);
+    const date = new Date(value);
 
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
+    if (Number.isNaN(date.getTime())) {
       return false;
     }
 
-    const today =
-      new Date();
+    const today = new Date();
 
     return (
-      date.getDate() ===
-      today.getDate() &&
-      date.getMonth() ===
-      today.getMonth() &&
-      date.getFullYear() ===
-      today.getFullYear()
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
     );
   }
 
   const calculatedSubtotal =
     formData.items.reduce(
       (total, item) =>
-        total +
-        Number(
-          item.amount || 0
-        ),
+        total + Number(item.amount || 0),
       0
     );
 
-  const calculatedDiscount =
-    Number(
-      formData.discount || 0
-    );
+  const calculatedDiscount = Number(
+    formData.discount || 0
+  );
 
-  const calculatedTax =
-    Number(
-      formData.tax || 0
-    );
+  const calculatedTax = Number(
+    formData.tax || 0
+  );
 
-  const calculatedTotal =
-    Math.max(
-      calculatedSubtotal -
+  const calculatedTotal = Math.max(
+    calculatedSubtotal -
       calculatedDiscount +
       calculatedTax,
-      0
-    );
-  const availableAppointments =
-    useMemo(() => {
-      if (
-        !formData.patient ||
-        !formData.doctor
-      ) {
-        return [];
+    0
+  );
+
+  const availableAppointments = useMemo(() => {
+    if (
+      !formData.patient ||
+      !formData.doctor
+    ) {
+      return [];
+    }
+
+    const filtered = appointments.filter(
+      (appointment) => {
+        const patientId =
+          appointment.patient?._id ||
+          appointment.patient;
+
+        const doctorId =
+          appointment.doctor?._id ||
+          appointment.doctor;
+
+        return (
+          String(patientId) ===
+            String(formData.patient) &&
+          String(doctorId) ===
+            String(formData.doctor)
+        );
       }
-
-      return appointments.filter(
-        (appointment) => {
-          const patientId =
-            appointment.patient
-              ?._id ||
-            appointment.patient;
-
-          const doctorId =
-            appointment.doctor
-              ?._id ||
-            appointment.doctor;
-
-          return (
-            String(patientId) ===
-            String(
-              formData.patient
-            ) &&
-            String(doctorId) ===
-            String(
-              formData.doctor
-            )
-          );
-        }
+    );
+    if (formData.appointment) {
+      const alreadyExists = filtered.some(
+        (appointment) =>
+          String(appointment._id) ===
+          String(formData.appointment)
       );
-    }, [
-      appointments,
-      formData.patient,
-      formData.doctor,
-    ]);
-  const totalBills =
-    billings.length;
 
-  const paidBills =
-    billings.filter(
-      (bill) =>
-        bill.paymentStatus ===
-        "Paid"
-    ).length;
+      if (!alreadyExists) {
+        const currentAppointment =
+          appointments.find(
+            (appointment) =>
+              String(appointment._id) ===
+              String(formData.appointment)
+          );
+
+        if (currentAppointment) {
+          return [
+            currentAppointment,
+            ...filtered,
+          ];
+        }
+      }
+    }
+
+    return filtered;
+  }, [
+    appointments,
+    formData.patient,
+    formData.doctor,
+    formData.appointment,
+  ]);
+
+  const totalBills = billings.length;
+
+  const paidBills = billings.filter(
+    (bill) =>
+      bill.paymentStatus === "Paid"
+  ).length;
 
   const partiallyPaidBills =
     billings.filter(
@@ -492,93 +407,138 @@ function Billing() {
         "Partially Paid"
     ).length;
 
-  const pendingBills =
-    billings.filter(
-      (bill) =>
-        bill.paymentStatus ===
-        "Pending"
-    ).length;
+  const pendingBills = billings.filter(
+    (bill) =>
+      bill.paymentStatus === "Pending"
+  ).length;
 
   const totalPaidRevenue =
     billings.reduce(
       (total, bill) =>
-        total +
-        getAmountPaid(bill),
+        total + getAmountPaid(bill),
       0
     );
 
-  const todaysRevenue =
-    billings.reduce(
-      (total, bill) => {
-        if (
-          !Array.isArray(
-            bill.payments
-          )
-        ) {
-          return total;
-        }
+  const todaysRevenue = billings.reduce(
+    (total, bill) => {
+      if (!Array.isArray(bill.payments)) {
+        return total;
+      }
 
-        const todayPayments =
-          bill.payments.reduce(
-            (
-              paymentTotal,
-              payment
-            ) => {
-              if (
-                isToday(
-                  payment.paymentDate
+      const todayPayments =
+        bill.payments.reduce(
+          (paymentTotal, payment) => {
+            if (
+              isToday(
+                payment.paymentDate
+              )
+            ) {
+              return (
+                paymentTotal +
+                Number(
+                  payment.amount || 0
                 )
-              ) {
-                return (
-                  paymentTotal +
-                  Number(
-                    payment.amount ||
-                    0
-                  )
-                );
-              }
+              );
+            }
 
-              return paymentTotal;
-            },
-            0
-          );
-
-        return (
-          total +
-          todayPayments
+            return paymentTotal;
+          },
+          0
         );
-      },
-      0
-    );
+
+      return total + todayPayments;
+    },
+    0
+  );
   function openAddModal() {
+    setSelectedBilling(null);
+
     setFormData({
       ...emptyForm,
-
       invoiceNumber:
         generateInvoiceNumber(),
-
-      invoiceDate:
-        getToday(),
-
-      dueDate:
-        getToday(),
-
-      items: [
-        { ...emptyItem },
-      ],
+      invoiceDate: getToday(),
+      dueDate: getToday(),
+      items: [{ ...emptyItem }],
     });
 
     setError("");
+    setShowViewModal(false);
+    setShowFormModal(true);
+  }
+  function openEditModal(billing) {
+    if (!billing) {
+      return;
+    }
 
-    setShowAddModal(true);
+    setSelectedBilling(billing);
+
+    const patientId = getId(
+      billing.patient
+    );
+
+    const doctorId = getId(
+      billing.doctor
+    );
+
+    const appointmentId = getId(
+      billing.appointment
+    );
+
+    const items =
+      Array.isArray(billing.items) &&
+      billing.items.length > 0
+        ? billing.items.map((item) => ({
+            description:
+              item.description || "",
+            category:
+              item.category || "Other",
+            amount:
+              item.amount ?? "",
+          }))
+        : [{ ...emptyItem }];
+
+    setFormData({
+      patient: patientId,
+      doctor: doctorId,
+      appointment: appointmentId,
+      invoiceNumber:
+        billing.invoiceNumber || "",
+      invoiceDate:
+        formatDateForInput(
+          billing.invoiceDate
+        ),
+      dueDate:
+        formatDateForInput(
+          billing.dueDate
+        ),
+      items,
+      discount:
+        billing.discount ?? "",
+      tax:
+        billing.tax ?? "",
+      paymentStatus:
+        billing.paymentStatus ||
+        "Pending",
+      paymentMethod:
+        billing.paymentMethod ||
+        "Cash",
+      notes:
+        billing.notes || "",
+    });
+
+    setError("");
+    setShowViewModal(false);
+    setShowFormModal(true);
   }
 
-  function closeAddModal() {
+  function closeFormModal() {
     if (saving) {
       return;
     }
 
-    setShowAddModal(false);
+    setShowFormModal(false);
+    setSelectedBilling(null);
     setFormData(emptyForm);
   }
 
@@ -588,25 +548,26 @@ function Billing() {
       value,
     } = event.target;
 
-    setFormData(
-      (previous) => ({
-        ...previous,
-        [name]: value,
-      })
-    );
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   }
 
-  function handleDoctorChange(
-    event
-  ) {
-    setFormData(
-      (previous) => ({
-        ...previous,
-        doctor:
-          event.target.value,
-        appointment: "",
-      })
-    );
+  function handlePatientChange(event) {
+    setFormData((previous) => ({
+      ...previous,
+      patient: event.target.value,
+      appointment: "",
+    }));
+  }
+
+  function handleDoctorChange(event) {
+    setFormData((previous) => ({
+      ...previous,
+      doctor: event.target.value,
+      appointment: "",
+    }));
   }
 
   function updateItem(
@@ -614,81 +575,57 @@ function Billing() {
     field,
     value
   ) {
-    setFormData(
-      (previous) => {
-        const updatedItems =
-          [
-            ...previous.items,
-          ];
+    setFormData((previous) => {
+      const updatedItems = [
+        ...previous.items,
+      ];
 
-        updatedItems[index] =
-        {
-          ...updatedItems[
-          index
-          ],
-          [field]: value,
-        };
+      updatedItems[index] = {
+        ...updatedItems[index],
+        [field]: value,
+      };
 
-        return {
-          ...previous,
-          items:
-            updatedItems,
-        };
-      }
-    );
+      return {
+        ...previous,
+        items: updatedItems,
+      };
+    });
   }
 
   function addItem() {
-    setFormData(
-      (previous) => ({
-        ...previous,
-        items: [
-          ...previous.items,
-          { ...emptyItem },
-        ],
-      })
-    );
+    setFormData((previous) => ({
+      ...previous,
+      items: [
+        ...previous.items,
+        { ...emptyItem },
+      ],
+    }));
   }
 
-  function removeItem(
-    index
-  ) {
-    setFormData(
-      (previous) => ({
-        ...previous,
-        items:
-          previous.items.filter(
-            (
-              _,
-              itemIndex
-            ) =>
-              itemIndex !==
-              index
-          ),
-      })
-    );
+  function removeItem(index) {
+    setFormData((previous) => ({
+      ...previous,
+      items: previous.items.filter(
+        (_, itemIndex) =>
+          itemIndex !== index
+      ),
+    }));
   }
-
-  async function handleSubmit(
-    event
-  ) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const validItems =
       formData.items.filter(
         (item) =>
           item.description.trim() &&
-          Number(
-            item.amount || 0
-          ) >= 0
+          Number(item.amount || 0) >= 0
       );
 
     if (
       !formData.patient ||
       !formData.invoiceNumber.trim() ||
       !formData.invoiceDate ||
-      validItems.length ===
-      0
+      validItems.length === 0
     ) {
       alert(
         "Patient, invoice number, invoice date and at least one billing item are required."
@@ -700,16 +637,13 @@ function Billing() {
       setSaving(true);
 
       const payload = {
-        patient:
-          formData.patient,
+        patient: formData.patient,
 
         doctor:
-          formData.doctor ||
-          null,
+          formData.doctor || null,
 
         appointment:
-          formData.appointment ||
-          null,
+          formData.appointment || null,
 
         invoiceNumber:
           formData.invoiceNumber.trim(),
@@ -718,38 +652,35 @@ function Billing() {
           formData.invoiceDate,
 
         dueDate:
-          formData.dueDate ||
-          null,
+          formData.dueDate || null,
 
-        items:
-          validItems.map(
-            (item) => ({
-              description:
-                item.description.trim(),
+        items: validItems.map(
+          (item) => ({
+            description:
+              item.description.trim(),
 
-              category:
-                item.category.trim() ||
-                "Other",
+            category:
+              item.category.trim() ||
+              "Other",
 
-              amount:
-                Number(
-                  item.amount || 0
-                ),
-            })
-          ),
+            amount: Number(
+              item.amount || 0
+            ),
+          })
+        ),
 
-        discount:
-          Number(
-            formData.discount || 0
-          ),
+        discount: Number(
+          formData.discount || 0
+        ),
 
-        tax:
-          Number(
-            formData.tax || 0
-          ),
+        tax: Number(
+          formData.tax || 0
+        ),
 
         paymentStatus:
-          "Pending",
+          selectedBilling
+            ? formData.paymentStatus
+            : "Pending",
 
         paymentMethod:
           formData.paymentMethod,
@@ -758,54 +689,111 @@ function Billing() {
           formData.notes.trim(),
       };
 
-      await api.post(
-  "/billing",
-  payload
-);
+      if (selectedBilling) {
+        await api.put(
+          `/billing/${selectedBilling._id}`,
+          payload
+        );
 
-      alert(
-        "Bill created successfully. You can record the patient's payment using Edit."
-      );
+        alert(
+          "Bill updated successfully."
+        );
+      } else {
+        await api.post(
+          "/billing",
+          payload
+        );
 
-      closeAddModal();
+        alert(
+          "Bill created successfully."
+        );
+      }
+
+      setShowFormModal(false);
+      setSelectedBilling(null);
+      setFormData(emptyForm);
+
       await loadData();
     } catch (error) {
       console.error(
-        "Create billing error:",
+        "Save billing error:",
         error
       );
 
       alert(
-        error.response?.data
-          ?.message ||
-        "Unable to create bill."
+        error.response?.data?.message ||
+          "Unable to save billing record."
       );
     } finally {
       setSaving(false);
     }
   }
-
-  function openViewModal(
+  async function handleDeleteBilling(
     billing
   ) {
-    setSelectedBilling(
-      billing
+    if (!billing?._id) {
+      return;
+    }
+
+    const invoiceNumber =
+      billing.invoiceNumber ||
+      "this invoice";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete/cancel invoice ${invoiceNumber}?\n\nThis action will remove the billing record and should only be used when the bill must be cancelled.`
     );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      await api.delete(
+        `/billing/${billing._id}`
+      );
+
+      alert(
+        "Billing record deleted successfully."
+      );
+
+      if (
+        selectedBilling?._id ===
+        billing._id
+      ) {
+        setSelectedBilling(null);
+      }
+
+      setShowViewModal(false);
+      setShowFormModal(false);
+
+      await loadData();
+    } catch (error) {
+      console.error(
+        "Delete billing error:",
+        error
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Unable to delete billing record."
+      );
+    }
+  }
+  function openViewModal(billing) {
+    setSelectedBilling(billing);
     setShowViewModal(true);
+    setShowFormModal(false);
   }
 
   function closeViewModal() {
     setSelectedBilling(null);
     setShowViewModal(false);
   }
-
-  function openPaymentModal(
-    billing
-  ) {
+  function openPaymentModal(billing) {
     const balance =
-      getBalanceAmount(
-        billing
-      );
+      getBalanceAmount(billing);
 
     if (balance <= 0) {
       alert(
@@ -814,14 +802,11 @@ function Billing() {
       return;
     }
 
-    setSelectedBilling(
-      billing
-    );
+    setSelectedBilling(billing);
 
     setPaymentForm({
       amount: "",
-      paymentDate:
-        getToday(),
+      paymentDate: getToday(),
       paymentMethod:
         billing.paymentMethod ||
         "Cash",
@@ -831,9 +816,8 @@ function Billing() {
 
     setError("");
 
-    setShowPaymentModal(
-      true
-    );
+    setShowViewModal(false);
+    setShowPaymentModal(true);
   }
 
   function closePaymentModal() {
@@ -841,33 +825,21 @@ function Billing() {
       return;
     }
 
-    setShowPaymentModal(
-      false
-    );
-
-    setSelectedBilling(
-      null
-    );
-
-    setPaymentForm(
-      emptyPaymentForm
-    );
+    setShowPaymentModal(false);
+    setSelectedBilling(null);
+    setPaymentForm(emptyPaymentForm);
   }
 
-  function handlePaymentChange(
-    event
-  ) {
+  function handlePaymentChange(event) {
     const {
       name,
       value,
     } = event.target;
 
-    setPaymentForm(
-      (previous) => ({
-        ...previous,
-        [name]: value,
-      })
-    );
+    setPaymentForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   }
 
   async function handleRecordPayment(
@@ -879,10 +851,9 @@ function Billing() {
       return;
     }
 
-    const paymentAmount =
-      Number(
-        paymentForm.amount
-      );
+    const paymentAmount = Number(
+      paymentForm.amount
+    );
 
     const balance =
       getBalanceAmount(
@@ -901,10 +872,7 @@ function Billing() {
       return;
     }
 
-    if (
-      paymentAmount >
-      balance
-    ) {
+    if (paymentAmount > balance) {
       alert(
         `Payment cannot exceed the remaining balance of ${formatCurrency(
           balance
@@ -914,14 +882,12 @@ function Billing() {
     }
 
     try {
-      setSavingPayment(
-        true
-      );
+      setSavingPayment(true);
 
       const response =
-  await api.patch(
-    `/billing/${selectedBilling._id}/payment`,
-    {
+        await api.patch(
+          `/billing/${selectedBilling._id}/payment`,
+          {
             amount:
               paymentAmount,
 
@@ -941,7 +907,7 @@ function Billing() {
 
       alert(
         response.data?.message ||
-        "Payment recorded successfully."
+          "Payment recorded successfully."
       );
 
       closePaymentModal();
@@ -954,14 +920,11 @@ function Billing() {
       );
 
       alert(
-        error.response?.data
-          ?.message ||
-        "Unable to record payment."
+        error.response?.data?.message ||
+          "Unable to record payment."
       );
     } finally {
-      setSavingPayment(
-        false
-      );
+      setSavingPayment(false);
     }
   }
 
@@ -988,29 +951,24 @@ function Billing() {
         ).getTime()
     );
   }
+
   return (
     <div className="billing-page">
-
       <div className="billing-header">
 
         <div>
-          <h1>
-            Billing
-          </h1>
+          <h1>Billing</h1>
 
           <p>
-            Manage invoices,
-            payments and patient
-            billing records.
+            Manage invoices, payments
+            and patient billing records.
           </p>
         </div>
 
         <button
           type="button"
           className="add-bill-button"
-          onClick={
-            openAddModal
-          }
+          onClick={openAddModal}
         >
           + Create Bill
         </button>
@@ -1020,93 +978,48 @@ function Billing() {
       <div className="billing-summary">
 
         <div className="billing-summary-card">
-          <span>
-            Total Bills
-          </span>
-
-          <strong>
-            {totalBills}
-          </strong>
-
-          <small>
-            All invoices
-          </small>
+          <span>Total Bills</span>
+          <strong>{totalBills}</strong>
+          <small>All invoices</small>
         </div>
 
-
         <div className="billing-summary-card">
-          <span>
-            Paid Bills
-          </span>
-
-          <strong>
-            {paidBills}
-          </strong>
-
-          <small>
-            Fully paid
-          </small>
+          <span>Paid Bills</span>
+          <strong>{paidBills}</strong>
+          <small>Fully paid</small>
         </div>
 
-
         <div className="billing-summary-card">
-          <span>
-            Partially Paid
-          </span>
-
+          <span>Partially Paid</span>
           <strong>
             {partiallyPaidBills}
           </strong>
-
-          <small>
-            Balance remaining
-          </small>
+          <small>Balance remaining</small>
         </div>
 
-
         <div className="billing-summary-card">
-          <span>
-            Pending Bills
-          </span>
-
-          <strong>
-            {pendingBills}
-          </strong>
-
-          <small>
-            No payment yet
-          </small>
+          <span>Pending Bills</span>
+          <strong>{pendingBills}</strong>
+          <small>No payment yet</small>
         </div>
 
-
         <div className="billing-summary-card">
-          <span>
-            Paid Revenue
-          </span>
-
+          <span>Paid Revenue</span>
           <strong>
             {formatCurrency(
               totalPaidRevenue
             )}
           </strong>
-
-          <small>
-            Total collected
-          </small>
+          <small>Total collected</small>
         </div>
 
-
         <div className="billing-summary-card">
-          <span>
-            Today's Revenue
-          </span>
-
+          <span>Today's Revenue</span>
           <strong>
             {formatCurrency(
               todaysRevenue
             )}
           </strong>
-
           <small>
             Payments received today
           </small>
@@ -1114,15 +1027,16 @@ function Billing() {
 
       </div>
 
+
+      {/* TOOLBAR */}
+
       <div className="billing-toolbar">
 
         <input
           type="text"
           placeholder="Search invoice or patient..."
           value={search}
-          onChange={(
-            event
-          ) =>
+          onChange={(event) =>
             setSearch(
               event.target.value
             )
@@ -1133,9 +1047,7 @@ function Billing() {
           value={
             paymentStatusFilter
           }
-          onChange={(
-            event
-          ) =>
+          onChange={(event) =>
             setPaymentStatusFilter(
               event.target.value
             )
@@ -1164,9 +1076,7 @@ function Billing() {
 
         <button
           type="button"
-          onClick={
-            loadData
-          }
+          onClick={loadData}
         >
           ↻ Refresh
         </button>
@@ -1179,10 +1089,6 @@ function Billing() {
           {error}
         </div>
       )}
-
-
-      {/* TABLE */}
-
       <div className="billing-table-card">
 
         {loading ? (
@@ -1192,7 +1098,6 @@ function Billing() {
         ) : filteredBillings.length ===
           0 ? (
           <div className="billing-empty">
-
             <strong>
               No billing records found
             </strong>
@@ -1201,7 +1106,6 @@ function Billing() {
               Create a bill to see
               billing data here.
             </span>
-
           </div>
         ) : (
           <div className="billing-table-wrapper">
@@ -1210,94 +1114,48 @@ function Billing() {
 
               <thead>
                 <tr>
-
-                  <th>
-                    Invoice
-                  </th>
-
-                  <th>
-                    Patient
-                  </th>
-
-                  <th>
-                    Doctor
-                  </th>
-
-                  <th>
-                    Invoice Date
-                  </th>
-
-                  <th>
-                    Total
-                  </th>
-
-                  <th>
-                    Paid
-                  </th>
-
-                  <th>
-                    Balance
-                  </th>
-
-                  <th>
-                    Payment
-                  </th>
-
-                  <th>
-                    Method
-                  </th>
-
-                  <th>
-                    Action
-                  </th>
-
+                  <th>Invoice</th>
+                  <th>Patient</th>
+                  <th>Doctor</th>
+                  <th>Invoice Date</th>
+                  <th>Total</th>
+                  <th>Paid</th>
+                  <th>Balance</th>
+                  <th>Payment</th>
+                  <th>Method</th>
+                  <th>Action</th>
                 </tr>
               </thead>
-
 
               <tbody>
 
                 {filteredBillings.map(
                   (bill) => (
-                    <tr
-                      key={
-                        bill._id
-                      }
-                    >
+                    <tr key={bill._id}>
 
                       <td>
                         <strong>
-                          {
-                            bill.invoiceNumber
-                          }
+                          {bill.invoiceNumber}
                         </strong>
                       </td>
 
-
                       <td>
-                        {
-                          bill.patient
-                            ?.fullName ||
-                          "Unknown Patient"
-                        }
+                        {bill.patient
+                          ?.fullName ||
+                          "Unknown Patient"}
                       </td>
 
-
                       <td>
-                        {
-                          bill.doctor
-                            ?.fullName ||
-                          "Not assigned"
-                        }
+                        {bill.doctor
+                          ?.fullName ||
+                          "Not assigned"}
                       </td>
-
 
                       <td>
                         {formatDate(
                           bill.invoiceDate
                         )}
                       </td>
-
 
                       <td>
                         <strong>
@@ -1306,7 +1164,6 @@ function Billing() {
                           )}
                         </strong>
                       </td>
-
 
                       <td className="paid-amount-cell">
                         <strong>
@@ -1318,7 +1175,6 @@ function Billing() {
                         </strong>
                       </td>
 
-
                       <td className="balance-amount-cell">
                         <strong>
                           {formatCurrency(
@@ -1329,12 +1185,11 @@ function Billing() {
                         </strong>
                       </td>
 
-
                       <td>
                         <span
                           className={`payment-status ${String(
                             bill.paymentStatus ||
-                            ""
+                              ""
                           )
                             .toLowerCase()
                             .replaceAll(
@@ -1348,14 +1203,10 @@ function Billing() {
                         </span>
                       </td>
 
-
                       <td>
-                        {
-                          bill.paymentMethod ||
-                          "-"
-                        }
+                        {bill.paymentMethod ||
+                          "-"}
                       </td>
-
 
                       <td>
 
@@ -1372,17 +1223,15 @@ function Billing() {
                           >
                             View
                           </button>
-
-
                           {bill.paymentStatus !==
                             "Paid" &&
                             bill.paymentStatus !==
-                            "Cancelled" && (
+                              "Cancelled" && (
                               <button
                                 type="button"
                                 className="edit-bill-button"
                                 onClick={() =>
-                                  openPaymentModal(
+                                  openEditModal(
                                     bill
                                   )
                                 }
@@ -1390,6 +1239,36 @@ function Billing() {
                                 Edit
                               </button>
                             )}
+                          {bill.paymentStatus !==
+                            "Paid" &&
+                            bill.paymentStatus !==
+                              "Cancelled" && (
+                              <button
+                                type="button"
+                                className="payment-bill-button"
+                                onClick={() =>
+                                  openPaymentModal(
+                                    bill
+                                  )
+                                }
+                              >
+                                Payment
+                              </button>
+                            )}
+                          {bill.paymentStatus !==
+                            "Paid" && (
+                            <button
+                              type="button"
+                              className="delete-bill-button"
+                              onClick={() =>
+                                handleDeleteBilling(
+                                  bill
+                                )
+                              }
+                            >
+                              Delete
+                            </button>
+                          )}
 
                         </div>
 
@@ -1408,17 +1287,15 @@ function Billing() {
 
       </div>
 
-      {showAddModal && (
+      {showFormModal && (
         <div
           className="billing-modal-overlay"
-          onMouseDown={(
-            event
-          ) => {
+          onMouseDown={(event) => {
             if (
               event.target ===
               event.currentTarget
             ) {
-              closeAddModal();
+              closeFormModal();
             }
           }}
         >
@@ -1429,12 +1306,15 @@ function Billing() {
 
               <div>
                 <h2>
-                  Create Bill
+                  {selectedBilling
+                    ? "Edit Bill"
+                    : "Create Bill"}
                 </h2>
 
                 <p>
-                  Create a new patient
-                  billing invoice.
+                  {selectedBilling
+                    ? "Update the patient billing invoice."
+                    : "Create a new patient billing invoice."}
                 </p>
               </div>
 
@@ -1442,8 +1322,9 @@ function Billing() {
                 type="button"
                 className="billing-close-button"
                 onClick={
-                  closeAddModal
+                  closeFormModal
                 }
+                disabled={saving}
               >
                 ×
               </button>
@@ -1453,9 +1334,7 @@ function Billing() {
 
             <form
               className="billing-form"
-              onSubmit={
-                handleSubmit
-              }
+              onSubmit={handleSubmit}
             >
 
               <div className="form-row">
@@ -1472,11 +1351,10 @@ function Billing() {
                       formData.patient
                     }
                     onChange={
-                      handleChange
+                      handlePatientChange
                     }
                     required
                   >
-
                     <option value="">
                       Select patient
                     </option>
@@ -1501,8 +1379,6 @@ function Billing() {
                   </select>
 
                 </div>
-
-
                 <div className="form-group">
 
                   <label>
@@ -1518,7 +1394,6 @@ function Billing() {
                       handleDoctorChange
                     }
                   >
-
                     <option value="">
                       Not assigned
                     </option>
@@ -1545,8 +1420,6 @@ function Billing() {
                 </div>
 
               </div>
-
-
               <div className="form-row">
 
                 <div className="form-group">
@@ -1564,15 +1437,12 @@ function Billing() {
                       handleChange
                     }
                   >
-
                     <option value="">
                       No appointment linked
                     </option>
 
                     {availableAppointments.map(
-                      (
-                        appointment
-                      ) => (
+                      (appointment) => (
                         <option
                           key={
                             appointment._id
@@ -1595,8 +1465,6 @@ function Billing() {
                   </select>
 
                 </div>
-
-
                 <div className="form-group">
 
                   <label>
@@ -1617,8 +1485,6 @@ function Billing() {
                 </div>
 
               </div>
-
-
               <div className="form-row">
 
                 <div className="form-group">
@@ -1640,8 +1506,6 @@ function Billing() {
                   />
 
                 </div>
-
-
                 <div className="form-group">
 
                   <label>
@@ -1663,6 +1527,94 @@ function Billing() {
 
               </div>
 
+              {selectedBilling && (
+                <div className="form-row">
+
+                  <div className="form-group">
+
+                    <label>
+                      Payment Status
+                    </label>
+
+                    <select
+                      name="paymentStatus"
+                      value={
+                        formData.paymentStatus
+                      }
+                      onChange={
+                        handleChange
+                      }
+                    >
+                      <option value="Pending">
+                        Pending
+                      </option>
+
+                      <option value="Partially Paid">
+                        Partially Paid
+                      </option>
+
+                      <option value="Paid">
+                        Paid
+                      </option>
+
+                      <option value="Cancelled">
+                        Cancelled
+                      </option>
+                    </select>
+
+                    <small className="form-help-text">
+                      Payment amounts should
+                      normally be changed through
+                      Record Payment.
+                    </small>
+
+                  </div>
+
+
+                  <div className="form-group">
+
+                    <label>
+                      Payment Method
+                    </label>
+
+                    <select
+                      name="paymentMethod"
+                      value={
+                        formData.paymentMethod
+                      }
+                      onChange={
+                        handleChange
+                      }
+                    >
+                      <option>
+                        Cash
+                      </option>
+
+                      <option>
+                        UPI
+                      </option>
+
+                      <option>
+                        Card
+                      </option>
+
+                      <option>
+                        Net Banking
+                      </option>
+
+                      <option>
+                        Insurance
+                      </option>
+
+                      <option>
+                        Other
+                      </option>
+                    </select>
+
+                  </div>
+
+                </div>
+              )}
 
               <div className="billing-items-heading">
 
@@ -1672,9 +1624,8 @@ function Billing() {
                   </h3>
 
                   <span>
-                    Consultation,
-                    tests, medicines,
-                    room charges,
+                    Consultation, tests,
+                    medicines, room charges,
                     procedures, etc.
                   </span>
                 </div>
@@ -1682,9 +1633,7 @@ function Billing() {
                 <button
                   type="button"
                   className="add-billing-item-button"
-                  onClick={
-                    addItem
-                  }
+                  onClick={addItem}
                 >
                   + Add Item
                 </button>
@@ -1695,10 +1644,7 @@ function Billing() {
               <div className="billing-items-list">
 
                 {formData.items.map(
-                  (
-                    item,
-                    index
-                  ) => (
+                  (item, index) => (
                     <div
                       className="billing-item-card"
                       key={index}
@@ -1712,19 +1658,18 @@ function Billing() {
                         </strong>
 
                         {formData.items
-                          .length >
-                          1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeItem(
-                                  index
-                                )
-                              }
-                            >
-                              Remove
-                            </button>
-                          )}
+                          .length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeItem(
+                                index
+                              )
+                            }
+                          >
+                            Remove
+                          </button>
+                        )}
 
                       </div>
 
@@ -1741,9 +1686,7 @@ function Billing() {
                             value={
                               item.description
                             }
-                            onChange={(
-                              event
-                            ) =>
+                            onChange={(event) =>
                               updateItem(
                                 index,
                                 "description",
@@ -1769,9 +1712,7 @@ function Billing() {
                             value={
                               item.category
                             }
-                            onChange={(
-                              event
-                            ) =>
+                            onChange={(event) =>
                               updateItem(
                                 index,
                                 "category",
@@ -1818,12 +1759,11 @@ function Billing() {
                           <input
                             type="number"
                             min="0"
+                            step="0.01"
                             value={
                               item.amount
                             }
-                            onChange={(
-                              event
-                            ) =>
+                            onChange={(event) =>
                               updateItem(
                                 index,
                                 "amount",
@@ -1845,8 +1785,6 @@ function Billing() {
                 )}
 
               </div>
-
-
               <div className="billing-calculation">
 
                 <div>
@@ -1903,6 +1841,7 @@ function Billing() {
 
 
                 <div className="billing-total">
+
                   <span>
                     Total Amount
                   </span>
@@ -1912,81 +1851,83 @@ function Billing() {
                       calculatedTotal
                     )}
                   </strong>
-                </div>
-
-              </div>
-
-
-              <div className="form-row">
-
-                <div className="form-group">
-
-                  <label>
-                    Payment Status
-                  </label>
-
-                  <select
-                    name="paymentStatus"
-                    value="Pending"
-                    disabled
-                  >
-                    <option value="Pending">
-                      Pending
-                    </option>
-                  </select>
-
-                  <small className="form-help-text">
-                    Create the invoice first,
-                    then use Edit to record
-                    the patient's payment.
-                  </small>
-
-                </div>
-
-
-                <div className="form-group">
-
-                  <label>
-                    Payment Method
-                  </label>
-
-                  <select
-                    name="paymentMethod"
-                    value={
-                      formData.paymentMethod
-                    }
-                    onChange={
-                      handleChange
-                    }
-                  >
-                    <option>
-                      Cash
-                    </option>
-
-                    <option>
-                      UPI
-                    </option>
-
-                    <option>
-                      Card
-                    </option>
-
-                    <option>
-                      Net Banking
-                    </option>
-
-                    <option>
-                      Insurance
-                    </option>
-
-                    <option>
-                      Other
-                    </option>
-                  </select>
 
                 </div>
 
               </div>
+
+              {!selectedBilling && (
+                <div className="form-row">
+
+                  <div className="form-group">
+
+                    <label>
+                      Payment Status
+                    </label>
+
+                    <select
+                      value="Pending"
+                      disabled
+                    >
+                      <option>
+                        Pending
+                      </option>
+                    </select>
+
+                    <small className="form-help-text">
+                      Create the invoice first,
+                      then use Record Payment
+                      to record the patient's
+                      payment.
+                    </small>
+
+                  </div>
+
+
+                  <div className="form-group">
+
+                    <label>
+                      Payment Method
+                    </label>
+
+                    <select
+                      name="paymentMethod"
+                      value={
+                        formData.paymentMethod
+                      }
+                      onChange={
+                        handleChange
+                      }
+                    >
+                      <option>
+                        Cash
+                      </option>
+
+                      <option>
+                        UPI
+                      </option>
+
+                      <option>
+                        Card
+                      </option>
+
+                      <option>
+                        Net Banking
+                      </option>
+
+                      <option>
+                        Insurance
+                      </option>
+
+                      <option>
+                        Other
+                      </option>
+                    </select>
+
+                  </div>
+
+                </div>
+              )}
 
 
               <div className="form-group">
@@ -2016,8 +1957,9 @@ function Billing() {
                   type="button"
                   className="cancel-bill-button"
                   onClick={
-                    closeAddModal
+                    closeFormModal
                   }
+                  disabled={saving}
                 >
                   Cancel
                 </button>
@@ -2025,12 +1967,12 @@ function Billing() {
                 <button
                   type="submit"
                   className="save-bill-button"
-                  disabled={
-                    saving
-                  }
+                  disabled={saving}
                 >
                   {saving
                     ? "Saving..."
+                    : selectedBilling
+                    ? "Update Bill"
                     : "Create Bill"}
                 </button>
 
@@ -2043,13 +1985,14 @@ function Billing() {
         </div>
       )}
 
+
+      {/* VIEW BILL MODAL */}
+
       {showViewModal &&
         selectedBilling && (
           <div
             className="billing-modal-overlay"
-            onMouseDown={(
-              event
-            ) => {
+            onMouseDown={(event) => {
               if (
                 event.target ===
                 event.currentTarget
@@ -2216,7 +2159,8 @@ function Billing() {
 
                     <strong>
                       {
-                        selectedBilling.paymentMethod ||
+                        selectedBilling
+                          .paymentMethod ||
                         "-"
                       }
                     </strong>
@@ -2234,10 +2178,7 @@ function Billing() {
                   </h3>
 
                   {selectedBilling.items?.map(
-                    (
-                      item,
-                      index
-                    ) => (
+                    (item, index) => (
                       <div
                         className="invoice-item-row"
                         key={
@@ -2247,6 +2188,7 @@ function Billing() {
                       >
 
                         <div>
+
                           <strong>
                             {
                               item.description
@@ -2258,6 +2200,7 @@ function Billing() {
                               item.category
                             }
                           </span>
+
                         </div>
 
                         <strong>
@@ -2318,6 +2261,7 @@ function Billing() {
 
 
                   <div className="invoice-grand-total">
+
                     <span>
                       Total
                     </span>
@@ -2327,10 +2271,12 @@ function Billing() {
                         selectedBilling.totalAmount
                       )}
                     </strong>
+
                   </div>
 
 
                   <div className="invoice-paid-total">
+
                     <span>
                       Paid
                     </span>
@@ -2342,10 +2288,12 @@ function Billing() {
                         )
                       )}
                     </strong>
+
                   </div>
 
 
                   <div className="invoice-balance-total">
+
                     <span>
                       Balance Due
                     </span>
@@ -2357,6 +2305,7 @@ function Billing() {
                         )
                       )}
                     </strong>
+
                   </div>
 
                 </div>
@@ -2382,7 +2331,7 @@ function Billing() {
                     {selectedBilling.paymentStatus !==
                       "Paid" &&
                       selectedBilling.paymentStatus !==
-                      "Cancelled" && (
+                        "Cancelled" && (
                         <button
                           type="button"
                           className="record-payment-button"
@@ -2510,27 +2459,42 @@ function Billing() {
                   Close
                 </button>
 
+
                 {selectedBilling.paymentStatus !==
                   "Paid" &&
                   selectedBilling.paymentStatus !==
-                  "Cancelled" && (
-                    <button
-                      type="button"
-                      className="save-bill-button"
-                      onClick={() => {
-                        closeViewModal();
+                    "Cancelled" && (
+                    <>
+                      <button
+                        type="button"
+                        className="edit-bill-button modal-action-button"
+                        onClick={() =>
+                          openEditModal(
+                            selectedBilling
+                          )
+                        }
+                      >
+                        Edit Bill
+                      </button>
 
-                        setTimeout(
-                          () =>
-                            openPaymentModal(
-                              selectedBilling
-                            ),
-                          0
-                        );
-                      }}
-                    >
-                      Record Payment
-                    </button>
+                      <button
+                        type="button"
+                        className="save-bill-button"
+                        onClick={() => {
+                          closeViewModal();
+
+                          setTimeout(
+                            () =>
+                              openPaymentModal(
+                                selectedBilling
+                              ),
+                            0
+                          );
+                        }}
+                      >
+                        Record Payment
+                      </button>
+                    </>
                   )}
 
               </div>
@@ -2540,13 +2504,14 @@ function Billing() {
           </div>
         )}
 
+
+      {/* PAYMENT MODAL */}
+
       {showPaymentModal &&
         selectedBilling && (
           <div
             className="billing-modal-overlay"
-            onMouseDown={(
-              event
-            ) => {
+            onMouseDown={(event) => {
               if (
                 event.target ===
                 event.currentTarget
@@ -2566,8 +2531,7 @@ function Billing() {
                   </h2>
 
                   <p>
-                    Add a payment to
-                    invoice{" "}
+                    Add a payment to invoice{" "}
                     <strong>
                       {
                         selectedBilling.invoiceNumber
@@ -2598,8 +2562,6 @@ function Billing() {
                   handleRecordPayment
                 }
               >
-
-                {/* PAYMENT SUMMARY */}
 
                 <div className="payment-summary-box">
 
@@ -2723,7 +2685,6 @@ function Billing() {
                       }
                       required
                     >
-
                       <option>
                         Cash
                       </option>
@@ -2747,7 +2708,6 @@ function Billing() {
                       <option>
                         Other
                       </option>
-
                     </select>
 
                   </div>
@@ -2810,10 +2770,10 @@ function Billing() {
                         getBalanceAmount(
                           selectedBilling
                         ) -
-                        Number(
-                          paymentForm.amount ||
-                          0
-                        ),
+                          Number(
+                            paymentForm.amount ||
+                              0
+                          ),
                         0
                       )
                     )}

@@ -13,7 +13,6 @@
         background-color 0.25s ease,
         color 0.25s ease;
 }
-
 .billing-header {
     display: flex;
 
@@ -25,6 +24,7 @@
 
     margin-bottom: 22px;
 }
+
 .billing-header h1 {
     margin: 0;
 
@@ -34,6 +34,7 @@
 
     font-weight: 700;
 }
+
 .billing-header p {
     margin: 7px 0 0;
 
@@ -84,6 +85,7 @@
 
     margin-bottom: 20px;
 }
+
 .billing-summary-card {
     padding: 17px 18px;
 
@@ -100,10 +102,12 @@
         border-color 0.25s ease,
         box-shadow 0.25s ease;
 }
+
 .billing-summary-card:hover {
     box-shadow:
         0 6px 18px rgba(37, 60, 82, 0.08);
 }
+
 .billing-summary-card span {
     display: block;
 
@@ -113,6 +117,7 @@
 
     font-size: 13px;
 }
+
 .billing-summary-card strong {
     display: block;
 
@@ -120,6 +125,7 @@
 
     font-size: 23px;
 }
+
 .billing-summary-card small {
     display: block;
 
@@ -129,7 +135,6 @@
 
     font-size: 11px;
 }
-
 .billing-toolbar {
     display: grid;
 
@@ -167,6 +172,7 @@
         border-color 0.2s ease,
         color 0.25s ease;
 }
+
 .billing-toolbar input::placeholder {
     color: var(--hms-text-muted);
 }
@@ -227,16 +233,19 @@
         border-color 0.25s ease,
         box-shadow 0.25s ease;
 }
+
 .billing-table-wrapper {
     overflow-x: auto;
 }
+
 .billing-table {
     width: 100%;
 
-    min-width: 1500px;
+    min-width: 1700px;
 
     border-collapse: collapse;
 }
+
 .billing-table th {
     padding: 16px;
 
@@ -254,6 +263,7 @@
 
     white-space: nowrap;
 }
+
 .billing-table td {
     padding: 17px 16px;
 
@@ -268,18 +278,23 @@
         color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .billing-table tr:last-child td {
     border-bottom: none;
 }
+
 .billing-table tbody tr:hover {
     background: var(--hms-primary-light);
 }
+
 .billing-table strong {
     color: var(--hms-text-primary);
 }
+
 .paid-amount-cell strong {
     color: var(--hms-success-text);
 }
+
 .balance-amount-cell strong {
     color: var(--hms-warning-text);
 }
@@ -300,12 +315,12 @@
 
     white-space: nowrap;
 }
+
 .payment-status.paid {
     background: var(--hms-success-bg);
 
     color: var(--hms-success-text);
 }
-
 
 .payment-status.pending {
     background: var(--hms-warning-bg);
@@ -313,30 +328,32 @@
     color: var(--hms-warning-text);
 }
 
-
 .payment-status.partially-paid {
     background: var(--hms-info-bg);
 
     color: var(--hms-info-text);
 }
 
-
 .payment-status.cancelled {
     background: var(--hms-danger-bg);
 
     color: var(--hms-danger-text);
 }
-
 .billing-action-buttons {
     display: flex;
 
     align-items: center;
 
     gap: 7px;
+
+    flex-wrap: wrap;
 }
+
 .view-bill-button,
-.edit-bill-button {
-    padding: 8px 12px;
+.edit-bill-button,
+.payment-bill-button,
+.delete-bill-button {
+    padding: 8px 11px;
 
     border-radius: 7px;
 
@@ -345,6 +362,8 @@
     cursor: pointer;
 
     font-size: 12px;
+
+    white-space: nowrap;
 
     transition:
         background-color 0.2s ease,
@@ -365,7 +384,6 @@
 
     transform: translateY(-1px);
 }
-
 .edit-bill-button {
     border: 1px solid var(--hms-info-text);
 
@@ -379,6 +397,36 @@
 
     transform: translateY(-1px);
 }
+.payment-bill-button {
+    border: 1px solid var(--hms-success-text);
+
+    background: var(--hms-input-bg);
+
+    color: var(--hms-success-text);
+}
+
+.payment-bill-button:hover {
+    background: var(--hms-success-bg);
+
+    transform: translateY(-1px);
+}
+.delete-bill-button {
+    border: 1px solid var(--hms-danger-text);
+
+    background: var(--hms-input-bg);
+
+    color: var(--hms-danger-text);
+}
+
+.delete-bill-button:hover {
+    background: var(--hms-danger-bg);
+
+    transform: translateY(-1px);
+}
+
+.modal-action-button {
+    padding: 11px 18px;
+}
 .billing-empty {
     padding: 60px 20px;
 
@@ -387,11 +435,11 @@
     color: var(--hms-text-secondary);
 }
 
-
 .billing-empty strong,
 .billing-empty span {
     display: block;
 }
+
 .billing-empty span {
     margin-top: 6px;
 
@@ -399,7 +447,6 @@
 
     color: var(--hms-text-muted);
 }
-
 .billing-modal-overlay {
     position: fixed;
 
@@ -469,6 +516,7 @@
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .billing-modal-header h2 {
     margin: 0;
 
@@ -482,6 +530,7 @@
 
     font-size: 13px;
 }
+
 .billing-close-button {
     width: 38px;
 
@@ -503,14 +552,23 @@
         background-color 0.2s ease,
         color 0.2s ease;
 }
+
 .billing-close-button:hover {
     background: var(--hms-danger-bg);
 
     color: var(--hms-danger-text);
 }
+
+.billing-close-button:disabled {
+    opacity: 0.5;
+
+    cursor: not-allowed;
+}
+
 .billing-form {
     padding: 24px 26px 0;
 }
+
 .form-row {
     display: grid;
 
@@ -519,9 +577,11 @@
 
     gap: 18px;
 }
+
 .form-group {
     margin-bottom: 18px;
 }
+
 .form-group label {
     display: block;
 
@@ -533,6 +593,7 @@
 
     font-weight: 700;
 }
+
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -560,13 +621,16 @@
         color 0.25s ease,
         box-shadow 0.2s ease;
 }
+
 .form-group input::placeholder,
 .form-group textarea::placeholder {
     color: var(--hms-text-muted);
 }
+
 .form-group textarea {
     resize: vertical;
 }
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -575,12 +639,25 @@
     box-shadow:
         0 0 0 3px var(--hms-primary-light);
 }
+
 .form-group select:disabled {
     background: var(--hms-table-header);
 
     color: var(--hms-text-muted);
 
     cursor: not-allowed;
+}
+
+.form-help-text {
+    display: block;
+
+    margin-top: 6px;
+
+    color: var(--hms-text-muted);
+
+    font-size: 11px;
+
+    line-height: 1.5;
 }
 
 .billing-items-heading {
@@ -600,6 +677,7 @@
 
     color: var(--hms-text-primary);
 }
+
 .billing-items-heading span {
     display: block;
 
@@ -609,6 +687,7 @@
 
     font-size: 12px;
 }
+
 .add-billing-item-button {
     border: 1px solid var(--hms-primary);
 
@@ -629,9 +708,11 @@
         color 0.2s ease,
         border-color 0.2s ease;
 }
+
 .add-billing-item-button:hover {
     background: var(--hms-primary-light);
 }
+
 .billing-item-card {
     margin-bottom: 14px;
 
@@ -647,6 +728,7 @@
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .billing-item-top {
     display: flex;
 
@@ -656,6 +738,7 @@
 
     margin-bottom: 14px;
 }
+
 .billing-item-top strong {
     color: var(--hms-text-primary);
 }
@@ -696,6 +779,7 @@
 
     background: var(--hms-card-bg);
 }
+
 .billing-calculation > div {
     display: flex;
 
@@ -709,15 +793,19 @@
 
     border-bottom: 1px solid var(--hms-border-light);
 }
+
 .billing-calculation > div:last-child {
     border-bottom: none;
 }
+
 .billing-calculation span {
     color: var(--hms-text-secondary);
 }
+
 .billing-calculation strong {
     color: var(--hms-text-primary);
 }
+
 .billing-calculation input {
     width: 100px;
 
@@ -733,6 +821,7 @@
 
     outline: none;
 }
+
 .billing-total {
     background: var(--hms-primary-light);
 }
@@ -765,6 +854,7 @@
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .cancel-bill-button,
 .save-bill-button {
     padding: 11px 18px;
@@ -775,6 +865,7 @@
 
     cursor: pointer;
 }
+
 .cancel-bill-button {
     border: 1px solid var(--hms-border);
 
@@ -782,11 +873,13 @@
 
     color: var(--hms-text-secondary);
 }
+
 .cancel-bill-button:hover {
     background: var(--hms-table-header);
 
     color: var(--hms-text-primary);
 }
+
 .save-bill-button {
     border: 1px solid var(--hms-primary);
 
@@ -794,9 +887,11 @@
 
     color: #ffffff;
 }
+
 .save-bill-button:hover {
     background: var(--hms-primary-dark);
 }
+
 .save-bill-button:disabled,
 .cancel-bill-button:disabled {
     opacity: 0.65;
@@ -806,6 +901,7 @@
 .billing-details {
     padding: 25px 26px;
 }
+
 .billing-detail-grid {
     display: grid;
 
@@ -816,6 +912,7 @@
 
     margin-bottom: 24px;
 }
+
 .billing-detail-grid > div {
     padding: 14px;
 
@@ -829,6 +926,7 @@
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .billing-detail-grid span {
     display: block;
 
@@ -838,17 +936,21 @@
 
     font-size: 11px;
 }
+
 .billing-detail-grid strong {
     color: var(--hms-text-primary);
 
     font-size: 14px;
 }
+
 .view-paid-amount {
     color: var(--hms-success-text) !important;
 }
+
 .view-balance-amount {
     color: var(--hms-warning-text) !important;
 }
+
 .invoice-items h3,
 .billing-view-notes h3,
 .payment-history-section h3 {
@@ -858,6 +960,7 @@
 
     font-size: 15px;
 }
+
 .invoice-item-row {
     display: flex;
 
@@ -871,13 +974,16 @@
 
     border-bottom: 1px solid var(--hms-border-light);
 }
+
 .invoice-item-row div strong,
 .invoice-item-row div span {
     display: block;
 }
+
 .invoice-item-row div strong {
     color: var(--hms-text-primary);
 }
+
 .invoice-item-row div span {
     margin-top: 3px;
 
@@ -885,6 +991,7 @@
 
     font-size: 12px;
 }
+
 .invoice-item-row > strong {
     color: var(--hms-text-primary);
 }
@@ -895,6 +1002,7 @@
 
     border-top: 1px solid var(--hms-border);
 }
+
 .invoice-totals > div {
     display: flex;
 
@@ -902,35 +1010,43 @@
 
     padding: 10px 0;
 }
+
 .invoice-totals span {
     color: var(--hms-text-secondary);
 }
+
 .invoice-totals strong {
     color: var(--hms-text-primary);
 }
+
 .invoice-grand-total {
     padding-top: 13px !important;
 
     border-top: 1px solid var(--hms-border);
 }
+
 .invoice-grand-total strong {
     color: var(--hms-primary);
 
     font-size: 20px;
 }
+
 .invoice-paid-total strong {
     color: var(--hms-success-text);
 }
+
 .invoice-balance-total {
     padding-top: 13px !important;
 
     border-top: 1px solid var(--hms-border);
 }
+
 .invoice-balance-total strong {
     color: var(--hms-warning-text);
 
     font-size: 18px;
 }
+
 .payment-history-section {
     margin-top: 24px;
 
@@ -938,6 +1054,7 @@
 
     border-top: 1px solid var(--hms-border);
 }
+
 .payment-history-heading {
     display: flex;
 
@@ -949,6 +1066,7 @@
 
     margin-bottom: 14px;
 }
+
 .payment-history-heading h3 {
     margin-bottom: 4px;
 }
@@ -960,6 +1078,7 @@
 
     font-size: 12px;
 }
+
 .record-payment-button {
     border: 1px solid var(--hms-primary);
 
@@ -975,9 +1094,11 @@
 
     cursor: pointer;
 }
+
 .record-payment-button:hover {
     background: var(--hms-primary-dark);
 }
+
 .no-payment-history {
     padding: 20px;
 
@@ -993,6 +1114,7 @@
 
     font-size: 13px;
 }
+
 .payment-history-list {
     display: flex;
 
@@ -1000,6 +1122,7 @@
 
     gap: 10px;
 }
+
 .payment-history-card {
     display: flex;
 
@@ -1021,6 +1144,7 @@
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .payment-history-card > div {
     display: flex;
 
@@ -1028,16 +1152,19 @@
 
     gap: 4px;
 }
+
 .payment-history-card span {
     color: var(--hms-text-muted);
 
     font-size: 11px;
 }
+
 .payment-history-card strong {
     color: var(--hms-text-primary);
 
     font-size: 13px;
 }
+
 .payment-history-card .payment-history-amount {
     color: var(--hms-success-text);
 
@@ -1061,9 +1188,11 @@
 
     background: var(--hms-table-header);
 }
+
 .payment-summary-box > div {
     padding: 10px;
 }
+
 .payment-summary-box span {
     display: block;
 
@@ -1073,17 +1202,21 @@
 
     font-size: 11px;
 }
+
 .payment-summary-box strong {
     color: var(--hms-text-primary);
 
     font-size: 18px;
 }
+
 .payment-summary-box .summary-paid {
     color: var(--hms-success-text);
 }
+
 .payment-summary-box .summary-balance {
     color: var(--hms-warning-text);
 }
+
 .payment-after-box {
     display: flex;
 
@@ -1106,23 +1239,21 @@
     border: 1px solid var(--hms-border);
 }
 
-
 .payment-after-box span {
     color: var(--hms-text-secondary);
 
     font-size: 13px;
 }
 
-
 .payment-after-box strong {
     color: var(--hms-primary);
 
     font-size: 20px;
 }
+
 .billing-view-notes {
     margin-bottom: 10px;
 }
-
 
 .billing-view-notes p {
     margin: 0;
@@ -1131,24 +1262,24 @@
 
     line-height: 1.6;
 }
+
 :root[data-theme="dark"] .billing-modal {
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
-
 :root[data-theme="dark"] .billing-summary-card:hover {
     box-shadow:
         0 7px 20px rgba(0, 0, 0, 0.25);
 }
-@media (max-width: 1200px) {
 
+@media (max-width: 1200px) {
     .billing-summary {
         grid-template-columns:
             repeat(3, 1fr);
     }
-
 }
+
 
 @media (max-width: 900px) {
 
@@ -1156,22 +1287,18 @@
         padding: 20px;
     }
 
-
     .billing-header {
         flex-direction: column;
     }
-
 
     .billing-summary {
         grid-template-columns:
             1fr 1fr;
     }
 
-
     .billing-toolbar {
         grid-template-columns: 1fr;
     }
-
 
     .form-row,
     .billing-item-grid,
@@ -1180,11 +1307,9 @@
         grid-template-columns: 1fr;
     }
 
-
     .billing-calculation {
         width: 100%;
     }
-
 
     .payment-history-heading {
         flex-direction: column;
@@ -1201,11 +1326,9 @@
         grid-template-columns: 1fr;
     }
 
-
     .billing-page {
         padding: 15px;
     }
-
 
     .billing-form,
     .billing-details {
@@ -1214,13 +1337,13 @@
         padding-right: 18px;
     }
 
-
     .billing-modal-footer {
         padding-left: 18px;
 
         padding-right: 18px;
-    }
 
+        flex-wrap: wrap;
+    }
 
     .billing-modal-header {
         padding-left: 18px;
@@ -1228,13 +1351,27 @@
         padding-right: 18px;
     }
 
-
     .billing-action-buttons {
         flex-wrap: wrap;
     }
 
-
     .payment-after-box {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .billing-items-heading {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .billing-items-heading button {
+        width: 100%;
+    }
+
+    .payment-history-card {
         flex-direction: column;
 
         align-items: flex-start;

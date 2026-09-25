@@ -29,12 +29,15 @@ function MedicalRecords() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
 
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [editingRecord, setEditingRecord] = useState(null);
+
   const [formData, setFormData] = useState(emptyForm);
 
   useEffect(() => {
@@ -137,7 +140,21 @@ function MedicalRecords() {
     return date.toISOString().split("T")[0];
   }
 
+  function getId(value) {
+    if (!value) {
+      return "";
+    }
+
+    if (typeof value === "object") {
+      return value._id || "";
+    }
+
+    return value;
+  }
+
   function openAddModal() {
+    setEditingRecord(null);
+
     setFormData({
       ...emptyForm,
       visitDate: formatDateForInput(new Date()),
@@ -147,12 +164,56 @@ function MedicalRecords() {
     setShowAddModal(true);
   }
 
+  function openEditModal(record) {
+    setEditingRecord(record);
+
+    setSelectedRecord(null);
+    setShowViewModal(false);
+
+    setFormData({
+      patient: getId(record.patient),
+      doctor: getId(record.doctor),
+      appointment: getId(record.appointment),
+      visitDate: formatDateForInput(record.visitDate),
+      symptoms: record.symptoms || "",
+      diagnosis: record.diagnosis || "",
+      treatmentPlan: record.treatmentPlan || "",
+      notes: record.notes || "",
+      bloodPressure: record.bloodPressure || "",
+      pulseRate:
+        record.pulseRate !== undefined &&
+        record.pulseRate !== null
+          ? String(record.pulseRate)
+          : "",
+      temperature:
+        record.temperature !== undefined &&
+        record.temperature !== null
+          ? String(record.temperature)
+          : "",
+      oxygenLevel:
+        record.oxygenLevel !== undefined &&
+        record.oxygenLevel !== null
+          ? String(record.oxygenLevel)
+          : "",
+      weight:
+        record.weight !== undefined &&
+        record.weight !== null
+          ? String(record.weight)
+          : "",
+      followUpDate: formatDateForInput(record.followUpDate),
+      status: record.status || "Open",
+    });
+
+    setShowAddModal(true);
+  }
+
   function closeAddModal() {
     if (saving) {
       return;
     }
 
     setShowAddModal(false);
+    setEditingRecord(null);
     setFormData(emptyForm);
   }
 
@@ -236,40 +297,106 @@ function MedicalRecords() {
         treatmentPlan: formData.treatmentPlan.trim(),
         notes: formData.notes.trim(),
         bloodPressure: formData.bloodPressure.trim(),
-        pulseRate: formData.pulseRate,
-        temperature: formData.temperature,
-        oxygenLevel: formData.oxygenLevel,
-        weight: formData.weight,
+        pulseRate:
+          formData.pulseRate === ""
+            ? null
+            : Number(formData.pulseRate),
+        temperature:
+          formData.temperature === ""
+            ? null
+            : Number(formData.temperature),
+        oxygenLevel:
+          formData.oxygenLevel === ""
+            ? null
+            : Number(formData.oxygenLevel),
+        weight:
+          formData.weight === ""
+            ? null
+            : Number(formData.weight),
         followUpDate: formData.followUpDate || null,
         status: formData.status,
       };
 
-      const response = await api.post(
-        "/medical-records",
-        payload
-      );
+      let response;
 
-      console.log(
-        "Medical record created:",
-        response.data
-      );
+      if (editingRecord) {
+        response = await api.put(
+          `/medical-records/${editingRecord._id}`,
+          payload
+        );
 
-      alert("Medical record added successfully.");
+        console.log(
+          "Medical record updated:",
+          response.data
+        );
+
+        alert("Medical record updated successfully.");
+      } else {
+        response = await api.post(
+          "/medical-records",
+          payload
+        );
+
+        console.log(
+          "Medical record created:",
+          response.data
+        );
+
+        alert("Medical record added successfully.");
+      }
 
       closeAddModal();
       await loadData();
     } catch (err) {
       console.error(
-        "Add medical record error:",
+        "Medical record save error:",
         err
       );
 
       alert(
         err.response?.data?.message ||
-          "Unable to add medical record."
+          "Unable to save medical record."
       );
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete(record) {
+    const patientName =
+      record.patient?.fullName || "this patient";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the medical record of ${patientName}?\n\nThis action cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+
+      await api.delete(
+        `/medical-records/${record._id}`
+      );
+
+      alert("Medical record deleted successfully.");
+
+      closeViewModal();
+      await loadData();
+    } catch (err) {
+      console.error(
+        "Delete medical record error:",
+        err
+      );
+
+      alert(
+        err.response?.data?.message ||
+          "Unable to delete medical record."
+      );
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -297,7 +424,7 @@ function MedicalRecords() {
       <div className="medical-records-toolbar">
         <input
           type="text"
-          placeholder="Search patient or diagnosis..."
+          placeholder="Search patient, doctor or diagnosis..."
           value={search}
           onChange={(event) =>
             setSearch(event.target.value)
@@ -308,8 +435,9 @@ function MedicalRecords() {
           type="button"
           className="refresh-records-button"
           onClick={loadData}
+          disabled={loading}
         >
-          ↻ Refresh
+          ↻ {loading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
@@ -342,6 +470,7 @@ function MedicalRecords() {
                   <th>Diagnosis</th>
                   <th>Treatment</th>
                   <th>Date</th>
+                  <th>Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -354,6 +483,12 @@ function MedicalRecords() {
                         {record.patient?.fullName ||
                           "Unknown Patient"}
                       </strong>
+
+                      {record.patient?.email && (
+                        <span className="patient-email">
+                          {record.patient.email}
+                        </span>
+                      )}
                     </td>
 
                     <td>
@@ -374,15 +509,49 @@ function MedicalRecords() {
                     </td>
 
                     <td>
-                      <button
-                        type="button"
-                        className="view-record-button"
-                        onClick={() =>
-                          openViewModal(record)
-                        }
+                      <span
+                        className={`record-status ${
+                          record.status === "Closed"
+                            ? "closed"
+                            : "open"
+                        }`}
                       >
-                        View
-                      </button>
+                        {record.status || "Open"}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="record-actions">
+                        <button
+                          type="button"
+                          className="view-record-button"
+                          onClick={() =>
+                            openViewModal(record)
+                          }
+                        >
+                          View
+                        </button>
+
+                        <button
+                          type="button"
+                          className="edit-record-button"
+                          onClick={() =>
+                            openEditModal(record)
+                          }
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          className="delete-record-button"
+                          onClick={() =>
+                            handleDelete(record)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -391,15 +560,23 @@ function MedicalRecords() {
           </div>
         )}
       </div>
+
+      {/* ADD / EDIT MODAL */}
       {showAddModal && (
         <div className="medical-modal-overlay">
           <div className="medical-modal">
             <div className="medical-modal-header">
               <div>
-                <h2>Add Medical Record</h2>
+                <h2>
+                  {editingRecord
+                    ? "Edit Medical Record"
+                    : "Add Medical Record"}
+                </h2>
 
                 <p>
-                  Create a new patient medical record.
+                  {editingRecord
+                    ? "Update patient medical history and treatment details."
+                    : "Create a new patient medical record."}
                 </p>
               </div>
 
@@ -491,9 +668,8 @@ function MedicalRecords() {
                             appointment.appointmentDate
                           )}{" "}
                           -{" "}
-                          {
-                            appointment.appointmentTime
-                          }
+                          {appointment.appointmentTime ||
+                            "Time not available"}
                         </option>
                       )
                     )}
@@ -665,6 +841,7 @@ function MedicalRecords() {
                   type="button"
                   className="cancel-record-button"
                   onClick={closeAddModal}
+                  disabled={saving}
                 >
                   Cancel
                 </button>
@@ -676,6 +853,8 @@ function MedicalRecords() {
                 >
                   {saving
                     ? "Saving..."
+                    : editingRecord
+                    ? "Update Record"
                     : "Save Record"}
                 </button>
               </div>
@@ -684,6 +863,7 @@ function MedicalRecords() {
         </div>
       )}
 
+      {/* VIEW MODAL */}
       {showViewModal && selectedRecord && (
         <div className="medical-modal-overlay">
           <div className="medical-modal view-medical-modal">
@@ -796,7 +976,10 @@ function MedicalRecords() {
                     <span>Pulse Rate</span>
 
                     <strong>
-                      {selectedRecord.pulseRate
+                      {selectedRecord.pulseRate !==
+                        undefined &&
+                      selectedRecord.pulseRate !==
+                        null
                         ? `${selectedRecord.pulseRate} bpm`
                         : "-"}
                     </strong>
@@ -806,7 +989,10 @@ function MedicalRecords() {
                     <span>Temperature</span>
 
                     <strong>
-                      {selectedRecord.temperature
+                      {selectedRecord.temperature !==
+                        undefined &&
+                      selectedRecord.temperature !==
+                        null
                         ? `${selectedRecord.temperature} °F`
                         : "-"}
                     </strong>
@@ -816,7 +1002,10 @@ function MedicalRecords() {
                     <span>Oxygen Level</span>
 
                     <strong>
-                      {selectedRecord.oxygenLevel
+                      {selectedRecord.oxygenLevel !==
+                        undefined &&
+                      selectedRecord.oxygenLevel !==
+                        null
                         ? `${selectedRecord.oxygenLevel}%`
                         : "-"}
                     </strong>
@@ -826,7 +1015,10 @@ function MedicalRecords() {
                     <span>Weight</span>
 
                     <strong>
-                      {selectedRecord.weight
+                      {selectedRecord.weight !==
+                        undefined &&
+                      selectedRecord.weight !==
+                        null
                         ? `${selectedRecord.weight} kg`
                         : "-"}
                     </strong>
@@ -856,11 +1048,38 @@ function MedicalRecords() {
             <div className="medical-modal-footer">
               <button
                 type="button"
-                className="cancel-record-button"
-                onClick={closeViewModal}
+                className="delete-record-modal-button"
+                onClick={() =>
+                  handleDelete(selectedRecord)
+                }
+                disabled={deleting}
               >
-                Close
+                {deleting
+                  ? "Deleting..."
+                  : "Delete"}
               </button>
+
+              <div className="view-modal-right-actions">
+                <button
+                  type="button"
+                  className="cancel-record-button"
+                  onClick={closeViewModal}
+                  disabled={deleting}
+                >
+                  Close
+                </button>
+
+                <button
+                  type="button"
+                  className="edit-record-modal-button"
+                  onClick={() =>
+                    openEditModal(selectedRecord)
+                  }
+                  disabled={deleting}
+                >
+                  Edit Record
+                </button>
+              </div>
             </div>
           </div>
         </div>
