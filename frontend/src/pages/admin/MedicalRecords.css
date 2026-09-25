@@ -1,60 +1,43 @@
 .medical-records-page {
     padding: 28px 32px;
-
     min-height: calc(100vh - 80px);
-
     background: var(--hms-page-bg);
-
     color: var(--hms-text-primary);
-
     box-sizing: border-box;
-
     transition:
         background-color 0.25s ease,
         color 0.25s ease;
 }
+
 .medical-records-header {
     display: flex;
-
     justify-content: space-between;
-
     align-items: flex-start;
-
     gap: 20px;
-
     margin-bottom: 28px;
 }
+
 .medical-records-header h1 {
     margin: 0;
-
     color: var(--hms-text-primary);
-
     font-size: 30px;
-
     font-weight: 700;
 }
+
 .medical-records-header p {
     margin: 7px 0 0;
-
     color: var(--hms-text-secondary);
-
     font-size: 15px;
 }
+
 .add-record-button {
     border: 1px solid var(--hms-primary);
-
     border-radius: 8px;
-
     background: var(--hms-primary);
-
     color: #ffffff;
-
     padding: 12px 18px;
-
     font-weight: 700;
-
     cursor: pointer;
-
     white-space: nowrap;
 
     transition:
@@ -63,41 +46,30 @@
         transform 0.2s ease,
         box-shadow 0.2s ease;
 }
+
 .add-record-button:hover {
     background: var(--hms-primary-dark);
-
     border-color: var(--hms-primary-dark);
-
     transform: translateY(-1px);
-
     box-shadow: var(--hms-shadow);
 }
+
 .medical-records-toolbar {
     display: flex;
-
     gap: 10px;
-
     margin-bottom: 20px;
 }
+
 .medical-records-toolbar input {
     width: 380px;
-
     height: 46px;
-
     padding: 0 14px;
-
     border: 1px solid var(--hms-border);
-
     border-radius: 8px;
-
     background: var(--hms-input-bg);
-
     color: var(--hms-text-primary);
-
     font-size: 14px;
-
     box-sizing: border-box;
-
     outline: none;
 
     transition:
@@ -106,30 +78,26 @@
         color 0.25s ease,
         box-shadow 0.2s ease;
 }
+
 .medical-records-toolbar input::placeholder {
     color: var(--hms-text-muted);
 }
+
 .medical-records-toolbar input:focus {
     border-color: var(--hms-primary);
 
     box-shadow:
         0 0 0 3px var(--hms-primary-light);
 }
+
 .refresh-records-button {
     height: 46px;
-
     padding: 0 17px;
-
     border: 1px solid var(--hms-border);
-
     border-radius: 8px;
-
     background: var(--hms-input-bg);
-
     color: var(--hms-text-secondary);
-
     font-weight: 700;
-
     cursor: pointer;
 
     transition:
@@ -137,37 +105,28 @@
         border-color 0.2s ease,
         color 0.2s ease;
 }
+
 .refresh-records-button:hover {
     border-color: var(--hms-primary);
-
     background: var(--hms-primary-light);
-
     color: var(--hms-primary);
 }
+
 .medical-records-error {
     padding: 12px 15px;
-
     margin-bottom: 16px;
-
     border: 1px solid var(--hms-danger-text);
-
     border-radius: 8px;
-
     background: var(--hms-danger-bg);
-
     color: var(--hms-danger-text);
-
     font-size: 13px;
 }
+
 .medical-records-table-card {
     background: var(--hms-card-bg);
-
     border: 1px solid var(--hms-border);
-
     border-radius: 11px;
-
     overflow: hidden;
-
     box-shadow: var(--hms-shadow);
 
     transition:
@@ -175,42 +134,33 @@
         border-color 0.25s ease,
         box-shadow 0.25s ease;
 }
+
 .medical-records-table-wrapper {
     overflow-x: auto;
 }
+
 .medical-records-table {
     width: 100%;
-
     border-collapse: collapse;
-
     min-width: 920px;
 }
+
 .medical-records-table th {
     padding: 16px 18px;
-
     text-align: left;
-
     background: var(--hms-table-header);
-
     color: var(--hms-text-secondary);
-
     font-size: 12px;
-
     font-weight: 700;
-
     text-transform: uppercase;
-
     border-bottom: 1px solid var(--hms-border);
-
     white-space: nowrap;
 }
+
 .medical-records-table td {
     padding: 18px;
-
     border-bottom: 1px solid var(--hms-border-light);
-
     color: var(--hms-text-secondary);
-
     font-size: 14px;
 
     transition:
@@ -218,6 +168,7 @@
         border-color 0.25s ease,
         color 0.25s ease;
 }
+
 .medical-records-table tbody tr:hover {
     background: var(--hms-primary-light);
 }
@@ -229,19 +180,14 @@
 .medical-records-table td strong {
     color: var(--hms-text-primary);
 }
+
 .view-record-button {
     padding: 8px 14px;
-
     border: 1px solid var(--hms-primary);
-
     border-radius: 7px;
-
     background: var(--hms-input-bg);
-
     color: var(--hms-primary);
-
     font-weight: 700;
-
     cursor: pointer;
 
     transition:
@@ -249,57 +195,50 @@
         border-color 0.2s ease,
         color 0.2s ease;
 }
+
 .view-record-button:hover {
     background: var(--hms-primary-light);
-
     border-color: var(--hms-primary);
 }
+
 .medical-records-empty {
     padding: 60px 20px;
-
     text-align: center;
-
     color: var(--hms-text-secondary);
 }
+
 .medical-records-empty strong,
 .medical-records-empty span {
     display: block;
 }
+
 .medical-records-empty span {
     margin-top: 7px;
-
     font-size: 13px;
-
     color: var(--hms-text-muted);
 }
+
 .medical-modal-overlay {
     position: fixed;
-
     inset: 0;
-
     z-index: 1000;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
     padding: 20px;
 
     background: var(--hms-overlay);
-
     box-sizing: border-box;
 }
+
 .medical-modal {
     width: min(900px, 100%);
-
     max-height: 92vh;
-
     overflow-y: auto;
 
     border: 1px solid var(--hms-border);
-
     border-radius: 14px;
 
     background: var(--hms-card-bg);
@@ -311,116 +250,102 @@
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .view-medical-modal {
     width: min(820px, 100%);
 }
+
 .medical-modal-header {
     position: sticky;
-
     top: 0;
-
     z-index: 5;
 
     display: flex;
-
     justify-content: space-between;
-
     align-items: flex-start;
 
     gap: 20px;
-
     padding: 22px 26px;
 
     background: var(--hms-card-bg);
-
     border-bottom: 1px solid var(--hms-border);
 
     transition:
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .medical-modal-header h2 {
     margin: 0;
-
     color: var(--hms-text-primary);
 }
+
 .medical-modal-header p {
     margin: 5px 0 0;
-
     color: var(--hms-text-secondary);
-
     font-size: 13px;
 }
+
 .medical-modal-close {
     width: 38px;
-
     height: 38px;
 
     border: none;
-
     border-radius: 8px;
 
     background: var(--hms-table-header);
-
     color: var(--hms-text-secondary);
 
     font-size: 22px;
-
     cursor: pointer;
 
     transition:
         background-color 0.2s ease,
         color 0.2s ease;
 }
+
 .medical-modal-close:hover {
     background: var(--hms-danger-bg);
-
     color: var(--hms-danger-text);
 }
+
 .medical-record-form {
     padding: 24px 26px 0;
 }
+
 .form-row {
     display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
+    grid-template-columns: 1fr 1fr;
     gap: 18px;
 }
+
 .form-group {
     margin-bottom: 18px;
 }
+
 .form-group label {
     display: block;
-
     margin-bottom: 7px;
-
     color: var(--hms-text-primary);
-
     font-size: 13px;
-
     font-weight: 700;
 }
+
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-
     box-sizing: border-box;
 
     border: 1px solid var(--hms-border);
-
     border-radius: 8px;
 
     padding: 12px;
 
     background: var(--hms-input-bg);
-
     color: var(--hms-text-primary);
 
     font-size: 14px;
-
     outline: none;
 
     transition:
@@ -429,13 +354,16 @@
         color 0.25s ease,
         box-shadow 0.2s ease;
 }
+
 .form-group input::placeholder,
 .form-group textarea::placeholder {
     color: var(--hms-text-muted);
 }
+
 .form-group textarea {
     resize: vertical;
 }
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -444,54 +372,44 @@
     box-shadow:
         0 0 0 3px var(--hms-primary-light);
 }
+
 .vitals-title {
     margin: 5px 0 15px;
-
     color: var(--hms-text-primary);
-
     font-size: 15px;
-
     font-weight: 800;
 }
+
 .vitals-grid {
     display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
+    grid-template-columns: repeat(3, 1fr);
     gap: 14px;
 }
+
 .medical-modal-footer {
     position: sticky;
-
     bottom: 0;
-
     z-index: 5;
 
     display: flex;
-
     justify-content: flex-end;
-
     gap: 10px;
 
     padding: 18px 26px 24px;
 
     background: var(--hms-card-bg);
-
     border-top: 1px solid var(--hms-border);
 
     transition:
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .cancel-record-button,
 .save-record-button {
     padding: 11px 18px;
-
     border-radius: 8px;
-
     font-weight: 700;
-
     cursor: pointer;
 
     transition:
@@ -499,51 +417,48 @@
         border-color 0.2s ease,
         color 0.2s ease;
 }
+
 .cancel-record-button {
     border: 1px solid var(--hms-border);
-
     background: var(--hms-input-bg);
-
     color: var(--hms-text-secondary);
 }
+
 .cancel-record-button:hover {
     background: var(--hms-table-header);
-
     color: var(--hms-text-primary);
 }
+
 .save-record-button {
     border: 1px solid var(--hms-primary);
-
     background: var(--hms-primary);
-
     color: #ffffff;
 }
+
 .save-record-button:hover {
     background: var(--hms-primary-dark);
 }
+
 .save-record-button:disabled {
     opacity: 0.65;
-
     cursor: not-allowed;
 }
+
 .record-details {
     padding: 25px 26px;
 }
+
 .record-detail-grid {
     display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-
     margin-bottom: 24px;
 }
+
 .record-detail-grid > div {
     padding: 14px;
 
     border: 1px solid var(--hms-border);
-
     border-radius: 9px;
 
     background: var(--hms-table-header);
@@ -552,112 +467,124 @@
         background-color 0.25s ease,
         border-color 0.25s ease;
 }
+
 .record-detail-grid span {
     display: block;
-
     margin-bottom: 5px;
-
     color: var(--hms-text-muted);
-
     font-size: 11px;
 }
+
 .record-detail-grid strong {
     color: var(--hms-text-primary);
-
     font-size: 14px;
 }
+
 .record-section {
     margin-bottom: 22px;
 }
+
 .record-section h3,
 .vitals-display h3 {
     margin: 0 0 9px;
-
     color: var(--hms-text-primary);
-
     font-size: 15px;
 }
+
 .record-section p {
     margin: 0;
-
     color: var(--hms-text-secondary);
-
     line-height: 1.6;
-
     white-space: pre-wrap;
 }
+
 :root[data-theme="dark"] .medical-modal {
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.45);
 }
-:root[data-theme="dark"] .medical-records-table tbody tr:hover {
+
+:root[data-theme="dark"]
+.medical-records-table
+tbody
+tr:hover {
     background: var(--hms-primary-light);
 }
+
 @media (max-width: 800px) {
     .medical-records-page {
         padding: 20px;
     }
+
     .medical-records-header {
         flex-direction: column;
     }
+
     .add-record-button {
         width: 100%;
     }
+
     .form-row,
     .record-detail-grid {
         grid-template-columns: 1fr;
     }
+
     .vitals-grid {
-        grid-template-columns:
-            1fr 1fr;
+        grid-template-columns: 1fr 1fr;
     }
+
     .medical-records-toolbar {
         flex-direction: column;
     }
+
     .medical-records-toolbar input {
         width: 100%;
     }
+
     .medical-modal {
         max-height: calc(100vh - 30px);
     }
+
     .medical-modal-header,
     .medical-record-form,
     .record-details {
         padding-left: 18px;
-
         padding-right: 18px;
     }
+
     .medical-modal-footer {
         padding-left: 18px;
-
         padding-right: 18px;
     }
 }
-@media (max-width: 520px) {
 
+@media (max-width: 520px) {
     .medical-records-page {
         padding: 15px;
     }
+
     .medical-records-header h1 {
         font-size: 25px;
     }
+
     .vitals-grid {
         grid-template-columns: 1fr;
     }
+
     .medical-modal-overlay {
         padding: 8px;
     }
+
     .medical-modal {
         max-height: calc(100vh - 16px);
-
         border-radius: 10px;
     }
+
     .medical-modal-footer {
         flex-direction: column-reverse;
     }
+
     .cancel-record-button,
     .save-record-button {
         width: 100%;
     }
-
 }

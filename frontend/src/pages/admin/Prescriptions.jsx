@@ -41,6 +41,9 @@ function Prescriptions() {
   const [showViewModal, setShowViewModal] =
     useState(false);
 
+  const [showEditModal, setShowEditModal] =
+    useState(false);
+
   const [selectedPrescription, setSelectedPrescription] =
     useState(null);
 
@@ -68,9 +71,10 @@ function Prescriptions() {
       );
     } else {
       setPrescriptions([]);
+
       setError(
         results[0].reason?.response?.data?.message ||
-        "Unable to load prescriptions."
+          "Unable to load prescriptions."
       );
     }
 
@@ -96,7 +100,8 @@ function Prescriptions() {
   }
 
   const filteredPrescriptions = useMemo(() => {
-    const searchText = search.trim().toLowerCase();
+    const searchText =
+      search.trim().toLowerCase();
 
     return prescriptions.filter((item) => {
       const patientName =
@@ -124,7 +129,10 @@ function Prescriptions() {
         statusFilter === "All" ||
         item.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
     });
   }, [
     prescriptions,
@@ -148,6 +156,28 @@ function Prescriptions() {
       month: "short",
       year: "numeric",
     });
+  }
+
+  function formatDateForInput(value) {
+    if (!value) {
+      return "";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    const year = date.getFullYear();
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   }
 
   function getToday() {
@@ -174,21 +204,116 @@ function Prescriptions() {
     }
 
     setShowAddModal(false);
-    setFormData(emptyForm);
+    setFormData({
+      ...emptyForm,
+      medications: [
+        { ...emptyMedicine },
+      ],
+    });
   }
 
   function openViewModal(prescription) {
-    setSelectedPrescription(prescription);
+    setSelectedPrescription(
+      prescription
+    );
+
     setShowViewModal(true);
   }
 
   function closeViewModal() {
+    if (saving) {
+      return;
+    }
+
     setSelectedPrescription(null);
     setShowViewModal(false);
   }
 
+  function openEditModal(prescription) {
+    setSelectedPrescription(
+      prescription
+    );
+
+    setFormData({
+      patient:
+        prescription.patient?._id ||
+        prescription.patient ||
+        "",
+
+      doctor:
+        prescription.doctor?._id ||
+        prescription.doctor ||
+        "",
+
+      appointment:
+        prescription.appointment?._id ||
+        prescription.appointment ||
+        "",
+
+      prescriptionDate:
+        formatDateForInput(
+          prescription.prescriptionDate
+        ),
+
+      diagnosis:
+        prescription.diagnosis || "",
+
+      medications:
+        Array.isArray(
+          prescription.medications
+        ) &&
+        prescription.medications.length > 0
+          ? prescription.medications.map(
+              (medicine) => ({
+                medicineName:
+                  medicine.medicineName ||
+                  "",
+                dosage:
+                  medicine.dosage || "",
+                frequency:
+                  medicine.frequency ||
+                  "",
+                duration:
+                  medicine.duration || "",
+                instructions:
+                  medicine.instructions ||
+                  "",
+              })
+            )
+          : [{ ...emptyMedicine }],
+
+      notes:
+        prescription.notes || "",
+
+      status:
+        prescription.status || "Active",
+    });
+
+    setShowViewModal(false);
+    setShowEditModal(true);
+  }
+
+  function closeEditModal() {
+    if (saving) {
+      return;
+    }
+
+    setShowEditModal(false);
+    setSelectedPrescription(null);
+
+    setFormData({
+      ...emptyForm,
+      medications: [
+        { ...emptyMedicine },
+      ],
+    });
+  }
+
   function handleChange(event) {
-    const { name, value } = event.target;
+    const {
+      name,
+      value,
+    } = event.target;
 
     setFormData((previous) => ({
       ...previous,
@@ -247,35 +372,38 @@ function Prescriptions() {
     }));
   }
 
-  const availableAppointments = useMemo(() => {
-    if (
-      !formData.patient ||
-      !formData.doctor
-    ) {
-      return [];
-    }
-
-    return appointments.filter(
-      (appointment) => {
-        const patientId =
-          appointment.patient?._id ||
-          appointment.patient;
-
-        const doctorId =
-          appointment.doctor?._id ||
-          appointment.doctor;
-
-        return (
-          patientId === formData.patient &&
-          doctorId === formData.doctor
-        );
+  const availableAppointments =
+    useMemo(() => {
+      if (
+        !formData.patient ||
+        !formData.doctor
+      ) {
+        return [];
       }
-    );
-  }, [
-    appointments,
-    formData.patient,
-    formData.doctor,
-  ]);
+
+      return appointments.filter(
+        (appointment) => {
+          const patientId =
+            appointment.patient?._id ||
+            appointment.patient;
+
+          const doctorId =
+            appointment.doctor?._id ||
+            appointment.doctor;
+
+          return (
+            patientId ===
+              formData.patient &&
+            doctorId ===
+              formData.doctor
+          );
+        }
+      );
+    }, [
+      appointments,
+      formData.patient,
+      formData.doctor,
+    ]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -298,6 +426,7 @@ function Prescriptions() {
       alert(
         "Patient, doctor, prescription date and at least one complete medicine are required."
       );
+
       return;
     }
 
@@ -305,29 +434,46 @@ function Prescriptions() {
       setSaving(true);
 
       const payload = {
-        patient: formData.patient,
-        doctor: formData.doctor,
+        patient:
+          formData.patient,
+
+        doctor:
+          formData.doctor,
+
         appointment:
           formData.appointment || null,
+
         prescriptionDate:
           formData.prescriptionDate,
+
         diagnosis:
           formData.diagnosis.trim(),
-        medications: validMedicines.map(
-          (medicine) => ({
-            medicineName:
-              medicine.medicineName.trim(),
-            dosage: medicine.dosage.trim(),
-            frequency:
-              medicine.frequency.trim(),
-            duration:
-              medicine.duration.trim(),
-            instructions:
-              medicine.instructions.trim(),
-          })
-        ),
-        notes: formData.notes.trim(),
-        status: formData.status,
+
+        medications:
+          validMedicines.map(
+            (medicine) => ({
+              medicineName:
+                medicine.medicineName.trim(),
+
+              dosage:
+                medicine.dosage.trim(),
+
+              frequency:
+                medicine.frequency.trim(),
+
+              duration:
+                medicine.duration.trim(),
+
+              instructions:
+                medicine.instructions.trim(),
+            })
+          ),
+
+        notes:
+          formData.notes.trim(),
+
+        status:
+          formData.status,
       };
 
       await api.post(
@@ -340,6 +486,7 @@ function Prescriptions() {
       );
 
       closeModal();
+
       await loadData();
     } catch (error) {
       console.error(
@@ -349,7 +496,113 @@ function Prescriptions() {
 
       alert(
         error.response?.data?.message ||
-        "Unable to add prescription."
+          "Unable to add prescription."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleUpdate(event) {
+    event.preventDefault();
+
+    if (!selectedPrescription?._id) {
+      alert(
+        "Prescription ID is missing."
+      );
+
+      return;
+    }
+
+    const validMedicines =
+      formData.medications.filter(
+        (medicine) =>
+          medicine.medicineName.trim() &&
+          medicine.dosage.trim() &&
+          medicine.frequency.trim() &&
+          medicine.duration.trim()
+      );
+
+    if (
+      !formData.patient ||
+      !formData.doctor ||
+      !formData.prescriptionDate ||
+      validMedicines.length === 0
+    ) {
+      alert(
+        "Patient, doctor, prescription date and at least one complete medicine are required."
+      );
+
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const payload = {
+        patient:
+          formData.patient,
+
+        doctor:
+          formData.doctor,
+
+        appointment:
+          formData.appointment || null,
+
+        prescriptionDate:
+          formData.prescriptionDate,
+
+        diagnosis:
+          formData.diagnosis.trim(),
+
+        medications:
+          validMedicines.map(
+            (medicine) => ({
+              medicineName:
+                medicine.medicineName.trim(),
+
+              dosage:
+                medicine.dosage.trim(),
+
+              frequency:
+                medicine.frequency.trim(),
+
+              duration:
+                medicine.duration.trim(),
+
+              instructions:
+                medicine.instructions.trim(),
+            })
+          ),
+
+        notes:
+          formData.notes.trim(),
+
+        status:
+          formData.status,
+      };
+
+      await api.put(
+        `/prescriptions/${selectedPrescription._id}`,
+        payload
+      );
+
+      alert(
+        "Prescription updated successfully."
+      );
+
+      closeEditModal();
+
+      await loadData();
+    } catch (error) {
+      console.error(
+        "Update prescription error:",
+        error
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Unable to update prescription."
       );
     } finally {
       setSaving(false);
@@ -361,19 +614,24 @@ function Prescriptions() {
 
   const activePrescriptions =
     prescriptions.filter(
-      (item) => item.status === "Active"
+      (item) =>
+        item.status === "Active"
     ).length;
 
   const completedPrescriptions =
     prescriptions.filter(
-      (item) => item.status === "Completed"
+      (item) =>
+        item.status === "Completed"
     ).length;
 
   return (
     <div className="prescriptions-page">
+
+
       <div className="prescriptions-header">
         <div>
           <h1>Prescriptions</h1>
+
           <p>
             Manage patient prescriptions and
             medication records.
@@ -389,54 +647,75 @@ function Prescriptions() {
         </button>
       </div>
 
+
       <div className="prescription-summary">
+
         <div className="prescription-summary-card">
-          <span>Total Prescriptions</span>
+          <span>
+            Total Prescriptions
+          </span>
+
           <strong>
             {totalPrescriptions}
           </strong>
         </div>
 
         <div className="prescription-summary-card">
-          <span>Active</span>
+          <span>
+            Active
+          </span>
+
           <strong>
             {activePrescriptions}
           </strong>
         </div>
 
         <div className="prescription-summary-card">
-          <span>Completed</span>
+          <span>
+            Completed
+          </span>
+
           <strong>
             {completedPrescriptions}
           </strong>
         </div>
+
       </div>
 
+
       <div className="prescriptions-toolbar">
+
         <input
           type="text"
           placeholder="Search patient, doctor or diagnosis..."
           value={search}
           onChange={(event) =>
-            setSearch(event.target.value)
+            setSearch(
+              event.target.value
+            )
           }
         />
 
         <select
           value={statusFilter}
           onChange={(event) =>
-            setStatusFilter(event.target.value)
+            setStatusFilter(
+              event.target.value
+            )
           }
         >
           <option value="All">
             All Status
           </option>
+
           <option value="Active">
             Active
           </option>
+
           <option value="Completed">
             Completed
           </option>
+
           <option value="Cancelled">
             Cancelled
           </option>
@@ -448,6 +727,7 @@ function Prescriptions() {
         >
           ↻ Refresh
         </button>
+
       </div>
 
       {error && (
@@ -457,6 +737,7 @@ function Prescriptions() {
       )}
 
       <div className="prescriptions-table-card">
+
         {loading ? (
           <div className="prescription-empty">
             Loading prescriptions...
@@ -464,17 +745,22 @@ function Prescriptions() {
         ) : filteredPrescriptions.length ===
           0 ? (
           <div className="prescription-empty">
+
             <strong>
               No prescriptions found
             </strong>
+
             <span>
               Add a prescription to see real
               database records here.
             </span>
+
           </div>
         ) : (
           <div className="prescriptions-table-wrapper">
+
             <table className="prescriptions-table">
+
               <thead>
                 <tr>
                   <th>Patient</th>
@@ -488,35 +774,50 @@ function Prescriptions() {
               </thead>
 
               <tbody>
+
                 {filteredPrescriptions.map(
                   (prescription) => (
                     <tr
-                      key={prescription._id}
+                      key={
+                        prescription._id
+                      }
                     >
+
                       <td>
                         <strong>
-                          {prescription.patient
-                            ?.fullName ||
-                            "Unknown Patient"}
+                          {
+                            prescription
+                              .patient
+                              ?.fullName ||
+                            "Unknown Patient"
+                          }
                         </strong>
                       </td>
 
                       <td>
-                        {prescription.doctor
-                          ?.fullName ||
-                          "Unknown Doctor"}
+                        {
+                          prescription
+                            .doctor
+                            ?.fullName ||
+                          "Unknown Doctor"
+                        }
                       </td>
 
                       <td>
-                        {prescription.diagnosis ||
-                          "-"}
+                        {
+                          prescription
+                            .diagnosis ||
+                          "-"
+                        }
                       </td>
 
                       <td>
                         <span className="medicine-count">
-                          {prescription
-                            .medications
-                            ?.length || 0}
+                          {
+                            prescription
+                              .medications
+                              ?.length || 0
+                          }
                         </span>
                       </td>
 
@@ -530,11 +831,14 @@ function Prescriptions() {
                         <span
                           className={`prescription-status ${prescription.status?.toLowerCase()}`}
                         >
-                          {prescription.status}
+                          {
+                            prescription.status
+                          }
                         </span>
                       </td>
 
                       <td>
+
                         <button
                           type="button"
                           className="view-prescription-button"
@@ -546,26 +850,34 @@ function Prescriptions() {
                         >
                           View
                         </button>
+
                       </td>
+
                     </tr>
                   )
                 )}
+
               </tbody>
+
             </table>
+
           </div>
         )}
-      </div>
 
-      {/* ADD MODAL */}
+      </div>
 
       {showAddModal && (
         <div className="prescription-modal-overlay">
+
           <div className="prescription-modal">
+
             <div className="prescription-modal-header">
+
               <div>
                 <h2>
                   Add Prescription
                 </h2>
+
                 <p>
                   Create a patient medication
                   prescription.
@@ -579,13 +891,17 @@ function Prescriptions() {
               >
                 ×
               </button>
+
             </div>
+
 
             <form
               className="prescription-form"
               onSubmit={handleSubmit}
             >
+
               <div className="form-row">
+
                 <div className="form-group">
                   <label>
                     Patient *
@@ -593,8 +909,12 @@ function Prescriptions() {
 
                   <select
                     name="patient"
-                    value={formData.patient}
-                    onChange={handleChange}
+                    value={
+                      formData.patient
+                    }
+                    onChange={
+                      handleChange
+                    }
                     required
                   >
                     <option value="">
@@ -604,15 +924,22 @@ function Prescriptions() {
                     {patients.map(
                       (patient) => (
                         <option
-                          key={patient._id}
-                          value={patient._id}
+                          key={
+                            patient._id
+                          }
+                          value={
+                            patient._id
+                          }
                         >
-                          {patient.fullName}
+                          {
+                            patient.fullName
+                          }
                         </option>
                       )
                     )}
                   </select>
                 </div>
+
 
                 <div className="form-group">
                   <label>
@@ -621,8 +948,12 @@ function Prescriptions() {
 
                   <select
                     name="doctor"
-                    value={formData.doctor}
-                    onChange={handleDoctorChange}
+                    value={
+                      formData.doctor
+                    }
+                    onChange={
+                      handleDoctorChange
+                    }
                     required
                   >
                     <option value="">
@@ -632,10 +963,17 @@ function Prescriptions() {
                     {doctors.map(
                       (doctor) => (
                         <option
-                          key={doctor._id}
-                          value={doctor._id}
+                          key={
+                            doctor._id
+                          }
+                          value={
+                            doctor._id
+                          }
                         >
-                          {doctor.fullName} -{" "}
+                          {
+                            doctor.fullName
+                          }{" "}
+                          -{" "}
                           {
                             doctor.specialization
                           }
@@ -644,9 +982,12 @@ function Prescriptions() {
                     )}
                   </select>
                 </div>
+
               </div>
 
+
               <div className="form-row">
+
                 <div className="form-group">
                   <label>
                     Appointment
@@ -657,7 +998,9 @@ function Prescriptions() {
                     value={
                       formData.appointment
                     }
-                    onChange={handleChange}
+                    onChange={
+                      handleChange
+                    }
                   >
                     <option value="">
                       No appointment linked
@@ -666,8 +1009,12 @@ function Prescriptions() {
                     {availableAppointments.map(
                       (appointment) => (
                         <option
-                          key={appointment._id}
-                          value={appointment._id}
+                          key={
+                            appointment._id
+                          }
+                          value={
+                            appointment._id
+                          }
                         >
                           {formatDate(
                             appointment.appointmentDate
@@ -682,6 +1029,7 @@ function Prescriptions() {
                   </select>
                 </div>
 
+
                 <div className="form-group">
                   <label>
                     Prescription Date *
@@ -693,11 +1041,15 @@ function Prescriptions() {
                     value={
                       formData.prescriptionDate
                     }
-                    onChange={handleChange}
+                    onChange={
+                      handleChange
+                    }
                     required
                   />
                 </div>
+
               </div>
+
 
               <div className="form-group">
                 <label>
@@ -707,169 +1059,30 @@ function Prescriptions() {
                 <input
                   type="text"
                   name="diagnosis"
-                  value={formData.diagnosis}
-                  onChange={handleChange}
+                  value={
+                    formData.diagnosis
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Enter diagnosis"
                 />
               </div>
 
-              <div className="medicines-heading">
-                <div>
-                  <h3>
-                    Medicines
-                  </h3>
 
-                  <span>
-                    {formData.medications.length}{" "}
-                    medicine
-                    {formData.medications.length !==
-                      1
-                      ? "s"
-                      : ""}
-                  </span>
-                </div>
+              <MedicineForm
+                formData={formData}
+                updateMedicine={
+                  updateMedicine
+                }
+                addMedicine={
+                  addMedicine
+                }
+                removeMedicine={
+                  removeMedicine
+                }
+              />
 
-                <button
-                  type="button"
-                  className="add-medicine-button"
-                  onClick={addMedicine}
-                >
-                  + Add Medicine
-                </button>
-              </div>
-
-              <div className="medicine-list">
-                {formData.medications.map(
-                  (medicine, index) => (
-                    <div
-                      className="medicine-card"
-                      key={index}
-                    >
-                      <div className="medicine-card-header">
-                        <strong>
-                          Medicine {index + 1}
-                        </strong>
-
-                        {formData.medications
-                          .length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeMedicine(
-                                  index
-                                )
-                              }
-                            >
-                              Remove
-                            </button>
-                          )}
-                      </div>
-
-                      <div className="medicine-grid">
-                        <div className="form-group">
-                          <label>
-                            Medicine Name *
-                          </label>
-
-                          <input
-                            value={
-                              medicine.medicineName
-                            }
-                            onChange={(event) =>
-                              updateMedicine(
-                                index,
-                                "medicineName",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Paracetamol"
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>
-                            Dosage *
-                          </label>
-
-                          <input
-                            value={
-                              medicine.dosage
-                            }
-                            onChange={(event) =>
-                              updateMedicine(
-                                index,
-                                "dosage",
-                                event.target.value
-                              )
-                            }
-                            placeholder="500 mg"
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>
-                            Frequency *
-                          </label>
-
-                          <input
-                            value={
-                              medicine.frequency
-                            }
-                            onChange={(event) =>
-                              updateMedicine(
-                                index,
-                                "frequency",
-                                event.target.value
-                              )
-                            }
-                            placeholder="Twice daily"
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>
-                            Duration *
-                          </label>
-
-                          <input
-                            value={
-                              medicine.duration
-                            }
-                            onChange={(event) =>
-                              updateMedicine(
-                                index,
-                                "duration",
-                                event.target.value
-                              )
-                            }
-                            placeholder="5 days"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-group">
-                        <label>
-                          Instructions
-                        </label>
-
-                        <input
-                          value={
-                            medicine.instructions
-                          }
-                          onChange={(event) =>
-                            updateMedicine(
-                              index,
-                              "instructions",
-                              event.target.value
-                            )
-                          }
-                          placeholder="After food"
-                        />
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
 
               <div className="form-group">
                 <label>
@@ -878,12 +1091,17 @@ function Prescriptions() {
 
                 <textarea
                   name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
+                  value={
+                    formData.notes
+                  }
+                  onChange={
+                    handleChange
+                  }
                   rows="3"
                   placeholder="Additional instructions or notes..."
                 />
               </div>
+
 
               <div className="form-group">
                 <label>
@@ -892,22 +1110,30 @@ function Prescriptions() {
 
                 <select
                   name="status"
-                  value={formData.status}
-                  onChange={handleChange}
+                  value={
+                    formData.status
+                  }
+                  onChange={
+                    handleChange
+                  }
                 >
                   <option value="Active">
                     Active
                   </option>
+
                   <option value="Completed">
                     Completed
                   </option>
+
                   <option value="Cancelled">
                     Cancelled
                   </option>
                 </select>
               </div>
 
+
               <div className="prescription-modal-footer">
+
                 <button
                   type="button"
                   className="cancel-prescription-button"
@@ -925,19 +1151,23 @@ function Prescriptions() {
                     ? "Saving..."
                     : "Save Prescription"}
                 </button>
+
               </div>
+
             </form>
+
           </div>
+
         </div>
       )}
-
-      {/* VIEW MODAL */}
-
       {showViewModal &&
         selectedPrescription && (
           <div className="prescription-modal-overlay">
+
             <div className="prescription-modal view-prescription-modal">
+
               <div className="prescription-modal-header">
+
                 <div>
                   <h2>
                     Prescription Details
@@ -958,47 +1188,64 @@ function Prescriptions() {
                 >
                   ×
                 </button>
+
               </div>
 
+
               <div className="prescription-details">
+
                 <div className="prescription-detail-grid">
+
                   <div>
                     <span>
                       Patient
                     </span>
+
                     <strong>
-                      {selectedPrescription
-                        .patient
-                        ?.fullName || "-"}
+                      {
+                        selectedPrescription
+                          .patient
+                          ?.fullName || "-"
+                      }
                     </strong>
                   </div>
+
 
                   <div>
                     <span>
                       Doctor
                     </span>
+
                     <strong>
-                      {selectedPrescription
-                        .doctor
-                        ?.fullName || "-"}
+                      {
+                        selectedPrescription
+                          .doctor
+                          ?.fullName || "-"
+                      }
                     </strong>
                   </div>
+
 
                   <div>
                     <span>
                       Department
                     </span>
+
                     <strong>
-                      {selectedPrescription
-                        .doctor
-                        ?.department || "-"}
+                      {
+                        selectedPrescription
+                          .doctor
+                          ?.department || "-"
+                      }
                     </strong>
                   </div>
+
 
                   <div>
                     <span>
                       Date
                     </span>
+
                     <strong>
                       {formatDate(
                         selectedPrescription.prescriptionDate
@@ -1006,105 +1253,704 @@ function Prescriptions() {
                     </strong>
                   </div>
 
+
                   <div>
                     <span>
                       Diagnosis
                     </span>
+
                     <strong>
-                      {selectedPrescription
-                        .diagnosis || "-"}
+                      {
+                        selectedPrescription
+                          .diagnosis || "-"
+                      }
                     </strong>
                   </div>
+
 
                   <div>
                     <span>
                       Status
                     </span>
+
                     <strong>
                       {
-                        selectedPrescription.status
+                        selectedPrescription
+                          .status
                       }
                     </strong>
                   </div>
+
                 </div>
 
+
                 <div className="prescription-view-section">
+
                   <h3>
                     Medicines
                   </h3>
 
                   <div className="medicine-view-list">
-                    {selectedPrescription.medications?.map(
-                      (medicine, index) => (
-                        <div
-                          className="medicine-view-card"
-                          key={
-                            medicine._id ||
-                            index
-                          }
-                        >
-                          <div>
-                            <strong>
-                              {
-                                medicine.medicineName
-                              }
-                            </strong>
 
-                            <span>
-                              {
-                                medicine.dosage
-                              }{" "}
-                              •{" "}
-                              {
-                                medicine.frequency
-                              }{" "}
-                              •{" "}
-                              {
-                                medicine.duration
-                              }
-                            </span>
+                    {selectedPrescription
+                      .medications
+                      ?.map(
+                        (
+                          medicine,
+                          index
+                        ) => (
+                          <div
+                            className="medicine-view-card"
+                            key={
+                              medicine._id ||
+                              index
+                            }
+                          >
+
+                            <div>
+
+                              <strong>
+                                {
+                                  medicine.medicineName
+                                }
+                              </strong>
+
+                              <span>
+                                {
+                                  medicine.dosage
+                                }{" "}
+                                •{" "}
+                                {
+                                  medicine.frequency
+                                }{" "}
+                                •{" "}
+                                {
+                                  medicine.duration
+                                }
+                              </span>
+
+                            </div>
+
+                            {medicine.instructions && (
+                              <small>
+                                {
+                                  medicine.instructions
+                                }
+                              </small>
+                            )}
+
                           </div>
+                        )
+                      )}
 
-                          {medicine.instructions && (
-                            <small>
-                              {
-                                medicine.instructions
-                              }
-                            </small>
-                          )}
-                        </div>
-                      )
-                    )}
                   </div>
+
                 </div>
 
+
                 <div className="prescription-view-section">
+
                   <h3>
                     Notes
                   </h3>
 
                   <p>
-                    {selectedPrescription
-                      .notes || "-"}
+                    {
+                      selectedPrescription
+                        .notes || "-"
+                    }
                   </p>
+
                 </div>
+
               </div>
 
               <div className="prescription-modal-footer">
+
                 <button
                   type="button"
-                  className="cancel-prescription-button"
-                  onClick={
-                    closeViewModal
+                  className="delete-prescription-button"
+                  onClick={() =>
+                    alert(
+                      "Use the existing Delete action for this prescription."
+                    )
                   }
                 >
-                  Close
+                  Delete
                 </button>
+
+                <div className="view-modal-actions">
+
+                  <button
+                    type="button"
+                    className="cancel-prescription-button"
+                    onClick={
+                      closeViewModal
+                    }
+                  >
+                    Close
+                  </button>
+
+                  <button
+                    type="button"
+                    className="edit-prescription-button"
+                    onClick={() =>
+                      openEditModal(
+                        selectedPrescription
+                      )
+                    }
+                  >
+                    Edit Prescription
+                  </button>
+
+                </div>
+
               </div>
+
             </div>
+
           </div>
         )}
+
+      {showEditModal &&
+        selectedPrescription && (
+          <div className="prescription-modal-overlay">
+
+            <div className="prescription-modal">
+
+              <div className="prescription-modal-header">
+
+                <div>
+                  <h2>
+                    Edit Prescription
+                  </h2>
+
+                  <p>
+                    Update the existing
+                    prescription details.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="prescription-close-button"
+                  onClick={
+                    closeEditModal
+                  }
+                >
+                  ×
+                </button>
+
+              </div>
+
+
+              <form
+                className="prescription-form"
+                onSubmit={
+                  handleUpdate
+                }
+              >
+
+                <div className="form-row">
+
+                  <div className="form-group">
+
+                    <label>
+                      Patient *
+                    </label>
+
+                    <select
+                      name="patient"
+                      value={
+                        formData.patient
+                      }
+                      onChange={
+                        handleChange
+                      }
+                      required
+                    >
+
+                      <option value="">
+                        Select patient
+                      </option>
+
+                      {patients.map(
+                        (patient) => (
+                          <option
+                            key={
+                              patient._id
+                            }
+                            value={
+                              patient._id
+                            }
+                          >
+                            {
+                              patient.fullName
+                            }
+                          </option>
+                        )
+                      )}
+
+                    </select>
+
+                  </div>
+
+
+                  <div className="form-group">
+
+                    <label>
+                      Doctor *
+                    </label>
+
+                    <select
+                      name="doctor"
+                      value={
+                        formData.doctor
+                      }
+                      onChange={
+                        handleDoctorChange
+                      }
+                      required
+                    >
+
+                      <option value="">
+                        Select doctor
+                      </option>
+
+                      {doctors.map(
+                        (doctor) => (
+                          <option
+                            key={
+                              doctor._id
+                            }
+                            value={
+                              doctor._id
+                            }
+                          >
+                            {
+                              doctor.fullName
+                            }{" "}
+                            -{" "}
+                            {
+                              doctor.specialization
+                            }
+                          </option>
+                        )
+                      )}
+
+                    </select>
+
+                  </div>
+
+                </div>
+
+
+                <div className="form-row">
+
+                  <div className="form-group">
+
+                    <label>
+                      Appointment
+                    </label>
+
+                    <select
+                      name="appointment"
+                      value={
+                        formData.appointment
+                      }
+                      onChange={
+                        handleChange
+                      }
+                    >
+
+                      <option value="">
+                        No appointment linked
+                      </option>
+
+                      {availableAppointments.map(
+                        (
+                          appointment
+                        ) => (
+                          <option
+                            key={
+                              appointment._id
+                            }
+                            value={
+                              appointment._id
+                            }
+                          >
+                            {formatDate(
+                              appointment.appointmentDate
+                            )}{" "}
+                            -{" "}
+                            {
+                              appointment.appointmentTime
+                            }
+                          </option>
+                        )
+                      )}
+
+                    </select>
+
+                  </div>
+
+
+                  <div className="form-group">
+
+                    <label>
+                      Prescription Date *
+                    </label>
+
+                    <input
+                      type="date"
+                      name="prescriptionDate"
+                      value={
+                        formData.prescriptionDate
+                      }
+                      onChange={
+                        handleChange
+                      }
+                      required
+                    />
+
+                  </div>
+
+                </div>
+
+
+                <div className="form-group">
+
+                  <label>
+                    Diagnosis
+                  </label>
+
+                  <input
+                    type="text"
+                    name="diagnosis"
+                    value={
+                      formData.diagnosis
+                    }
+                    onChange={
+                      handleChange
+                    }
+                    placeholder="Enter diagnosis"
+                  />
+
+                </div>
+
+
+                <MedicineForm
+                  formData={formData}
+                  updateMedicine={
+                    updateMedicine
+                  }
+                  addMedicine={
+                    addMedicine
+                  }
+                  removeMedicine={
+                    removeMedicine
+                  }
+                />
+
+
+                <div className="form-group">
+
+                  <label>
+                    Additional Notes
+                  </label>
+
+                  <textarea
+                    name="notes"
+                    value={
+                      formData.notes
+                    }
+                    onChange={
+                      handleChange
+                    }
+                    rows="3"
+                    placeholder="Additional instructions or notes..."
+                  />
+
+                </div>
+
+
+                <div className="form-group">
+
+                  <label>
+                    Status
+                  </label>
+
+                  <select
+                    name="status"
+                    value={
+                      formData.status
+                    }
+                    onChange={
+                      handleChange
+                    }
+                  >
+
+                    <option value="Active">
+                      Active
+                    </option>
+
+                    <option value="Completed">
+                      Completed
+                    </option>
+
+                    <option value="Cancelled">
+                      Cancelled
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div className="prescription-modal-footer">
+
+                  <button
+                    type="button"
+                    className="cancel-prescription-button"
+                    onClick={
+                      closeEditModal
+                    }
+                    disabled={saving}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="save-prescription-button"
+                    disabled={saving}
+                  >
+                    {saving
+                      ? "Saving Changes..."
+                      : "Save Changes"}
+                  </button>
+
+                </div>
+
+              </form>
+
+            </div>
+
+          </div>
+        )}
+
     </div>
+  );
+}
+
+function MedicineForm({
+  formData,
+  updateMedicine,
+  addMedicine,
+  removeMedicine,
+}) {
+  return (
+    <>
+      <div className="medicines-heading">
+
+        <div>
+          <h3>
+            Medicines
+          </h3>
+
+          <span>
+            {
+              formData.medications.length
+            }{" "}
+            medicine
+            {formData.medications.length !==
+            1
+              ? "s"
+              : ""}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          className="add-medicine-button"
+          onClick={
+            addMedicine
+          }
+        >
+          + Add Medicine
+        </button>
+
+      </div>
+
+
+      <div className="medicine-list">
+
+        {formData.medications.map(
+          (medicine, index) => (
+
+            <div
+              className="medicine-card"
+              key={index}
+            >
+
+              <div className="medicine-card-header">
+
+                <strong>
+                  Medicine {index + 1}
+                </strong>
+
+                {formData.medications
+                  .length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeMedicine(
+                        index
+                      )
+                    }
+                  >
+                    Remove
+                  </button>
+                )}
+
+              </div>
+
+
+              <div className="medicine-grid">
+
+                <div className="form-group">
+
+                  <label>
+                    Medicine Name *
+                  </label>
+
+                  <input
+                    value={
+                      medicine.medicineName
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateMedicine(
+                        index,
+                        "medicineName",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Paracetamol"
+                  />
+
+                </div>
+
+
+                <div className="form-group">
+
+                  <label>
+                    Dosage *
+                  </label>
+
+                  <input
+                    value={
+                      medicine.dosage
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateMedicine(
+                        index,
+                        "dosage",
+                        event.target.value
+                      )
+                    }
+                    placeholder="500 mg"
+                  />
+
+                </div>
+
+
+                <div className="form-group">
+
+                  <label>
+                    Frequency *
+                  </label>
+
+                  <input
+                    value={
+                      medicine.frequency
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateMedicine(
+                        index,
+                        "frequency",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Twice daily"
+                  />
+
+                </div>
+
+
+                <div className="form-group">
+
+                  <label>
+                    Duration *
+                  </label>
+
+                  <input
+                    value={
+                      medicine.duration
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateMedicine(
+                        index,
+                        "duration",
+                        event.target.value
+                      )
+                    }
+                    placeholder="5 days"
+                  />
+
+                </div>
+
+              </div>
+
+
+              <div className="form-group">
+
+                <label>
+                  Instructions
+                </label>
+
+                <input
+                  value={
+                    medicine.instructions
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    updateMedicine(
+                      index,
+                      "instructions",
+                      event.target.value
+                    )
+                  }
+                  placeholder="After food"
+                />
+
+              </div>
+
+            </div>
+
+          )
+        )}
+
+      </div>
+    </>
   );
 }
 

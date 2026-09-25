@@ -2,13 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import "./MedicalRecords.css";
 
-const results = await Promise.allSettled([
-  api.get("/medical-records"),
-  api.get("/patients"),
-  api.get("/doctors"),
-  api.get("/appointments"),
-]);
-
 const emptyForm = {
   patient: "",
   doctor: "",
@@ -58,33 +51,29 @@ function MedicalRecords() {
       api.get("/doctors"),
       api.get("/appointments"),
     ]);
+
     const recordResult = results[0];
     const patientResult = results[1];
     const doctorResult = results[2];
     const appointmentResult = results[3];
 
     if (recordResult.status === "fulfilled") {
-      setRecords(
-        recordResult.value.data?.records || []
-      );
+      setRecords(recordResult.value.data?.records || []);
     } else {
       setRecords([]);
+
       setError(
         recordResult.reason?.response?.data?.message ||
-        "Unable to load medical records."
+          "Unable to load medical records."
       );
     }
 
     if (patientResult.status === "fulfilled") {
-      setPatients(
-        patientResult.value.data?.patients || []
-      );
+      setPatients(patientResult.value.data?.patients || []);
     }
 
     if (doctorResult.status === "fulfilled") {
-      setDoctors(
-        doctorResult.value.data?.doctors || []
-      );
+      setDoctors(doctorResult.value.data?.doctors || []);
     }
 
     if (appointmentResult.status === "fulfilled") {
@@ -104,21 +93,14 @@ function MedicalRecords() {
     }
 
     return records.filter((record) => {
-      const patientName =
-        record.patient?.fullName || "";
-
-      const doctorName =
-        record.doctor?.fullName || "";
+      const patientName = record.patient?.fullName || "";
+      const doctorName = record.doctor?.fullName || "";
 
       return (
         patientName.toLowerCase().includes(text) ||
         doctorName.toLowerCase().includes(text) ||
-        record.diagnosis
-          ?.toLowerCase()
-          .includes(text) ||
-        record.treatmentPlan
-          ?.toLowerCase()
-          .includes(text)
+        record.diagnosis?.toLowerCase().includes(text) ||
+        record.treatmentPlan?.toLowerCase().includes(text)
       );
     });
   }, [records, search]);
@@ -210,16 +192,14 @@ function MedicalRecords() {
 
     return appointments.filter((appointment) => {
       const patientId =
-        appointment.patient?._id ||
-        appointment.patient;
+        appointment.patient?._id || appointment.patient;
 
       const doctorId =
-        appointment.doctor?._id ||
-        appointment.doctor;
+        appointment.doctor?._id || appointment.doctor;
 
       return (
-        patientId === formData.patient &&
-        doctorId === formData.doctor
+        String(patientId) === String(formData.patient) &&
+        String(doctorId) === String(formData.doctor)
       );
     });
   }, [
@@ -249,22 +229,18 @@ function MedicalRecords() {
       const payload = {
         patient: formData.patient,
         doctor: formData.doctor,
-        appointment:
-          formData.appointment || null,
+        appointment: formData.appointment || null,
         visitDate: formData.visitDate,
         symptoms: formData.symptoms.trim(),
         diagnosis: formData.diagnosis.trim(),
-        treatmentPlan:
-          formData.treatmentPlan.trim(),
+        treatmentPlan: formData.treatmentPlan.trim(),
         notes: formData.notes.trim(),
-        bloodPressure:
-          formData.bloodPressure.trim(),
+        bloodPressure: formData.bloodPressure.trim(),
         pulseRate: formData.pulseRate,
         temperature: formData.temperature,
         oxygenLevel: formData.oxygenLevel,
         weight: formData.weight,
-        followUpDate:
-          formData.followUpDate || null,
+        followUpDate: formData.followUpDate || null,
         status: formData.status,
       };
 
@@ -290,7 +266,7 @@ function MedicalRecords() {
 
       alert(
         err.response?.data?.message ||
-        "Unable to add medical record."
+          "Unable to add medical record."
       );
     } finally {
       setSaving(false);
@@ -302,6 +278,7 @@ function MedicalRecords() {
       <div className="medical-records-header">
         <div>
           <h1>Medical Records</h1>
+
           <p>
             Manage patient medical history and treatment
             records.
@@ -350,6 +327,7 @@ function MedicalRecords() {
         ) : filteredRecords.length === 0 ? (
           <div className="medical-records-empty">
             <strong>No medical records found</strong>
+
             <span>
               Add a medical record to see real data here.
             </span>
@@ -413,15 +391,13 @@ function MedicalRecords() {
           </div>
         )}
       </div>
-
-      {/* ADD RECORD MODAL */}
-
       {showAddModal && (
         <div className="medical-modal-overlay">
           <div className="medical-modal">
             <div className="medical-modal-header">
               <div>
                 <h2>Add Medical Record</h2>
+
                 <p>
                   Create a new patient medical record.
                 </p>
@@ -581,6 +557,7 @@ function MedicalRecords() {
               <div className="vitals-grid">
                 <div className="form-group">
                   <label>Blood Pressure</label>
+
                   <input
                     name="bloodPressure"
                     value={formData.bloodPressure}
@@ -591,6 +568,7 @@ function MedicalRecords() {
 
                 <div className="form-group">
                   <label>Pulse Rate</label>
+
                   <input
                     type="number"
                     name="pulseRate"
@@ -602,6 +580,7 @@ function MedicalRecords() {
 
                 <div className="form-group">
                   <label>Temperature</label>
+
                   <input
                     type="number"
                     step="0.1"
@@ -614,6 +593,7 @@ function MedicalRecords() {
 
                 <div className="form-group">
                   <label>Oxygen Level (%)</label>
+
                   <input
                     type="number"
                     name="oxygenLevel"
@@ -625,6 +605,7 @@ function MedicalRecords() {
 
                 <div className="form-group">
                   <label>Weight (kg)</label>
+
                   <input
                     type="number"
                     step="0.1"
@@ -659,6 +640,7 @@ function MedicalRecords() {
                     <option value="Open">
                       Open
                     </option>
+
                     <option value="Closed">
                       Closed
                     </option>
@@ -702,14 +684,13 @@ function MedicalRecords() {
         </div>
       )}
 
-      {/* VIEW MODAL */}
-
       {showViewModal && selectedRecord && (
         <div className="medical-modal-overlay">
           <div className="medical-modal view-medical-modal">
             <div className="medical-modal-header">
               <div>
                 <h2>Medical Record</h2>
+
                 <p>
                   Patient medical history and treatment
                   details.
@@ -729,6 +710,7 @@ function MedicalRecords() {
               <div className="record-detail-grid">
                 <div>
                   <span>Patient</span>
+
                   <strong>
                     {selectedRecord.patient
                       ?.fullName || "-"}
@@ -737,6 +719,7 @@ function MedicalRecords() {
 
                 <div>
                   <span>Doctor</span>
+
                   <strong>
                     {selectedRecord.doctor
                       ?.fullName || "-"}
@@ -745,6 +728,7 @@ function MedicalRecords() {
 
                 <div>
                   <span>Department</span>
+
                   <strong>
                     {selectedRecord.doctor
                       ?.department || "-"}
@@ -753,6 +737,7 @@ function MedicalRecords() {
 
                 <div>
                   <span>Visit Date</span>
+
                   <strong>
                     {formatDate(
                       selectedRecord.visitDate
@@ -762,14 +747,15 @@ function MedicalRecords() {
 
                 <div>
                   <span>Diagnosis</span>
+
                   <strong>
-                    {selectedRecord.diagnosis ||
-                      "-"}
+                    {selectedRecord.diagnosis || "-"}
                   </strong>
                 </div>
 
                 <div>
                   <span>Status</span>
+
                   <strong>
                     {selectedRecord.status || "-"}
                   </strong>
@@ -778,6 +764,7 @@ function MedicalRecords() {
 
               <div className="record-section">
                 <h3>Symptoms</h3>
+
                 <p>
                   {selectedRecord.symptoms || "-"}
                 </p>
@@ -785,6 +772,7 @@ function MedicalRecords() {
 
               <div className="record-section">
                 <h3>Treatment Plan</h3>
+
                 <p>
                   {selectedRecord.treatmentPlan ||
                     "-"}
@@ -797,6 +785,7 @@ function MedicalRecords() {
                 <div className="record-detail-grid">
                   <div>
                     <span>Blood Pressure</span>
+
                     <strong>
                       {selectedRecord.bloodPressure ||
                         "-"}
@@ -805,6 +794,7 @@ function MedicalRecords() {
 
                   <div>
                     <span>Pulse Rate</span>
+
                     <strong>
                       {selectedRecord.pulseRate
                         ? `${selectedRecord.pulseRate} bpm`
@@ -814,6 +804,7 @@ function MedicalRecords() {
 
                   <div>
                     <span>Temperature</span>
+
                     <strong>
                       {selectedRecord.temperature
                         ? `${selectedRecord.temperature} °F`
@@ -823,6 +814,7 @@ function MedicalRecords() {
 
                   <div>
                     <span>Oxygen Level</span>
+
                     <strong>
                       {selectedRecord.oxygenLevel
                         ? `${selectedRecord.oxygenLevel}%`
@@ -832,6 +824,7 @@ function MedicalRecords() {
 
                   <div>
                     <span>Weight</span>
+
                     <strong>
                       {selectedRecord.weight
                         ? `${selectedRecord.weight} kg`
@@ -841,6 +834,7 @@ function MedicalRecords() {
 
                   <div>
                     <span>Follow-up</span>
+
                     <strong>
                       {formatDate(
                         selectedRecord.followUpDate
@@ -852,6 +846,7 @@ function MedicalRecords() {
 
               <div className="record-section">
                 <h3>Notes</h3>
+
                 <p>
                   {selectedRecord.notes || "-"}
                 </p>
