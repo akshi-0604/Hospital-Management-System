@@ -200,10 +200,197 @@ ${hospitalInfo.name}`;
   });
 }
 
+async function sendAppointmentStatusEmail({
+  patient,
+  doctor,
+  appointment,
+  status,
+  departmentLocation,
+}) {
+  const appointmentDate = new Date(
+    appointment.appointmentDate
+  ).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  let subject = "";
+  let patientMessage = "";
+  let doctorMessage = "";
+
+  if (status === "Confirmed") {
+    subject = `Appointment Confirmed - ${appointment.department}`;
+
+    patientMessage = `Hello ${patient.fullName},
+
+Your appointment has been confirmed.
+
+Appointment Details
+-------------------
+Department: ${appointment.department}
+Doctor: Dr. ${doctor.fullName}
+
+Date: ${appointmentDate}
+Time: ${appointment.appointmentTime}
+
+Location / Floor:
+${departmentLocation || "Please contact hospital reception"}
+
+Reason:
+${appointment.reason || "Not provided"}
+
+Please arrive 10-15 minutes before your appointment time.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+
+Thank you,
+${hospitalInfo.name}`;
+
+    doctorMessage = `Hello Dr. ${doctor.fullName},
+
+An appointment has been confirmed.
+
+Appointment Details
+-------------------
+Patient: ${patient.fullName}
+Department: ${appointment.department}
+
+Date: ${appointmentDate}
+Time: ${appointment.appointmentTime}
+
+Reason:
+${appointment.reason || "Not provided"}
+
+Please review the appointment in the Hospital Management System.
+
+Regards,
+${hospitalInfo.name}`;
+  }
+
+  if (status === "Cancelled") {
+    subject = `Appointment Cancelled - ${appointment.department}`;
+
+    patientMessage = `Hello ${patient.fullName},
+
+Your appointment has been cancelled.
+
+Appointment Details
+-------------------
+Department: ${appointment.department}
+Doctor: Dr. ${doctor.fullName}
+
+Date: ${appointmentDate}
+Time: ${appointment.appointmentTime}
+
+Please contact the hospital if you need to book another appointment.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+
+Regards,
+${hospitalInfo.name}`;
+
+    doctorMessage = `Hello Dr. ${doctor.fullName},
+
+An appointment has been cancelled.
+
+Appointment Details
+-------------------
+Patient: ${patient.fullName}
+Department: ${appointment.department}
+
+Date: ${appointmentDate}
+Time: ${appointment.appointmentTime}
+
+Please review the appointment status in the Hospital Management System.
+
+Regards,
+${hospitalInfo.name}`;
+  }
+
+  if (status === "Rescheduled") {
+    subject = `Appointment Rescheduled - ${appointment.department}`;
+
+    patientMessage = `Hello ${patient.fullName},
+
+Your appointment has been rescheduled.
+
+Updated Appointment Details
+---------------------------
+Department: ${appointment.department}
+Doctor: Dr. ${doctor.fullName}
+
+New Date: ${appointmentDate}
+New Time: ${appointment.appointmentTime}
+
+Location / Floor:
+${departmentLocation || "Please contact hospital reception"}
+
+Reason:
+${appointment.reason || "Not provided"}
+
+Please arrive 10-15 minutes before your new appointment time.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+
+Regards,
+${hospitalInfo.name}`;
+
+    doctorMessage = `Hello Dr. ${doctor.fullName},
+
+An appointment has been rescheduled.
+
+Updated Appointment Details
+---------------------------
+Patient: ${patient.fullName}
+Department: ${appointment.department}
+
+New Date: ${appointmentDate}
+New Time: ${appointment.appointmentTime}
+
+Reason:
+${appointment.reason || "Not provided"}
+
+Please review the updated appointment in the Hospital Management System.
+
+Regards,
+${hospitalInfo.name}`;
+  }
+
+  if (!patientMessage || !doctorMessage) {
+    throw new Error(`Unsupported appointment status: ${status}`);
+  }
+
+  await sendEmail({
+    to: patient.email,
+    subject,
+    message: patientMessage,
+  });
+
+  await sendEmail({
+    to: doctor.email,
+    subject,
+    message: doctorMessage,
+  });
+}
+
 module.exports = {
   createPatientNotification,
   sendWelcomeEmail,
   sendHospitalInformationEmail,
   sendAppointmentEmail,
   sendDoctorAppointmentEmail,
+  sendAppointmentStatusEmail,
 };

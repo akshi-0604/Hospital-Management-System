@@ -7,64 +7,48 @@ const {
   createPatientNotification,
   sendAppointmentEmail,
   sendDoctorAppointmentEmail,
+  sendAppointmentStatusEmail,
 } = require("../services/patientNotificationService");
 
 function hasAppointmentPassed(
   appointmentDate,
   appointmentTime
 ) {
-  if (
-    !appointmentDate ||
-    !appointmentTime
-  ) {
+  if (!appointmentDate || !appointmentTime) {
     return false;
   }
 
-  const storedDate =
-    new Date(appointmentDate);
+  const storedDate = new Date(appointmentDate);
 
-  if (
-    Number.isNaN(
-      storedDate.getTime()
-    )
-  ) {
+  if (Number.isNaN(storedDate.getTime())) {
     return false;
   }
-  const year =
-    storedDate.getUTCFullYear();
 
-  const month =
-    String(
-      storedDate.getUTCMonth() + 1
-    ).padStart(2, "0");
+  const year = storedDate.getUTCFullYear();
 
-  const day =
-    String(
-      storedDate.getUTCDate()
-    ).padStart(2, "0");
+  const month = String(
+    storedDate.getUTCMonth() + 1
+  ).padStart(2, "0");
 
-  const timeParts =
-    String(appointmentTime)
-      .split(":");
+  const day = String(
+    storedDate.getUTCDate()
+  ).padStart(2, "0");
 
-  const hour =
-    String(
-      Number(
-        timeParts[0] || 0
-      )
-    ).padStart(2, "0");
+  const timeParts = String(
+    appointmentTime
+  ).split(":");
 
-  const minute =
-    String(
-      Number(
-        timeParts[1] || 0
-      )
-    ).padStart(2, "0");
+  const hour = String(
+    Number(timeParts[0] || 0)
+  ).padStart(2, "0");
 
-  const appointmentDateTime =
-    new Date(
-      `${year}-${month}-${day}T${hour}:${minute}:00+05:30`
-    );
+  const minute = String(
+    Number(timeParts[1] || 0)
+  ).padStart(2, "0");
+
+  const appointmentDateTime = new Date(
+    `${year}-${month}-${day}T${hour}:${minute}:00+05:30`
+  );
 
   if (
     Number.isNaN(
@@ -92,10 +76,7 @@ async function updatePastAppointments() {
         },
       });
 
-    for (
-      const appointment
-      of appointments
-    ) {
+    for (const appointment of appointments) {
       const passed =
         hasAppointmentPassed(
           appointment.appointmentDate,
@@ -135,10 +116,7 @@ async function updatePastAppointments() {
               appointment.department,
           });
 
-        if (
-          patient &&
-          doctor
-        ) {
+        if (patient && doctor) {
           const location =
             department?.location ||
             "Please contact hospital reception";
@@ -186,6 +164,7 @@ async function updatePastAppointments() {
                 "Completed",
             },
           });
+
           await sendAppointmentEmail({
             patient,
             doctor,
@@ -194,21 +173,12 @@ async function updatePastAppointments() {
               location,
           });
 
-          await sendDoctorAppointmentEmail({
-            doctor,
-            patient,
-            appointment,
-          });
-
           console.log(
             "Appointment completion email sent to:",
             patient.email
           );
         }
-      } catch (
-      notificationError
-      ) {
-
+      } catch (notificationError) {
         console.error(
           "Appointment completion notification error:",
           notificationError.message
@@ -222,6 +192,7 @@ async function updatePastAppointments() {
     );
   }
 }
+
 const createAppointment =
   async (req, res) => {
     try {
@@ -235,6 +206,7 @@ const createAppointment =
         notes,
         status,
       } = req.body;
+
       if (
         !patient ||
         !doctor ||
@@ -259,6 +231,7 @@ const createAppointment =
             "Selected patient was not found.",
         });
       }
+
       const doctorExists =
         await Doctor.findById(
           doctor
@@ -270,6 +243,7 @@ const createAppointment =
             "Selected doctor was not found.",
         });
       }
+
       if (
         doctorExists.status !==
         "Available"
@@ -299,9 +273,7 @@ const createAppointment =
           },
         });
 
-      if (
-        conflictingAppointment
-      ) {
+      if (conflictingAppointment) {
         return res.status(409).json({
           message:
             `Dr. ${doctorExists.fullName} is already booked on ${appointmentDate} at ${appointmentTime}. Please choose another time.`,
@@ -353,25 +325,26 @@ const createAppointment =
         const departmentLocation =
           departmentData?.location ||
           "Please contact hospital reception";
+
         await createPatientNotification({
           patientId:
             patientExists._id,
 
           type:
             initialStatus ===
-              "Completed"
+            "Completed"
               ? "Appointment Updated"
               : "Appointment",
 
           title:
             initialStatus ===
-              "Completed"
+            "Completed"
               ? "Appointment Completed"
               : "Appointment Created",
 
           message:
             initialStatus ===
-              "Completed"
+            "Completed"
               ? `Your appointment with Dr. ${doctorExists.fullName} has been completed.`
               : `Your appointment with Dr. ${doctorExists.fullName} has been ${initialStatus.toLowerCase()}.`,
 
@@ -404,6 +377,8 @@ const createAppointment =
               initialStatus,
           },
         });
+
+        // Email to patient
         await sendAppointmentEmail({
           patient:
             patientExists,
@@ -416,18 +391,33 @@ const createAppointment =
           departmentLocation,
         });
 
+        // Email to doctor
+        await sendDoctorAppointmentEmail({
+          doctor:
+            doctorExists,
+
+          patient:
+            patientExists,
+
+          appointment,
+        });
+
         console.log(
-          "APPOINTMENT NOTIFICATION SENT:",
+          "APPOINTMENT EMAIL SENT TO PATIENT:",
           patientExists.email
         );
-      } catch (
-      notificationError
-      ) {
+
+        console.log(
+          "APPOINTMENT EMAIL SENT TO DOCTOR:",
+          doctorExists.email
+        );
+      } catch (notificationError) {
         console.error(
           "APPOINTMENT NOTIFICATION ERROR:",
           notificationError.message
         );
       }
+
       const populatedAppointment =
         await Appointment.findById(
           appointment._id
@@ -463,10 +453,12 @@ const createAppointment =
       });
     }
   };
+
 const getAppointments =
   async (req, res) => {
     try {
       await updatePastAppointments();
+
       const appointments =
         await Appointment.find()
           .populate(
@@ -518,12 +510,13 @@ const getAppointmentById =
             "Appointment not found.",
         });
       }
+
       if (
         (
           appointment.status ===
-          "Pending" ||
+            "Pending" ||
           appointment.status ===
-          "Confirmed"
+            "Confirmed"
         ) &&
         hasAppointmentPassed(
           appointment.appointmentDate,
@@ -542,6 +535,7 @@ const getAppointmentById =
           `Appointment ${appointment._id} changed from ${previousStatus} to Completed`
         );
       }
+
       const populatedAppointment =
         await Appointment.findById(
           req.params.id
@@ -588,6 +582,7 @@ const updateAppointment =
         notes,
         status,
       } = req.body;
+
       const existingAppointment =
         await Appointment.findById(
           req.params.id
@@ -599,6 +594,7 @@ const updateAppointment =
             "Appointment not found.",
         });
       }
+
       const finalPatient =
         patient !== undefined
           ? patient
@@ -640,6 +636,7 @@ const updateAppointment =
             "Selected patient was not found.",
         });
       }
+
       const doctorExists =
         await Doctor.findById(
           finalDoctor
@@ -651,10 +648,9 @@ const updateAppointment =
             "Selected doctor was not found.",
         });
       }
+
       const doctorWasChanged =
-        String(
-          finalDoctor
-        ) !==
+        String(finalDoctor) !==
         String(
           existingAppointment.doctor
         );
@@ -662,13 +658,14 @@ const updateAppointment =
       if (
         doctorWasChanged &&
         doctorExists.status !==
-        "Available"
+          "Available"
       ) {
         return res.status(409).json({
           message:
             `Dr. ${doctorExists.fullName} is currently ${doctorExists.status.toLowerCase()}. Please select an available doctor.`,
         });
       }
+
       const conflict =
         await Appointment.findOne({
           _id: {
@@ -699,11 +696,12 @@ const updateAppointment =
             `Dr. ${doctorExists.fullName} is already booked on ${finalDate} at ${finalTime}. Please choose another time.`,
         });
       }
+
       if (
         finalStatus !==
-        "Cancelled" &&
+          "Cancelled" &&
         finalStatus !==
-        "Completed" &&
+          "Completed" &&
         hasAppointmentPassed(
           finalDate,
           finalTime
@@ -712,6 +710,51 @@ const updateAppointment =
         finalStatus =
           "Completed";
       }
+
+      /*
+       * Detect whether the appointment
+       * was rescheduled.
+       *
+       * We check date, time, doctor,
+       * and department.
+       */
+
+      const dateChanged =
+        new Date(finalDate).getTime() !==
+        new Date(
+          existingAppointment.appointmentDate
+        ).getTime();
+
+      const timeChanged =
+        String(finalTime) !==
+        String(
+          existingAppointment.appointmentTime
+        );
+
+      const doctorChanged =
+        String(finalDoctor) !==
+        String(
+          existingAppointment.doctor
+        );
+
+      const departmentChanged =
+        String(finalDepartment) !==
+        String(
+          existingAppointment.department
+        );
+
+      const appointmentRescheduled =
+        dateChanged ||
+        timeChanged ||
+        doctorChanged ||
+        departmentChanged;
+
+      const statusChanged =
+        String(finalStatus) !==
+        String(
+          existingAppointment.status
+        );
+
       const updateData = {
         patient:
           finalPatient,
@@ -741,6 +784,7 @@ const updateAppointment =
         status:
           finalStatus,
       };
+
       const appointment =
         await Appointment.findByIdAndUpdate(
           req.params.id,
@@ -760,10 +804,20 @@ const updateAppointment =
             "doctor",
             "fullName doctorId email phone specialization department experience qualification consultationFee gender status"
           );
+
+      /*
+       * Send notifications/emails when:
+       *
+       * 1. Status changes
+       * 2. Appointment is rescheduled
+       */
+
       if (
         appointment &&
-        appointment.status !==
-        existingAppointment.status
+        (
+          statusChanged ||
+          appointmentRescheduled
+        )
       ) {
         try {
           const departmentData =
@@ -780,9 +834,46 @@ const updateAppointment =
             "Appointment Updated";
 
           let notificationMessage =
-            `Your appointment with Dr. ${doctorExists.fullName} has been updated to ${appointment.status}.`;
+            `Your appointment with Dr. ${doctorExists.fullName} has been updated.`;
+
+          /*
+           * Rescheduled has priority
+           * because date/time/doctor/
+           * department may have changed
+           * together with the status.
+           */
 
           if (
+            appointmentRescheduled &&
+            appointment.status !==
+              "Cancelled" &&
+            appointment.status !==
+              "Completed"
+          ) {
+            notificationTitle =
+              "Appointment Rescheduled";
+
+            notificationMessage =
+              `Your appointment with Dr. ${doctorExists.fullName} has been rescheduled.`;
+          } else if (
+            appointment.status ===
+            "Confirmed"
+          ) {
+            notificationTitle =
+              "Appointment Confirmed";
+
+            notificationMessage =
+              `Your appointment with Dr. ${doctorExists.fullName} has been confirmed.`;
+          } else if (
+            appointment.status ===
+            "Cancelled"
+          ) {
+            notificationTitle =
+              "Appointment Cancelled";
+
+            notificationMessage =
+              `Your appointment with Dr. ${doctorExists.fullName} has been cancelled.`;
+          } else if (
             appointment.status ===
             "Completed"
           ) {
@@ -793,28 +884,12 @@ const updateAppointment =
               `Your appointment with Dr. ${doctorExists.fullName} has been completed.`;
           }
 
-          if (
-            appointment.status ===
-            "Cancelled"
-          ) {
-            notificationTitle =
-              "Appointment Cancelled";
-
-            notificationMessage =
-              `Your appointment with Dr. ${doctorExists.fullName} has been cancelled.`;
-          }
           await createPatientNotification({
             patientId:
               patientExists._id,
 
             type:
-              appointment.status ===
-                "Completed"
-                ? "Appointment Updated"
-                : appointment.status ===
-                  "Cancelled"
-                  ? "Appointment Cancelled"
-                  : "Appointment Updated",
+              "Appointment Updated",
 
             title:
               notificationTitle,
@@ -852,34 +927,91 @@ const updateAppointment =
 
               newStatus:
                 appointment.status,
+
+              rescheduled:
+                appointmentRescheduled,
             },
           });
 
           /*
-           * Send email
+           * Send status/reschedule email.
            *
-           * Reuse your existing Brevo email service
-           * through sendAppointmentEmail().
+           * For Confirmed, Cancelled,
+           * and Rescheduled.
            */
-          await sendAppointmentEmail({
-            patient:
-              patientExists,
 
-            doctor:
-              doctorExists,
+          if (
+            appointment.status ===
+              "Confirmed" ||
+            appointment.status ===
+              "Cancelled" ||
+            (
+              appointmentRescheduled &&
+              appointment.status !==
+                "Completed"
+            )
+          ) {
+            let emailStatus =
+              appointment.status;
 
-            appointment,
+            if (
+              appointmentRescheduled &&
+              appointment.status !==
+                "Cancelled" &&
+              appointment.status !==
+                "Completed"
+            ) {
+              emailStatus =
+                "Rescheduled";
+            }
 
-            departmentLocation,
-          });
+            await sendAppointmentStatusEmail({
+              patient:
+                patientExists,
 
-          console.log(
-            "Appointment status notification sent:",
-            patientExists.email
-          );
-        } catch (
-        notificationError
-        ) {
+              doctor:
+                doctorExists,
+
+              appointment,
+
+              status:
+                emailStatus,
+
+              departmentLocation,
+            });
+
+            console.log(
+              `Appointment ${emailStatus.toLowerCase()} email sent to patient and doctor.`
+            );
+          }
+
+          /*
+           * Keep the existing completion
+           * email behavior.
+           */
+
+          if (
+            appointment.status ===
+            "Completed"
+          ) {
+            await sendAppointmentEmail({
+              patient:
+                patientExists,
+
+              doctor:
+                doctorExists,
+
+              appointment,
+
+              departmentLocation,
+            });
+
+            console.log(
+              "Appointment completion email sent to:",
+              patientExists.email
+            );
+          }
+        } catch (notificationError) {
           console.error(
             "Appointment update notification error:",
             notificationError.message
@@ -943,6 +1075,7 @@ const deleteAppointment =
       });
     }
   };
+
 module.exports = {
   createAppointment,
   getAppointments,
