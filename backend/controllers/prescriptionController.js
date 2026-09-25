@@ -3,9 +3,19 @@ const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
 
+const {
+  createPatientNotification,
+  sendPrescriptionCreatedEmail,
+  sendPrescriptionUpdatedEmail,
+  sendPrescriptionDeletedEmail,
+} = require("../services/patientNotificationService");
+
 const populatePrescription = (query) => {
   return query
-    .populate("patient", "fullName email phone")
+    .populate(
+      "patient",
+      "fullName email phone"
+    )
     .populate(
       "doctor",
       "fullName doctorId specialization department"
@@ -43,8 +53,8 @@ const createPrescription = async (req, res) => {
       });
     }
 
-    const patientExists = await User.findById(patient);
-    const doctorExists = await Doctor.findById(doctor);
+    const patientExists =
+      await User.findById(patient);
 
     if (!patientExists) {
       return res.status(404).json({
@@ -52,6 +62,9 @@ const createPrescription = async (req, res) => {
         message: "Patient not found",
       });
     }
+
+    const doctorExists =
+      await Doctor.findById(doctor);
 
     if (!doctorExists) {
       return res.status(404).json({
@@ -62,7 +75,9 @@ const createPrescription = async (req, res) => {
 
     if (appointment) {
       const appointmentExists =
-        await Appointment.findById(appointment);
+        await Appointment.findById(
+          appointment
+        );
 
       if (!appointmentExists) {
         return res.status(404).json({
@@ -76,7 +91,8 @@ const createPrescription = async (req, res) => {
       await Prescription.create({
         patient,
         doctor,
-        appointment: appointment || null,
+        appointment:
+          appointment || null,
         prescriptionDate,
         diagnosis: diagnosis || "",
         medications,
@@ -84,22 +100,71 @@ const createPrescription = async (req, res) => {
         status,
       });
 
-    const result = await populatePrescription(
-      Prescription.findById(prescription._id)
-    );
+    const result =
+      await populatePrescription(
+        Prescription.findById(
+          prescription._id
+        )
+      );
 
-    res.status(201).json({
+    try {
+      await createPatientNotification({
+        patientId: patientExists._id,
+
+        type: "prescription",
+
+        title:
+          "New Prescription Created",
+
+        message:
+          `Dr. ${
+            doctorExists.fullName
+          } has created a new prescription for you.`,
+
+        metadata: {
+          prescriptionId:
+            prescription._id,
+          doctorId:
+            doctorExists._id,
+          appointmentId:
+            appointment || null,
+        },
+      });
+
+      await sendPrescriptionCreatedEmail({
+        patient: patientExists,
+        doctor: doctorExists,
+        prescription: result,
+      });
+
+      console.log(
+        "PRESCRIPTION CREATED NOTIFICATIONS SENT:",
+        patientExists.email
+      );
+    } catch (notificationError) {
+      console.error(
+        "Prescription creation notification error:",
+        notificationError.message
+      );
+    }
+
+    return res.status(201).json({
       success: true,
-      message: "Prescription created successfully",
+      message:
+        "Prescription created successfully",
       prescription: result,
     });
   } catch (error) {
-    console.error("Create Prescription Error:", error);
+    console.error(
+      "Create Prescription Error:",
+      error
+    );
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to create prescription",
+        error.message ||
+        "Failed to create prescription",
     });
   }
 };
@@ -113,37 +178,48 @@ const getPrescriptions = async (req, res) => {
         })
       );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Prescriptions fetched successfully",
+      message:
+        "Prescriptions fetched successfully",
       prescriptions,
     });
   } catch (error) {
-    console.error("Get Prescriptions Error:", error);
+    console.error(
+      "Get Prescriptions Error:",
+      error
+    );
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to fetch prescriptions",
+        error.message ||
+        "Failed to fetch prescriptions",
     });
   }
 };
 
-const getPrescriptionById = async (req, res) => {
+const getPrescriptionById = async (
+  req,
+  res
+) => {
   try {
     const prescription =
       await populatePrescription(
-        Prescription.findById(req.params.id)
+        Prescription.findById(
+          req.params.id
+        )
       );
 
     if (!prescription) {
       return res.status(404).json({
         success: false,
-        message: "Prescription not found",
+        message:
+          "Prescription not found",
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       prescription,
     });
@@ -153,15 +229,19 @@ const getPrescriptionById = async (req, res) => {
       error
     );
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to fetch prescription",
+        error.message ||
+        "Failed to fetch prescription",
     });
   }
 };
 
-const updatePrescription = async (req, res) => {
+const updatePrescription = async (
+  req,
+  res
+) => {
   try {
     const prescription =
       await Prescription.findById(
@@ -171,9 +251,16 @@ const updatePrescription = async (req, res) => {
     if (!prescription) {
       return res.status(404).json({
         success: false,
-        message: "Prescription not found",
+        message:
+          "Prescription not found",
       });
     }
+
+    const oldPatientId =
+      prescription.patient;
+
+    const oldDoctorId =
+      prescription.doctor;
 
     const allowedFields = [
       "patient",
@@ -186,54 +273,191 @@ const updatePrescription = async (req, res) => {
       "status",
     ];
 
-    allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        prescription[field] =
-          req.body[field] === ""
-            ? null
-            : req.body[field];
+    allowedFields.forEach(
+      (field) => {
+        if (
+          req.body[field] !== undefined
+        ) {
+          prescription[field] =
+            req.body[field] === ""
+              ? null
+              : req.body[field];
+        }
       }
-    });
+    );
 
     await prescription.save();
 
-    const result = await populatePrescription(
-      Prescription.findById(prescription._id)
-    );
+    const patientExists =
+      await User.findById(
+        prescription.patient
+      );
 
-    res.status(200).json({
+    const doctorExists =
+      await Doctor.findById(
+        prescription.doctor
+      );
+
+    const result =
+      await populatePrescription(
+        Prescription.findById(
+          prescription._id
+        )
+      );
+
+    try {
+      if (patientExists) {
+        await createPatientNotification({
+          patientId:
+            patientExists._id,
+
+          type: "prescription",
+
+          title:
+            "Prescription Updated",
+
+          message:
+            `Your prescription has been updated by Dr. ${
+              doctorExists?.fullName ||
+              "your doctor"
+            }.`,
+
+          metadata: {
+            prescriptionId:
+              prescription._id,
+
+            doctorId:
+              doctorExists?._id ||
+              oldDoctorId,
+
+            previousPatientId:
+              oldPatientId,
+
+            previousDoctorId:
+              oldDoctorId,
+          },
+        });
+
+        await sendPrescriptionUpdatedEmail({
+          patient: patientExists,
+          doctor: doctorExists,
+          prescription: result,
+        });
+
+        console.log(
+          "PRESCRIPTION UPDATE NOTIFICATIONS SENT:",
+          patientExists.email
+        );
+      }
+    } catch (notificationError) {
+      console.error(
+        "Prescription update notification error:",
+        notificationError.message
+      );
+    }
+
+    return res.status(200).json({
       success: true,
-      message: "Prescription updated successfully",
+      message:
+        "Prescription updated successfully",
       prescription: result,
     });
   } catch (error) {
-    console.error("Update Prescription Error:", error);
+    console.error(
+      "Update Prescription Error:",
+      error
+    );
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to update prescription",
+        error.message ||
+        "Failed to update prescription",
     });
   }
 };
 
-const deletePrescription = async (req, res) => {
+const deletePrescription = async (
+  req,
+  res
+) => {
   try {
     const prescription =
-      await Prescription.findByIdAndDelete(
+      await Prescription.findById(
         req.params.id
       );
 
     if (!prescription) {
       return res.status(404).json({
         success: false,
-        message: "Prescription not found",
+        message:
+          "Prescription not found",
       });
     }
 
-    res.status(200).json({
+    const patientExists =
+      await User.findById(
+        prescription.patient
+      );
+
+    const doctorExists =
+      await Doctor.findById(
+        prescription.doctor
+      );
+
+    await Prescription.findByIdAndDelete(
+      req.params.id
+    );
+
+    try {
+      if (patientExists) {
+        await createPatientNotification({
+          patientId:
+            patientExists._id,
+
+          type: "prescription",
+
+          title:
+            "Prescription Removed",
+
+          message:
+            `A prescription created by Dr. ${
+              doctorExists?.fullName ||
+              "your doctor"
+            } has been removed.`,
+
+          metadata: {
+            prescriptionId:
+              prescription._id,
+
+            doctorId:
+              doctorExists?._id ||
+              prescription.doctor,
+          },
+        });
+
+        await sendPrescriptionDeletedEmail({
+          patient: patientExists,
+          doctor: doctorExists,
+          prescription,
+        });
+
+        console.log(
+          "PRESCRIPTION DELETE NOTIFICATIONS SENT:",
+          patientExists.email
+        );
+      }
+    } catch (notificationError) {
+      console.error(
+        "Prescription deletion notification error:",
+        notificationError.message
+      );
+    }
+
+    return res.status(200).json({
       success: true,
-      message: "Prescription deleted successfully",
+      message:
+        "Prescription deleted successfully",
     });
   } catch (error) {
     console.error(
@@ -241,10 +465,11 @@ const deletePrescription = async (req, res) => {
       error
     );
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to delete prescription",
+        error.message ||
+        "Failed to delete prescription",
     });
   }
 };

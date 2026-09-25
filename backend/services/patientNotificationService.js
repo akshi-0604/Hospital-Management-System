@@ -637,17 +637,276 @@ ${hospitalInfo.name}`;
   });
 }
 
+async function sendPrescriptionCreatedEmail({
+  patient,
+  doctor,
+  prescription,
+}) {
+  try {
+    if (!patient?.email) {
+      throw new Error(
+        "Patient email is required for prescription email"
+      );
+    }
+
+    const hospitalInfo = `
+Hospital Management System
+
+For any assistance, please contact the hospital administration.
+`;
+
+    const medicines = Array.isArray(
+      prescription.medications
+    )
+      ? prescription.medications
+          .map(
+            (medicine, index) =>
+              `${index + 1}. ${medicine.medicineName}
+   Dosage: ${medicine.dosage}
+   Frequency: ${medicine.frequency}
+   Duration: ${medicine.duration}
+   Instructions: ${
+     medicine.instructions || "No special instructions"
+   }`
+          )
+          .join("\n\n")
+      : "No medicines available.";
+
+    const message = `
+Hello ${patient.fullName},
+
+A new prescription has been created for you.
+
+PRESCRIPTION DETAILS
+--------------------
+
+Doctor:
+${doctor?.fullName || "N/A"}
+
+Doctor ID:
+${doctor?.doctorId || "N/A"}
+
+Specialization:
+${doctor?.specialization || "N/A"}
+
+Department:
+${doctor?.department || "N/A"}
+
+Prescription Date:
+${prescription.prescriptionDate
+  ? new Date(
+      prescription.prescriptionDate
+    ).toLocaleDateString("en-IN")
+  : "N/A"}
+
+Diagnosis:
+${prescription.diagnosis || "Not provided"}
+
+Medicines:
+${medicines}
+
+Notes:
+${prescription.notes || "No additional notes"}
+
+Status:
+${prescription.status || "Active"}
+
+Please follow the prescribed dosage and instructions carefully.
+
+${hospitalInfo}
+`;
+
+    return await sendEmail({
+      to: patient.email,
+      subject:
+        "New Prescription Created - Hospital Management System",
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Prescription created email error:",
+      error.message
+    );
+
+    throw error;
+  }
+}
+
+async function sendPrescriptionUpdatedEmail({
+  patient,
+  doctor,
+  prescription,
+}) {
+  try {
+    if (!patient?.email) {
+      throw new Error(
+        "Patient email is required for prescription email"
+      );
+    }
+
+    const hospitalInfo = `
+Hospital Management System
+
+For any assistance, please contact the hospital administration.
+`;
+
+    const medicines = Array.isArray(
+      prescription.medications
+    )
+      ? prescription.medications
+          .map(
+            (medicine, index) =>
+              `${index + 1}. ${medicine.medicineName}
+   Dosage: ${medicine.dosage}
+   Frequency: ${medicine.frequency}
+   Duration: ${medicine.duration}
+   Instructions: ${
+     medicine.instructions || "No special instructions"
+   }`
+          )
+          .join("\n\n")
+      : "No medicines available.";
+
+    const message = `
+Hello ${patient.fullName},
+
+Your prescription has been updated.
+
+UPDATED PRESCRIPTION DETAILS
+----------------------------
+
+Doctor:
+${doctor?.fullName || "N/A"}
+
+Doctor ID:
+${doctor?.doctorId || "N/A"}
+
+Specialization:
+${doctor?.specialization || "N/A"}
+
+Department:
+${doctor?.department || "N/A"}
+
+Prescription Date:
+${prescription.prescriptionDate
+  ? new Date(
+      prescription.prescriptionDate
+    ).toLocaleDateString("en-IN")
+  : "N/A"}
+
+Diagnosis:
+${prescription.diagnosis || "Not provided"}
+
+Medicines:
+${medicines}
+
+Notes:
+${prescription.notes || "No additional notes"}
+
+Status:
+${prescription.status || "Active"}
+
+Please review the updated prescription carefully.
+
+${hospitalInfo}
+`;
+
+    return await sendEmail({
+      to: patient.email,
+      subject:
+        "Prescription Updated - Hospital Management System",
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Prescription updated email error:",
+      error.message
+    );
+
+    throw error;
+  }
+}
+
+async function sendPrescriptionDeletedEmail({
+  patient,
+  doctor,
+  prescription,
+}) {
+  try {
+    if (!patient?.email) {
+      throw new Error(
+        "Patient email is required for prescription email"
+      );
+    }
+
+    const hospitalInfo = `
+Hospital Management System
+
+For any assistance, please contact the hospital administration.
+`;
+
+    const message = `
+Hello ${patient.fullName},
+
+Your prescription has been removed from the hospital management system.
+
+PRESCRIPTION DETAILS
+--------------------
+
+Doctor:
+${doctor?.fullName || "N/A"}
+
+Doctor ID:
+${doctor?.doctorId || "N/A"}
+
+Department:
+${doctor?.department || "N/A"}
+
+Prescription Date:
+${prescription.prescriptionDate
+  ? new Date(
+      prescription.prescriptionDate
+    ).toLocaleDateString("en-IN")
+  : "N/A"}
+
+Diagnosis:
+${prescription.diagnosis || "Not provided"}
+
+Status:
+${prescription.status || "N/A"}
+
+If you believe this prescription was removed incorrectly, please contact the hospital administration.
+
+${hospitalInfo}
+`;
+
+    return await sendEmail({
+      to: patient.email,
+      subject:
+        "Prescription Removed - Hospital Management System",
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Prescription deleted email error:",
+      error.message
+    );
+
+    throw error;
+  }
+}
+
 module.exports = {
   createPatientNotification,
-
   sendWelcomeEmail,
   sendHospitalInformationEmail,
-
   sendAppointmentEmail,
   sendDoctorAppointmentEmail,
   sendAppointmentStatusEmail,
-
   sendMedicalRecordCreatedEmail,
   sendMedicalRecordUpdatedEmail,
   sendMedicalRecordDeletedEmail,
+  sendPrescriptionCreatedEmail,
+  sendPrescriptionUpdatedEmail,
+  sendPrescriptionDeletedEmail,
 };
