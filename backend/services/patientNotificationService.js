@@ -154,9 +154,56 @@ ${hospitalInfo.name}`;
   });
 }
 
+async function sendDoctorAppointmentEmail({
+  doctor,
+  patient,
+  appointment,
+}) {
+  const appointmentDate = new Date(
+    appointment.appointmentDate
+  ).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  const message = `Hello Dr. ${doctor.fullName},
+
+You have a new appointment.
+
+Appointment Details
+-------------------
+Patient: ${patient.fullName}
+Department: ${appointment.department}
+
+Date: ${appointmentDate}
+Time: ${appointment.appointmentTime}
+
+Reason:
+${appointment.reason || "Not provided"}
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+
+Please review the appointment in the Hospital Management System.
+
+Regards,
+${hospitalInfo.name}`;
+
+  return sendEmail({
+    to: doctor.email,
+    subject: `New Appointment - ${appointment.department}`,
+    message,
+  });
+}
+
 module.exports = {
   createPatientNotification,
   sendWelcomeEmail,
   sendHospitalInformationEmail,
   sendAppointmentEmail,
+  sendDoctorAppointmentEmail,
 };

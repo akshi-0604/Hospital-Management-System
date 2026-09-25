@@ -6,6 +6,7 @@ const Department = require("../models/Department");
 const {
   createPatientNotification,
   sendAppointmentEmail,
+  sendDoctorAppointmentEmail,
 } = require("../services/patientNotificationService");
 
 function hasAppointmentPassed(
@@ -187,13 +188,16 @@ async function updatePastAppointments() {
           });
           await sendAppointmentEmail({
             patient,
-
             doctor,
-
             appointment,
-
             departmentLocation:
               location,
+          });
+
+          await sendDoctorAppointmentEmail({
+            doctor,
+            patient,
+            appointment,
           });
 
           console.log(
@@ -202,9 +206,9 @@ async function updatePastAppointments() {
           );
         }
       } catch (
-        notificationError
+      notificationError
       ) {
-        
+
         console.error(
           "Appointment completion notification error:",
           notificationError.message
@@ -355,19 +359,19 @@ const createAppointment =
 
           type:
             initialStatus ===
-            "Completed"
+              "Completed"
               ? "Appointment Updated"
               : "Appointment",
 
           title:
             initialStatus ===
-            "Completed"
+              "Completed"
               ? "Appointment Completed"
               : "Appointment Created",
 
           message:
             initialStatus ===
-            "Completed"
+              "Completed"
               ? `Your appointment with Dr. ${doctorExists.fullName} has been completed.`
               : `Your appointment with Dr. ${doctorExists.fullName} has been ${initialStatus.toLowerCase()}.`,
 
@@ -417,7 +421,7 @@ const createAppointment =
           patientExists.email
         );
       } catch (
-        notificationError
+      notificationError
       ) {
         console.error(
           "APPOINTMENT NOTIFICATION ERROR:",
@@ -658,7 +662,7 @@ const updateAppointment =
       if (
         doctorWasChanged &&
         doctorExists.status !==
-          "Available"
+        "Available"
       ) {
         return res.status(409).json({
           message:
@@ -697,9 +701,9 @@ const updateAppointment =
       }
       if (
         finalStatus !==
-          "Cancelled" &&
+        "Cancelled" &&
         finalStatus !==
-          "Completed" &&
+        "Completed" &&
         hasAppointmentPassed(
           finalDate,
           finalTime
@@ -759,7 +763,7 @@ const updateAppointment =
       if (
         appointment &&
         appointment.status !==
-          existingAppointment.status
+        existingAppointment.status
       ) {
         try {
           const departmentData =
@@ -805,12 +809,12 @@ const updateAppointment =
 
             type:
               appointment.status ===
-              "Completed"
+                "Completed"
                 ? "Appointment Updated"
                 : appointment.status ===
                   "Cancelled"
-                ? "Appointment Cancelled"
-                : "Appointment Updated",
+                  ? "Appointment Cancelled"
+                  : "Appointment Updated",
 
             title:
               notificationTitle,
@@ -874,7 +878,7 @@ const updateAppointment =
             patientExists.email
           );
         } catch (
-          notificationError
+        notificationError
         ) {
           console.error(
             "Appointment update notification error:",
