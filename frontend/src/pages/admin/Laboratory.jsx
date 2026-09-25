@@ -27,16 +27,19 @@ function Laboratory() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+
+  const [editingLaboratory, setEditingLaboratory] =
+    useState(null);
 
   const [selectedLaboratory, setSelectedLaboratory] =
     useState(null);
 
   const [formData, setFormData] = useState(emptyForm);
-
   useEffect(() => {
     loadData();
   }, []);
@@ -85,7 +88,6 @@ function Laboratory() {
 
     setLoading(false);
   }
-
   const filteredLaboratories = useMemo(() => {
     const searchText = search.trim().toLowerCase();
 
@@ -121,14 +123,16 @@ function Laboratory() {
         statusFilter === "All" ||
         item.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
     });
   }, [
     laboratories,
     search,
     statusFilter,
   ]);
-
   function formatDate(value) {
     if (!value) {
       return "-";
@@ -147,12 +151,49 @@ function Laboratory() {
     });
   }
 
-  function getToday() {
-    return new Date()
-      .toISOString()
-      .split("T")[0];
+  function formatDateForInput(value) {
+    if (!value) {
+      return "";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    const year = date.getFullYear();
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   }
 
+  function getToday() {
+    const date = new Date();
+
+    const year = date.getFullYear();
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  function getStatusClass(status) {
+    return (
+      status
+        ?.toLowerCase()
+        .replaceAll(" ", "-") || ""
+    );
+  }
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -177,25 +218,74 @@ function Laboratory() {
       appointment: "",
     }));
   }
-
   function openAddModal() {
+    setEditingLaboratory(null);
+
     setFormData({
       ...emptyForm,
       testDate: getToday(),
     });
 
-    setShowAddModal(true);
+    setShowFormModal(true);
   }
 
-  function closeModal() {
+  function openEditModal(laboratory) {
+    setEditingLaboratory(laboratory);
+
+    setFormData({
+      patient:
+        laboratory.patient?._id ||
+        laboratory.patient ||
+        "",
+
+      doctor:
+        laboratory.doctor?._id ||
+        laboratory.doctor ||
+        "",
+
+      appointment:
+        laboratory.appointment?._id ||
+        laboratory.appointment ||
+        "",
+
+      testName:
+        laboratory.testName || "",
+
+      category:
+        laboratory.category || "",
+
+      testDate:
+        formatDateForInput(
+          laboratory.testDate
+        ),
+
+      result:
+        laboratory.result || "",
+
+      unit:
+        laboratory.unit || "",
+
+      referenceRange:
+        laboratory.referenceRange || "",
+
+      notes:
+        laboratory.notes || "",
+
+      status:
+        laboratory.status || "Ordered",
+    });
+
+    setShowFormModal(true);
+  }
+  function closeFormModal() {
     if (saving) {
       return;
     }
 
-    setShowAddModal(false);
+    setShowFormModal(false);
+    setEditingLaboratory(null);
     setFormData(emptyForm);
   }
-
   function openViewModal(laboratory) {
     setSelectedLaboratory(laboratory);
     setShowViewModal(true);
@@ -205,7 +295,6 @@ function Laboratory() {
     setSelectedLaboratory(null);
     setShowViewModal(false);
   }
-
   const availableAppointments = useMemo(() => {
     if (
       !formData.patient ||
@@ -237,7 +326,6 @@ function Laboratory() {
     formData.patient,
     formData.doctor,
   ]);
-
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -260,48 +348,120 @@ function Laboratory() {
       const payload = {
         patient: formData.patient,
         doctor: formData.doctor,
+
         appointment:
           formData.appointment || null,
+
         testName:
           formData.testName.trim(),
+
         category:
           formData.category.trim(),
-        testDate: formData.testDate,
+
+        testDate:
+          formData.testDate,
+
         result:
           formData.result.trim(),
+
         unit:
           formData.unit.trim(),
+
         referenceRange:
           formData.referenceRange.trim(),
+
         notes:
           formData.notes.trim(),
-        status: formData.status,
+
+        status:
+          formData.status,
       };
 
-      await api.post(
-        "/laboratory",
-        payload
-      );
+      if (editingLaboratory) {
+        await api.put(
+          `/laboratory/${editingLaboratory._id}`,
+          payload
+        );
 
-      alert(
-        "Laboratory record added successfully."
-      );
+        alert(
+          "Laboratory record updated successfully."
+        );
+      } else {
+        await api.post(
+          "/laboratory",
+          payload
+        );
 
-      closeModal();
+        alert(
+          "Laboratory record added successfully."
+        );
+      }
+
+      closeFormModal();
 
       await loadData();
     } catch (error) {
       console.error(
-        "Add laboratory record error:",
+        "Save laboratory record error:",
         error
       );
 
       alert(
         error.response?.data?.message ||
-          "Unable to add laboratory record."
+          "Unable to save laboratory record."
       );
     } finally {
       setSaving(false);
+    }
+  }
+  async function handleDelete(laboratory) {
+    const patientName =
+      laboratory.patient?.fullName ||
+      "this patient";
+
+    const testName =
+      laboratory.testName ||
+      "this laboratory test";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the ${testName} record for ${patientName}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+
+      await api.delete(
+        `/laboratory/${laboratory._id}`
+      );
+
+      alert(
+        "Laboratory record deleted successfully."
+      );
+
+      if (
+        selectedLaboratory?._id ===
+        laboratory._id
+      ) {
+        closeViewModal();
+      }
+
+      await loadData();
+    } catch (error) {
+      console.error(
+        "Delete laboratory record error:",
+        error
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Unable to delete laboratory record."
+      );
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -321,10 +481,8 @@ function Laboratory() {
         item.status ===
           "Sample Collected"
     ).length;
-
   return (
     <div className="laboratory-page">
-      {/* HEADER */}
 
       <div className="laboratory-header">
         <div>
@@ -345,11 +503,12 @@ function Laboratory() {
         </button>
       </div>
 
-      {/* SUMMARY */}
-
       <div className="lab-summary">
+
         <div className="lab-summary-card">
-          <span>Total Tests</span>
+          <span>
+            Total Tests
+          </span>
 
           <strong>
             {totalTests}
@@ -357,7 +516,9 @@ function Laboratory() {
         </div>
 
         <div className="lab-summary-card">
-          <span>Completed</span>
+          <span>
+            Completed
+          </span>
 
           <strong>
             {completedTests}
@@ -365,23 +526,27 @@ function Laboratory() {
         </div>
 
         <div className="lab-summary-card">
-          <span>Processing</span>
+          <span>
+            Processing
+          </span>
 
           <strong>
             {processingTests}
           </strong>
         </div>
+
       </div>
 
-      {/* TOOLBAR */}
-
       <div className="lab-toolbar">
+
         <input
           type="text"
           placeholder="Search patient, doctor, test or category..."
           value={search}
           onChange={(event) =>
-            setSearch(event.target.value)
+            setSearch(
+              event.target.value
+            )
           }
         />
 
@@ -425,19 +590,16 @@ function Laboratory() {
         >
           ↻ Refresh
         </button>
-      </div>
 
-      {/* ERROR */}
+      </div>
 
       {error && (
         <div className="lab-error">
           {error}
         </div>
       )}
-
-      {/* TABLE */}
-
       <div className="laboratory-table-card">
+
         {loading ? (
           <div className="lab-empty">
             Loading laboratory records...
@@ -456,7 +618,9 @@ function Laboratory() {
           </div>
         ) : (
           <div className="laboratory-table-wrapper">
+
             <table className="laboratory-table">
+
               <thead>
                 <tr>
                   <th>Patient</th>
@@ -471,11 +635,13 @@ function Laboratory() {
               </thead>
 
               <tbody>
+
                 {filteredLaboratories.map(
                   (item) => (
                     <tr
                       key={item._id}
                     >
+
                       <td>
                         <strong>
                           {item.patient
@@ -509,6 +675,7 @@ function Laboratory() {
                       <td>
                         {item.result ||
                           "-"}
+
                         {item.unit
                           ? ` ${item.unit}`
                           : ""}
@@ -516,12 +683,9 @@ function Laboratory() {
 
                       <td>
                         <span
-                          className={`lab-status ${item.status
-                            ?.toLowerCase()
-                            .replaceAll(
-                              " ",
-                              "-"
-                            )}`}
+                          className={`lab-status ${getStatusClass(
+                            item.status
+                          )}`}
                         >
                           {item.status ||
                             "-"}
@@ -529,62 +693,109 @@ function Laboratory() {
                       </td>
 
                       <td>
-                        <button
-                          type="button"
-                          className="view-lab-button"
-                          onClick={() =>
-                            openViewModal(
-                              item
-                            )
-                          }
-                        >
-                          View
-                        </button>
+                        <div className="lab-action-buttons">
+
+                          <button
+                            type="button"
+                            className="view-lab-button"
+                            onClick={() =>
+                              openViewModal(
+                                item
+                              )
+                            }
+                          >
+                            View
+                          </button>
+
+                          <button
+                            type="button"
+                            className="edit-lab-button"
+                            onClick={() =>
+                              openEditModal(
+                                item
+                              )
+                            }
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            className="delete-lab-button"
+                            onClick={() =>
+                              handleDelete(
+                                item
+                              )
+                            }
+                            disabled={
+                              deleting
+                            }
+                          >
+                            Delete
+                          </button>
+
+                        </div>
                       </td>
+
                     </tr>
                   )
                 )}
+
               </tbody>
+
             </table>
+
           </div>
         )}
+
       </div>
 
-      {/* ADD LABORATORY MODAL */}
-
-      {showAddModal && (
+      {showFormModal && (
         <div className="lab-modal-overlay">
+
           <div className="lab-modal">
+
             <div className="lab-modal-header">
+
               <div>
+
                 <h2>
-                  Add Laboratory Record
+                  {editingLaboratory
+                    ? "Edit Laboratory Record"
+                    : "Add Laboratory Record"}
                 </h2>
 
                 <p>
-                  Add a patient laboratory
-                  test and result.
+                  {editingLaboratory
+                    ? "Update patient laboratory test details."
+                    : "Add a patient laboratory test and result."}
                 </p>
+
               </div>
 
               <button
                 type="button"
                 className="lab-close-button"
-                onClick={closeModal}
+                onClick={
+                  closeFormModal
+                }
                 disabled={saving}
               >
                 ×
               </button>
+
             </div>
 
             <form
               className="lab-form"
-              onSubmit={handleSubmit}
+              onSubmit={
+                handleSubmit
+              }
             >
-              {/* PATIENT + DOCTOR */}
-
               <div className="form-row">
+
                 <div className="form-group">
+
                   <label>
                     Patient *
                   </label>
@@ -599,6 +810,7 @@ function Laboratory() {
                     }
                     required
                   >
+
                     <option value="">
                       Select patient
                     </option>
@@ -613,14 +825,19 @@ function Laboratory() {
                             patient._id
                           }
                         >
-                          {patient.fullName}
+                          {
+                            patient.fullName
+                          }
                         </option>
                       )
                     )}
+
                   </select>
+
                 </div>
 
                 <div className="form-group">
+
                   <label>
                     Doctor *
                   </label>
@@ -635,6 +852,7 @@ function Laboratory() {
                     }
                     required
                   >
+
                     <option value="">
                       Select doctor
                     </option>
@@ -649,7 +867,9 @@ function Laboratory() {
                             doctor._id
                           }
                         >
-                          {doctor.fullName}
+                          {
+                            doctor.fullName
+                          }
                           {" - "}
                           {
                             doctor.specialization
@@ -657,14 +877,17 @@ function Laboratory() {
                         </option>
                       )
                     )}
+
                   </select>
+
                 </div>
+
               </div>
 
-              {/* APPOINTMENT + DATE */}
-
               <div className="form-row">
+
                 <div className="form-group">
+
                   <label>
                     Appointment
                   </label>
@@ -678,6 +901,7 @@ function Laboratory() {
                       handleChange
                     }
                   >
+
                     <option value="">
                       No appointment linked
                     </option>
@@ -702,10 +926,13 @@ function Laboratory() {
                         </option>
                       )
                     )}
+
                   </select>
+
                 </div>
 
                 <div className="form-group">
+
                   <label>
                     Test Date *
                   </label>
@@ -721,13 +948,15 @@ function Laboratory() {
                     }
                     required
                   />
+
                 </div>
+
               </div>
 
-              {/* TEST + CATEGORY */}
-
               <div className="form-row">
+
                 <div className="form-group">
+
                   <label>
                     Test Name *
                   </label>
@@ -743,9 +972,11 @@ function Laboratory() {
                     placeholder="Complete Blood Count"
                     required
                   />
+
                 </div>
 
                 <div className="form-group">
+
                   <label>
                     Category *
                   </label>
@@ -761,13 +992,14 @@ function Laboratory() {
                     placeholder="Hematology"
                     required
                   />
+
                 </div>
+
               </div>
-
-              {/* RESULT + UNIT */}
-
               <div className="form-row">
+
                 <div className="form-group">
+
                   <label>
                     Result
                   </label>
@@ -782,9 +1014,11 @@ function Laboratory() {
                     }
                     placeholder="13.2"
                   />
+
                 </div>
 
                 <div className="form-group">
+
                   <label>
                     Unit
                   </label>
@@ -799,12 +1033,13 @@ function Laboratory() {
                     }
                     placeholder="g/dL"
                   />
+
                 </div>
+
               </div>
 
-              {/* REFERENCE RANGE */}
-
               <div className="form-group">
+
                 <label>
                   Reference Range
                 </label>
@@ -819,11 +1054,11 @@ function Laboratory() {
                   }
                   placeholder="12 - 16 g/dL"
                 />
+
               </div>
 
-              {/* NOTES */}
-
               <div className="form-group">
+
                 <label>
                   Notes
                 </label>
@@ -839,11 +1074,11 @@ function Laboratory() {
                   rows="3"
                   placeholder="Laboratory observations..."
                 />
+
               </div>
 
-              {/* STATUS */}
-
               <div className="form-group">
+
                 <label>
                   Status
                 </label>
@@ -857,6 +1092,7 @@ function Laboratory() {
                     handleChange
                   }
                 >
+
                   <option value="Ordered">
                     Ordered
                   </option>
@@ -876,16 +1112,19 @@ function Laboratory() {
                   <option value="Cancelled">
                     Cancelled
                   </option>
+
                 </select>
+
               </div>
 
-              {/* FOOTER */}
-
               <div className="lab-modal-footer">
+
                 <button
                   type="button"
                   className="cancel-lab-button"
-                  onClick={closeModal}
+                  onClick={
+                    closeFormModal
+                  }
                   disabled={saving}
                 >
                   Cancel
@@ -898,22 +1137,30 @@ function Laboratory() {
                 >
                   {saving
                     ? "Saving..."
+                    : editingLaboratory
+                    ? "Update Laboratory Record"
                     : "Save Laboratory Record"}
                 </button>
+
               </div>
+
             </form>
+
           </div>
+
         </div>
       )}
-
-      {/* VIEW MODAL */}
 
       {showViewModal &&
         selectedLaboratory && (
           <div className="lab-modal-overlay">
+
             <div className="lab-modal view-lab-modal">
+
               <div className="lab-modal-header">
+
                 <div>
+
                   <h2>
                     Laboratory Result
                   </h2>
@@ -922,6 +1169,7 @@ function Laboratory() {
                     Patient laboratory
                     test details.
                   </p>
+
                 </div>
 
                 <button
@@ -933,10 +1181,13 @@ function Laboratory() {
                 >
                   ×
                 </button>
+
               </div>
 
               <div className="lab-details">
+
                 <div className="lab-detail-grid">
+
                   <div>
                     <span>
                       Patient
@@ -1024,9 +1275,11 @@ function Laboratory() {
                       }
                     </strong>
                   </div>
+
                 </div>
 
                 <div className="lab-result-card">
+
                   <span>
                     Result
                   </span>
@@ -1043,9 +1296,11 @@ function Laboratory() {
                       }
                     </small>
                   )}
+
                 </div>
 
                 <div className="lab-info-section">
+
                   <h3>
                     Reference Range
                   </h3>
@@ -1056,34 +1311,75 @@ function Laboratory() {
                       "-"
                     }
                   </p>
+
                 </div>
 
                 <div className="lab-info-section">
+
                   <h3>
                     Notes
                   </h3>
 
                   <p>
-                    {selectedLaboratory.notes ||
-                      "-"}
+                    {
+                      selectedLaboratory.notes ||
+                      "-"
+                    }
                   </p>
+
                 </div>
+
               </div>
 
               <div className="lab-modal-footer">
+
+                <button
+                  type="button"
+                  className="delete-view-button"
+                  onClick={() =>
+                    handleDelete(
+                      selectedLaboratory
+                    )
+                  }
+                  disabled={deleting}
+                >
+                  {deleting
+                    ? "Deleting..."
+                    : "Delete"}
+                </button>
+
+                <button
+                  type="button"
+                  className="edit-view-button"
+                  onClick={() => {
+                    closeViewModal();
+                    openEditModal(
+                      selectedLaboratory
+                    );
+                  }}
+                  disabled={deleting}
+                >
+                  Edit
+                </button>
+
                 <button
                   type="button"
                   className="cancel-lab-button"
                   onClick={
                     closeViewModal
                   }
+                  disabled={deleting}
                 >
                   Close
                 </button>
+
               </div>
+
             </div>
+
           </div>
         )}
+
     </div>
   );
 }

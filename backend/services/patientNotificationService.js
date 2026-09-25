@@ -404,13 +404,13 @@ async function sendMedicalRecordCreatedEmail({
 
   const followUpDate = record.followUpDate
     ? new Date(record.followUpDate).toLocaleDateString(
-        "en-IN",
-        {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        }
-      )
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }
+    )
     : "Not scheduled";
 
   const message = `Hello ${patient.fullName},
@@ -441,30 +441,26 @@ ${record.notes || "Not provided"}
 Vital Information
 -----------------
 Blood Pressure: ${record.bloodPressure || "Not recorded"}
-Pulse Rate: ${
-    record.pulseRate !== null &&
-    record.pulseRate !== undefined
+Pulse Rate: ${record.pulseRate !== null &&
+      record.pulseRate !== undefined
       ? record.pulseRate
       : "Not recorded"
-  }
-Temperature: ${
-    record.temperature !== null &&
-    record.temperature !== undefined
+    }
+Temperature: ${record.temperature !== null &&
+      record.temperature !== undefined
       ? record.temperature
       : "Not recorded"
-  }
-Oxygen Level: ${
-    record.oxygenLevel !== null &&
-    record.oxygenLevel !== undefined
+    }
+Oxygen Level: ${record.oxygenLevel !== null &&
+      record.oxygenLevel !== undefined
       ? record.oxygenLevel
       : "Not recorded"
-  }
-Weight: ${
-    record.weight !== null &&
-    record.weight !== undefined
+    }
+Weight: ${record.weight !== null &&
+      record.weight !== undefined
       ? record.weight
       : "Not recorded"
-  }
+    }
 
 Follow-up Date:
 ${followUpDate}
@@ -504,13 +500,13 @@ async function sendMedicalRecordUpdatedEmail({
 
   const followUpDate = record.followUpDate
     ? new Date(record.followUpDate).toLocaleDateString(
-        "en-IN",
-        {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        }
-      )
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }
+    )
     : "Not scheduled";
 
   const message = `Hello ${patient.fullName},
@@ -541,30 +537,26 @@ ${record.notes || "Not provided"}
 Vital Information
 -----------------
 Blood Pressure: ${record.bloodPressure || "Not recorded"}
-Pulse Rate: ${
-    record.pulseRate !== null &&
-    record.pulseRate !== undefined
+Pulse Rate: ${record.pulseRate !== null &&
+      record.pulseRate !== undefined
       ? record.pulseRate
       : "Not recorded"
-  }
-Temperature: ${
-    record.temperature !== null &&
-    record.temperature !== undefined
+    }
+Temperature: ${record.temperature !== null &&
+      record.temperature !== undefined
       ? record.temperature
       : "Not recorded"
-  }
-Oxygen Level: ${
-    record.oxygenLevel !== null &&
-    record.oxygenLevel !== undefined
+    }
+Oxygen Level: ${record.oxygenLevel !== null &&
+      record.oxygenLevel !== undefined
       ? record.oxygenLevel
       : "Not recorded"
-  }
-Weight: ${
-    record.weight !== null &&
-    record.weight !== undefined
+    }
+Weight: ${record.weight !== null &&
+      record.weight !== undefined
       ? record.weight
       : "Not recorded"
-  }
+    }
 
 Follow-up Date:
 ${followUpDate}
@@ -597,13 +589,13 @@ async function sendMedicalRecordDeletedEmail({
 }) {
   const visitDate = record.visitDate
     ? new Date(record.visitDate).toLocaleDateString(
-        "en-IN",
-        {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        }
-      )
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }
+    )
     : "Not available";
 
   const message = `Hello ${patient.fullName},
@@ -659,17 +651,16 @@ For any assistance, please contact the hospital administration.
       prescription.medications
     )
       ? prescription.medications
-          .map(
-            (medicine, index) =>
-              `${index + 1}. ${medicine.medicineName}
+        .map(
+          (medicine, index) =>
+            `${index + 1}. ${medicine.medicineName}
    Dosage: ${medicine.dosage}
    Frequency: ${medicine.frequency}
    Duration: ${medicine.duration}
-   Instructions: ${
-     medicine.instructions || "No special instructions"
-   }`
-          )
-          .join("\n\n")
+   Instructions: ${medicine.instructions || "No special instructions"
+            }`
+        )
+        .join("\n\n")
       : "No medicines available.";
 
     const message = `
@@ -694,10 +685,10 @@ ${doctor?.department || "N/A"}
 
 Prescription Date:
 ${prescription.prescriptionDate
-  ? new Date(
-      prescription.prescriptionDate
-    ).toLocaleDateString("en-IN")
-  : "N/A"}
+        ? new Date(
+          prescription.prescriptionDate
+        ).toLocaleDateString("en-IN")
+        : "N/A"}
 
 Diagnosis:
 ${prescription.diagnosis || "Not provided"}
@@ -754,17 +745,16 @@ For any assistance, please contact the hospital administration.
       prescription.medications
     )
       ? prescription.medications
-          .map(
-            (medicine, index) =>
-              `${index + 1}. ${medicine.medicineName}
+        .map(
+          (medicine, index) =>
+            `${index + 1}. ${medicine.medicineName}
    Dosage: ${medicine.dosage}
    Frequency: ${medicine.frequency}
    Duration: ${medicine.duration}
-   Instructions: ${
-     medicine.instructions || "No special instructions"
-   }`
-          )
-          .join("\n\n")
+   Instructions: ${medicine.instructions || "No special instructions"
+            }`
+        )
+        .join("\n\n")
       : "No medicines available.";
 
     const message = `
@@ -789,10 +779,10 @@ ${doctor?.department || "N/A"}
 
 Prescription Date:
 ${prescription.prescriptionDate
-  ? new Date(
-      prescription.prescriptionDate
-    ).toLocaleDateString("en-IN")
-  : "N/A"}
+        ? new Date(
+          prescription.prescriptionDate
+        ).toLocaleDateString("en-IN")
+        : "N/A"}
 
 Diagnosis:
 ${prescription.diagnosis || "Not provided"}
@@ -864,10 +854,10 @@ ${doctor?.department || "N/A"}
 
 Prescription Date:
 ${prescription.prescriptionDate
-  ? new Date(
-      prescription.prescriptionDate
-    ).toLocaleDateString("en-IN")
-  : "N/A"}
+        ? new Date(
+          prescription.prescriptionDate
+        ).toLocaleDateString("en-IN")
+        : "N/A"}
 
 Diagnosis:
 ${prescription.diagnosis || "Not provided"}
@@ -896,6 +886,369 @@ ${hospitalInfo}
   }
 }
 
+// ======================================================
+// LABORATORY TEST ORDERED EMAIL
+// ======================================================
+
+async function sendLaboratoryTestOrderedEmail({
+  patient,
+  doctor,
+  laboratory,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for laboratory test notification."
+      );
+      return;
+    }
+
+    const hospitalInfo = `
+Hospital Management System
+
+For assistance, please contact the hospital administration.
+`;
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+A laboratory test has been ordered for you.
+
+Laboratory Test Details
+-----------------------
+Test Name: ${laboratory.testName || "N/A"}
+Category: ${laboratory.category || "N/A"}
+Test Date: ${laboratory.testDate
+        ? new Date(laboratory.testDate).toLocaleDateString()
+        : "N/A"
+      }
+Status: ${laboratory.status || "Ordered"}
+
+Doctor Details
+--------------
+Doctor: ${doctor?.fullName ||
+      laboratory.doctor?.fullName ||
+      "N/A"
+      }
+Specialization: ${doctor?.specialization ||
+      laboratory.doctor?.specialization ||
+      "N/A"
+      }
+Department: ${doctor?.department ||
+      laboratory.doctor?.department ||
+      "N/A"
+      }
+
+Please follow the instructions provided by your doctor or hospital.
+
+${hospitalInfo}
+`;
+
+    await sendEmail({
+      to: patient.email,
+      subject: `Laboratory Test Ordered - ${laboratory.testName || "Laboratory Test"
+        }`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Laboratory test ordered email error:",
+      error.message
+    );
+  }
+}
+
+
+// ======================================================
+// LABORATORY TEST NOTIFICATION TO DOCTOR
+// ======================================================
+
+async function sendLaboratoryDoctorNotificationEmail({
+  doctor,
+  patient,
+  laboratory,
+}) {
+  try {
+    if (!doctor?.email) {
+      console.log(
+        "Doctor email not available for laboratory notification."
+      );
+      return;
+    }
+
+    const hospitalInfo = `
+Hospital Management System
+
+For assistance, please contact the hospital administration.
+`;
+
+    const message = `
+Hello Dr. ${doctor.fullName || "Doctor"
+      },
+
+A new laboratory test record has been created.
+
+Patient Details
+---------------
+Patient: ${patient?.fullName || "N/A"
+      }
+Email: ${patient?.email || "N/A"
+      }
+
+Laboratory Details
+------------------
+Test Name: ${laboratory.testName || "N/A"
+      }
+Category: ${laboratory.category || "N/A"
+      }
+Test Date: ${laboratory.testDate
+        ? new Date(
+          laboratory.testDate
+        ).toLocaleDateString()
+        : "N/A"
+      }
+Status: ${laboratory.status || "Ordered"
+      }
+
+${hospitalInfo}
+`;
+
+    await sendEmail({
+      to: doctor.email,
+      subject: `New Laboratory Test - ${laboratory.testName || "Laboratory Test"
+        }`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Laboratory doctor notification email error:",
+      error.message
+    );
+  }
+}
+
+async function sendLaboratoryReportAvailableEmail({
+  patient,
+  doctor,
+  laboratory,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for laboratory report notification."
+      );
+      return;
+    }
+
+    const hospitalInfo = `
+Hospital Management System
+
+For assistance, please contact the hospital administration.
+`;
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+Your laboratory report is now available.
+
+Laboratory Report
+-----------------
+Test Name: ${laboratory.testName || "N/A"
+      }
+Category: ${laboratory.category || "N/A"
+      }
+Test Date: ${laboratory.testDate
+        ? new Date(
+          laboratory.testDate
+        ).toLocaleDateString()
+        : "N/A"
+      }
+
+Result: ${laboratory.result || "N/A"
+      }
+Unit: ${laboratory.unit || "N/A"
+      }
+
+Reference Range: ${laboratory.referenceRange || "N/A"
+      }
+
+Notes:
+${laboratory.notes ||
+      "No additional notes."
+      }
+
+Doctor
+------
+${doctor?.fullName ||
+      laboratory.doctor?.fullName ||
+      "N/A"
+      }
+
+Specialization:
+${doctor?.specialization ||
+      laboratory.doctor?.specialization ||
+      "N/A"
+      }
+
+Department:
+${doctor?.department ||
+      laboratory.doctor?.department ||
+      "N/A"
+      }
+
+Please discuss your laboratory results with your doctor.
+
+${hospitalInfo}
+`;
+
+    await sendEmail({
+      to: patient.email,
+      subject: `Laboratory Report Available - ${laboratory.testName || "Lab Report"
+        }`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Laboratory report email error:",
+      error.message
+    );
+  }
+}
+
+async function sendLaboratoryUpdatedEmail({
+  patient,
+  doctor,
+  laboratory,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for laboratory update notification."
+      );
+      return;
+    }
+
+    const hospitalInfo = `
+Hospital Management System
+
+For assistance, please contact the hospital administration.
+`;
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+Your laboratory record has been updated.
+
+Laboratory Details
+------------------
+Test Name: ${laboratory.testName || "N/A"
+      }
+Category: ${laboratory.category || "N/A"
+      }
+Test Date: ${laboratory.testDate
+        ? new Date(
+          laboratory.testDate
+        ).toLocaleDateString()
+        : "N/A"
+      }
+Status: ${laboratory.status || "N/A"
+      }
+
+Result: ${laboratory.result || "Not available"
+      }
+Unit: ${laboratory.unit || "N/A"
+      }
+
+Reference Range: ${laboratory.referenceRange || "N/A"
+      }
+
+Notes:
+${laboratory.notes ||
+      "No additional notes."
+      }
+
+Doctor:
+${doctor?.fullName ||
+      laboratory.doctor?.fullName ||
+      "N/A"
+      }
+
+${hospitalInfo}
+`;
+
+    await sendEmail({
+      to: patient.email,
+      subject: `Laboratory Record Updated - ${laboratory.testName || "Laboratory Test"
+        }`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Laboratory updated email error:",
+      error.message
+    );
+  }
+}
+
+async function sendLaboratoryDeletedEmail({
+  patient,
+  doctor,
+  laboratory,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for laboratory deletion notification."
+      );
+      return;
+    }
+
+    const hospitalInfo = `
+Hospital Management System
+
+For assistance, please contact the hospital administration.
+`;
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+Your laboratory record has been removed from the Hospital Management System.
+
+Removed Laboratory Record
+-------------------------
+Test Name: ${laboratory.testName || "N/A"
+      }
+Category: ${laboratory.category || "N/A"
+      }
+Test Date: ${laboratory.testDate
+        ? new Date(
+          laboratory.testDate
+        ).toLocaleDateString()
+        : "N/A"
+      }
+
+Doctor:
+${doctor?.fullName ||
+      "N/A"
+      }
+
+${hospitalInfo}
+`;
+
+    await sendEmail({
+      to: patient.email,
+      subject: `Laboratory Record Removed - ${laboratory.testName || "Laboratory Test"
+        }`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Laboratory deleted email error:",
+      error.message
+    );
+  }
+}
+
 module.exports = {
   createPatientNotification,
   sendWelcomeEmail,
@@ -903,10 +1256,18 @@ module.exports = {
   sendAppointmentEmail,
   sendDoctorAppointmentEmail,
   sendAppointmentStatusEmail,
+
   sendMedicalRecordCreatedEmail,
   sendMedicalRecordUpdatedEmail,
   sendMedicalRecordDeletedEmail,
+
   sendPrescriptionCreatedEmail,
   sendPrescriptionUpdatedEmail,
   sendPrescriptionDeletedEmail,
+  
+  sendLaboratoryTestOrderedEmail,
+  sendLaboratoryDoctorNotificationEmail,
+  sendLaboratoryReportAvailableEmail,
+  sendLaboratoryUpdatedEmail,
+  sendLaboratoryDeletedEmail,
 };

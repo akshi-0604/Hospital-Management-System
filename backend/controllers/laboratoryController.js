@@ -3,6 +3,15 @@ const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
 
+const {
+  createPatientNotification,
+  sendLaboratoryTestOrderedEmail,
+  sendLaboratoryDoctorNotificationEmail,
+  sendLaboratoryReportAvailableEmail,
+  sendLaboratoryUpdatedEmail,
+  sendLaboratoryDeletedEmail,
+} = require("../services/patientNotificationService");
+
 const populateLab = (query) => {
   return query
     .populate("patient", "fullName email phone")
@@ -75,24 +84,73 @@ const createLaboratory = async (req, res) => {
       }
     }
 
-    const lab =
-      await Laboratory.create({
-        patient,
-        doctor,
-        appointment: appointment || null,
-        testName,
-        category,
-        testDate,
-        result: result || "",
-        unit: unit || "",
-        referenceRange: referenceRange || "",
-        notes: notes || "",
-        status,
-      });
+    const lab = await Laboratory.create({
+      patient,
+      doctor,
+      appointment: appointment || null,
+      testName,
+      category,
+      testDate,
+      result: result || "",
+      unit: unit || "",
+      referenceRange: referenceRange || "",
+      notes: notes || "",
+      status,
+    });
 
     const resultData = await populateLab(
       Laboratory.findById(lab._id)
     );
+
+    try {
+      
+      await createPatientNotification({
+        patientId: patient,
+        type: "laboratory",
+        title:
+          status === "Completed"
+            ? "Lab Report Available"
+            : "Laboratory Test Ordered",
+        message:
+          status === "Completed"
+            ? `Your ${testName} laboratory report is now available.`
+            : `A ${testName} laboratory test has been ordered for you.`,
+        metadata: {
+          laboratoryId: lab._id,
+          doctorId: doctor,
+          appointmentId: appointment || null,
+        },
+      });
+
+      if (
+        status === "Completed" &&
+        result
+      ) {
+        await sendLaboratoryReportAvailableEmail({
+          patient: patientExists,
+          doctor: doctorExists,
+          laboratory: resultData,
+        });
+      } else {
+      
+        await sendLaboratoryTestOrderedEmail({
+          patient: patientExists,
+          doctor: doctorExists,
+          laboratory: resultData,
+        });
+      }
+
+      await sendLaboratoryDoctorNotificationEmail({
+        doctor: doctorExists,
+        patient: patientExists,
+        laboratory: resultData,
+      });
+    } catch (notificationError) {
+      console.error(
+        "Laboratory notification error:",
+        notificationError.message
+      );
+    }
 
     res.status(201).json({
       success: true,
@@ -113,12 +171,11 @@ const createLaboratory = async (req, res) => {
 
 const getLaboratories = async (req, res) => {
   try {
-    const laboratories =
-      await populateLab(
-        Laboratory.find().sort({
-          testDate: -1,
-        })
-      );
+    const laboratories = await populateLab(
+      Laboratory.find().sort({
+        testDate: -1,
+      })
+    );
 
     res.status(200).json({
       success: true,
@@ -139,10 +196,9 @@ const getLaboratories = async (req, res) => {
 
 const getLaboratoryById = async (req, res) => {
   try {
-    const laboratory =
-      await populateLab(
-        Laboratory.findById(req.params.id)
-      );
+    const laboratory = await populateLab(
+      Laboratory.findById(req.params.id)
+    );
 
     if (!laboratory) {
       return res.status(404).json({
@@ -173,9 +229,7 @@ const getLaboratoryById = async (req, res) => {
 const updateLaboratory = async (req, res) => {
   try {
     const laboratory =
-      await Laboratory.findById(
-        req.params.id
-      );
+      await Laboratory.findById(req.params.id);
 
     if (!laboratory) {
       return res.status(404).json({
@@ -183,6 +237,9 @@ const updateLaboratory = async (req, res) => {
         message: "Laboratory record not found",
       });
     }
+
+    const oldStatus = laboratory.status;
+    const oldResult = laboratory.result;
 
     const fields = [
       "patient",
@@ -211,14 +268,81 @@ const updateLaboratory = async (req, res) => {
 
     await laboratory.save();
 
-    const result = await populateLab(
+    const resultData = await populateLab(
       Laboratory.findById(laboratory._id)
     );
+
+    const patient = await User.findById(
+      laboratory.patient
+    );
+
+    const doctor = await Doctor.findById(
+      laboratory.doctor
+    );
+
+    try {
+      const becameCompleted =
+        laboratory.status === "Completed" &&
+        oldStatus !== "Completed";
+
+      const resultWasAdded =
+        laboratory.status === "Completed" &&
+        laboratory.result &&
+        !oldResult;
+
+      if (
+        becameCompleted ||
+        resultWasAdded
+      ) {
+        await createPatientNotification({
+          patientId: laboratory.patient,
+          type: "laboratory",
+          title: "Lab Report Available",
+          message: `Your ${laboratory.testName} laboratory report is now available.`,
+          metadata: {
+            laboratoryId: laboratory._id,
+            doctorId: laboratory.doctor,
+            appointmentId:
+              laboratory.appointment || null,
+          },
+        });
+
+        await sendLaboratoryReportAvailableEmail({
+          patient,
+          doctor,
+          laboratory: resultData,
+        });
+      } else {
+        await createPatientNotification({
+          patientId: laboratory.patient,
+          type: "laboratory",
+          title: "Laboratory Record Updated",
+          message: `Your ${laboratory.testName} laboratory record has been updated.`,
+          metadata: {
+            laboratoryId: laboratory._id,
+            doctorId: laboratory.doctor,
+            appointmentId:
+              laboratory.appointment || null,
+          },
+        });
+
+        await sendLaboratoryUpdatedEmail({
+          patient,
+          doctor,
+          laboratory: resultData,
+        });
+      }
+    } catch (notificationError) {
+      console.error(
+        "Laboratory update notification error:",
+        notificationError.message
+      );
+    }
 
     res.status(200).json({
       success: true,
       message: "Laboratory record updated successfully",
-      laboratory: result,
+      laboratory: resultData,
     });
   } catch (error) {
     console.error(
@@ -238,15 +362,51 @@ const updateLaboratory = async (req, res) => {
 const deleteLaboratory = async (req, res) => {
   try {
     const laboratory =
-      await Laboratory.findByIdAndDelete(
-        req.params.id
-      );
+      await Laboratory.findById(req.params.id);
 
     if (!laboratory) {
       return res.status(404).json({
         success: false,
         message: "Laboratory record not found",
       });
+    }
+
+    const patient = await User.findById(
+      laboratory.patient
+    );
+
+    const doctor = await Doctor.findById(
+      laboratory.doctor
+    );
+
+    const laboratoryId = laboratory._id;
+
+    await Laboratory.findByIdAndDelete(
+      req.params.id
+    );
+
+    try {
+      await createPatientNotification({
+        patientId: laboratory.patient,
+        type: "laboratory",
+        title: "Laboratory Record Removed",
+        message: `Your ${laboratory.testName} laboratory record has been removed from the system.`,
+        metadata: {
+          laboratoryId,
+          doctorId: laboratory.doctor,
+        },
+      });
+
+      await sendLaboratoryDeletedEmail({
+        patient,
+        doctor,
+        laboratory,
+      });
+    } catch (notificationError) {
+      console.error(
+        "Laboratory deletion notification error:",
+        notificationError.message
+      );
     }
 
     res.status(200).json({
