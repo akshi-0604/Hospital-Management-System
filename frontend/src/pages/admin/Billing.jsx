@@ -47,6 +47,7 @@ function Billing() {
 
   const [error, setError] = useState("");
 
+  // Create / Edit bill modal
   const [showFormModal, setShowFormModal] = useState(false);
 
   // View bill modal
@@ -361,6 +362,10 @@ function Billing() {
         );
       }
     );
+
+    // Keep the currently selected appointment
+    // visible during edit even if it is not returned
+    // by the current appointment list.
     if (formData.appointment) {
       const alreadyExists = filtered.some(
         (appointment) =>

@@ -1249,6 +1249,501 @@ ${hospitalInfo}
   }
 }
 
+async function sendBillingCreatedEmail({
+  patient,
+  doctor,
+  appointment,
+  billing,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for billing notification."
+      );
+      return;
+    }
+
+    const invoiceDate = billing.invoiceDate
+      ? new Date(billing.invoiceDate).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+      : "N/A";
+
+    const dueDate = billing.dueDate
+      ? new Date(billing.dueDate).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+      : "Not specified";
+
+    const items = Array.isArray(billing.items)
+      ? billing.items
+        .map(
+          (item, index) =>
+            `${index + 1}. ${item.description || "Service"}
+   Category: ${item.category || "N/A"}
+   Amount: ₹${Number(item.amount || 0).toFixed(2)}`
+        )
+        .join("\n\n")
+      : "No billing items available.";
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+A new bill has been generated for you by ${hospitalInfo.name}.
+
+BILL DETAILS
+------------
+
+Invoice Number:
+${billing.invoiceNumber || "N/A"}
+
+Invoice Date:
+${invoiceDate}
+
+Due Date:
+${dueDate}
+
+Doctor:
+${doctor?.fullName ? `Dr. ${doctor.fullName}` : "N/A"}
+
+Department:
+${doctor?.department || appointment?.department || "N/A"}
+
+Billing Items:
+${items}
+
+Subtotal:
+₹${Number(billing.subtotal || 0).toFixed(2)}
+
+Discount:
+₹${Number(billing.discount || 0).toFixed(2)}
+
+Tax:
+₹${Number(billing.tax || 0).toFixed(2)}
+
+Total Amount:
+₹${Number(billing.totalAmount || 0).toFixed(2)}
+
+Amount Paid:
+₹${Number(billing.amountPaid || 0).toFixed(2)}
+
+Outstanding Balance:
+₹${Number(billing.balanceAmount || 0).toFixed(2)}
+
+Payment Status:
+${billing.paymentStatus || "Pending"}
+
+Notes:
+${billing.notes || "No additional notes."}
+
+Please log in to the Hospital Management System to view your billing information.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+Email: ${hospitalInfo.email}
+
+Regards,
+${hospitalInfo.name}
+`;
+
+    await sendEmail({
+      to: patient.email,
+      subject: `New Bill Generated - ${billing.invoiceNumber || hospitalInfo.name}`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Billing created email error:",
+      error.message
+    );
+  }
+}
+
+
+async function sendBillingUpdatedEmail({
+  patient,
+  doctor,
+  appointment,
+  billing,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for billing update notification."
+      );
+      return;
+    }
+
+    const invoiceDate = billing.invoiceDate
+      ? new Date(billing.invoiceDate).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+      : "N/A";
+
+    const dueDate = billing.dueDate
+      ? new Date(billing.dueDate).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+      : "Not specified";
+
+    const items = Array.isArray(billing.items)
+      ? billing.items
+        .map(
+          (item, index) =>
+            `${index + 1}. ${item.description || "Service"}
+   Category: ${item.category || "N/A"}
+   Amount: ₹${Number(item.amount || 0).toFixed(2)}`
+        )
+        .join("\n\n")
+      : "No billing items available.";
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+Your bill has been updated by ${hospitalInfo.name}.
+
+UPDATED BILL DETAILS
+--------------------
+
+Invoice Number:
+${billing.invoiceNumber || "N/A"}
+
+Invoice Date:
+${invoiceDate}
+
+Due Date:
+${dueDate}
+
+Doctor:
+${doctor?.fullName ? `Dr. ${doctor.fullName}` : "N/A"}
+
+Department:
+${doctor?.department || appointment?.department || "N/A"}
+
+Billing Items:
+${items}
+
+Subtotal:
+₹${Number(billing.subtotal || 0).toFixed(2)}
+
+Discount:
+₹${Number(billing.discount || 0).toFixed(2)}
+
+Tax:
+₹${Number(billing.tax || 0).toFixed(2)}
+
+Total Amount:
+₹${Number(billing.totalAmount || 0).toFixed(2)}
+
+Amount Paid:
+₹${Number(billing.amountPaid || 0).toFixed(2)}
+
+Outstanding Balance:
+₹${Number(billing.balanceAmount || 0).toFixed(2)}
+
+Payment Status:
+${billing.paymentStatus || "Pending"}
+
+Notes:
+${billing.notes || "No additional notes."}
+
+Please log in to the Hospital Management System to view the updated billing information.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+
+Regards,
+${hospitalInfo.name}
+`;
+
+    await sendEmail({
+      to: patient.email,
+      subject: `Bill Updated - ${billing.invoiceNumber || hospitalInfo.name}`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Billing updated email error:",
+      error.message
+    );
+  }
+}
+
+
+async function sendPaymentReceivedEmail({
+  patient,
+  doctor,
+  billing,
+  payment,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for payment notification."
+      );
+      return;
+    }
+
+    const paymentDate = payment?.paymentDate
+      ? new Date(payment.paymentDate).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+      : new Date().toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+
+    const amountPaid = Number(payment?.amount || 0);
+    const totalAmount = Number(billing.totalAmount || 0);
+    const totalPaid = Number(billing.amountPaid || 0);
+    const balance = Number(billing.balanceAmount || 0);
+
+    let paymentStatusMessage = "";
+
+    if (balance <= 0) {
+      paymentStatusMessage = `
+Payment Status:
+FULLY PAID
+
+Your bill has been fully paid. No outstanding balance remains.
+`;
+    } else {
+      paymentStatusMessage = `
+Payment Status:
+PARTIALLY PAID
+
+Outstanding Balance:
+₹${balance.toFixed(2)}
+
+Please clear the remaining outstanding balance.
+`;
+    }
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+We have received your payment for the following hospital bill.
+
+PAYMENT DETAILS
+---------------
+
+Invoice Number:
+${billing.invoiceNumber || "N/A"}
+
+Payment Date:
+${paymentDate}
+
+Payment Amount:
+₹${amountPaid.toFixed(2)}
+
+Payment Method:
+${payment?.paymentMethod || billing.paymentMethod || "N/A"}
+
+Reference Number:
+${payment?.referenceNumber || "N/A"}
+
+Doctor:
+${doctor?.fullName ? `Dr. ${doctor.fullName}` : "N/A"}
+
+Bill Total:
+₹${totalAmount.toFixed(2)}
+
+Total Amount Paid:
+₹${totalPaid.toFixed(2)}
+
+Outstanding Balance:
+₹${balance.toFixed(2)}
+
+${paymentStatusMessage}
+
+Notes:
+${payment?.notes || "No additional payment notes."}
+
+Thank you for making the payment.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+Email: ${hospitalInfo.email}
+
+Regards,
+${hospitalInfo.name}
+`;
+
+    let subject = "Payment Received";
+
+    if (balance <= 0) {
+      subject = `Payment Received - Bill Fully Paid - ${billing.invoiceNumber || hospitalInfo.name
+        }`;
+    } else {
+      subject = `Payment Received - Outstanding Balance - ${billing.invoiceNumber || hospitalInfo.name
+        }`;
+    }
+
+    await sendEmail({
+      to: patient.email,
+      subject,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Payment received email error:",
+      error.message
+    );
+  }
+}
+
+
+async function sendBillingCancelledEmail({
+  patient,
+  doctor,
+  billing,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for billing cancellation notification."
+      );
+      return;
+    }
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+Your hospital bill has been cancelled.
+
+CANCELLED BILL DETAILS
+----------------------
+
+Invoice Number:
+${billing.invoiceNumber || "N/A"}
+
+Invoice Date:
+${billing.invoiceDate
+        ? new Date(billing.invoiceDate).toLocaleDateString("en-IN")
+        : "N/A"
+      }
+
+Doctor:
+${doctor?.fullName ? `Dr. ${doctor.fullName}` : "N/A"}
+
+Total Amount:
+₹${Number(billing.totalAmount || 0).toFixed(2)}
+
+Payment Status:
+Cancelled
+
+If you believe this bill was cancelled incorrectly, please contact the hospital administration.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+Email: ${hospitalInfo.email}
+
+Regards,
+${hospitalInfo.name}
+`;
+
+    await sendEmail({
+      to: patient.email,
+      subject: `Bill Cancelled - ${billing.invoiceNumber || hospitalInfo.name}`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Billing cancelled email error:",
+      error.message
+    );
+  }
+}
+
+
+async function sendBillingDeletedEmail({
+  patient,
+  doctor,
+  billing,
+}) {
+  try {
+    if (!patient?.email) {
+      console.log(
+        "Patient email not available for billing deletion notification."
+      );
+      return;
+    }
+
+    const message = `
+Hello ${patient.fullName || "Patient"},
+
+A billing record associated with your hospital visit has been removed from the Hospital Management System.
+
+REMOVED BILL DETAILS
+--------------------
+
+Invoice Number:
+${billing.invoiceNumber || "N/A"}
+
+Invoice Date:
+${billing.invoiceDate
+        ? new Date(billing.invoiceDate).toLocaleDateString("en-IN")
+        : "N/A"
+      }
+
+Doctor:
+${doctor?.fullName ? `Dr. ${doctor.fullName}` : "N/A"}
+
+Total Amount:
+₹${Number(billing.totalAmount || 0).toFixed(2)}
+
+Payment Status:
+${billing.paymentStatus || "N/A"}
+
+If you believe this billing record was removed incorrectly, please contact the hospital administration.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+Email: ${hospitalInfo.email}
+
+Regards,
+${hospitalInfo.name}
+`;
+
+    await sendEmail({
+      to: patient.email,
+      subject: `Bill Removed - ${billing.invoiceNumber || hospitalInfo.name}`,
+      message,
+    });
+  } catch (error) {
+    console.error(
+      "Billing deleted email error:",
+      error.message
+    );
+  }
+}
+
 module.exports = {
   createPatientNotification,
   sendWelcomeEmail,
@@ -1264,10 +1759,16 @@ module.exports = {
   sendPrescriptionCreatedEmail,
   sendPrescriptionUpdatedEmail,
   sendPrescriptionDeletedEmail,
-  
+
   sendLaboratoryTestOrderedEmail,
   sendLaboratoryDoctorNotificationEmail,
   sendLaboratoryReportAvailableEmail,
   sendLaboratoryUpdatedEmail,
   sendLaboratoryDeletedEmail,
+
+  sendBillingCreatedEmail,
+  sendBillingUpdatedEmail,
+  sendPaymentReceivedEmail,
+  sendBillingCancelledEmail,
+  sendBillingDeletedEmail,
 };

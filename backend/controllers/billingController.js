@@ -3,6 +3,15 @@ const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
 
+const {
+  createPatientNotification,
+  sendBillingCreatedEmail,
+  sendBillingUpdatedEmail,
+  sendPaymentReceivedEmail,
+  sendBillingCancelledEmail,
+  sendBillingDeletedEmail,
+} = require("../services/patientNotificationService");
+
 function calculateBillTotals(
   items = [],
   discount = 0,
@@ -83,6 +92,7 @@ async function normalizeBillingRecord(
     Number(
       billing.amountPaid || 0
     );
+
   if (
     billing.paymentStatus ===
       "Paid" &&
@@ -112,6 +122,7 @@ async function normalizeBillingRecord(
 
     return billing;
   }
+
   if (
     !Number.isFinite(
       amountPaid
@@ -156,6 +167,7 @@ async function normalizeBillingRecord(
 
   return billing;
 }
+
 function populateBilling(
   query
 ) {
@@ -173,6 +185,7 @@ function populateBilling(
       "appointmentDate appointmentTime status department"
     );
 }
+
 const createBilling = async (
   req,
   res
@@ -192,6 +205,7 @@ const createBilling = async (
       paymentMethod,
       notes,
     } = req.body;
+
     if (
       !patient ||
       !invoiceNumber ||
@@ -204,6 +218,7 @@ const createBilling = async (
           "Patient, invoice number, invoice date and at least one billing item are required.",
       });
     }
+
     const patientExists =
       await User.findById(
         patient
@@ -215,6 +230,7 @@ const createBilling = async (
           "Selected patient was not found.",
       });
     }
+
     if (doctor) {
       const doctorExists =
         await Doctor.findById(
@@ -228,6 +244,7 @@ const createBilling = async (
         });
       }
     }
+
     if (appointment) {
       const appointmentExists =
         await Appointment.findById(
@@ -241,6 +258,7 @@ const createBilling = async (
         });
       }
     }
+
     const existingBill =
       await Billing.findOne({
         invoiceNumber:
@@ -253,6 +271,7 @@ const createBilling = async (
           "Invoice number already exists.",
       });
     }
+
     const cleanItems =
       items.map(
         (item) => ({
@@ -298,6 +317,7 @@ const createBilling = async (
         discount,
         tax
       );
+
     const initialAmountPaid =
       0;
 
@@ -361,12 +381,77 @@ const createBilling = async (
         notes:
           notes || "",
       });
+
     const populatedBilling =
       await populateBilling(
         Billing.findById(
           billing._id
         )
       );
+    try {
+      await createPatientNotification({
+        patientId:
+          populatedBilling.patient._id,
+
+        type:
+          "billing",
+
+        title:
+          "New Bill Generated",
+
+        message:
+          `A new bill ${populatedBilling.invoiceNumber} has been generated. Total amount: ₹${Number(
+            populatedBilling.totalAmount || 0
+          ).toLocaleString(
+            "en-IN"
+          )}. Outstanding balance: ₹${Number(
+            populatedBilling.balanceAmount || 0
+          ).toLocaleString(
+            "en-IN"
+          )}.`,
+
+        metadata: {
+          billingId:
+            populatedBilling._id,
+
+          invoiceNumber:
+            populatedBilling.invoiceNumber,
+
+          totalAmount:
+            populatedBilling.totalAmount,
+
+          balanceAmount:
+            populatedBilling.balanceAmount,
+
+          paymentStatus:
+            populatedBilling.paymentStatus,
+        },
+      });
+
+      await sendBillingCreatedEmail({
+        patient:
+          populatedBilling.patient,
+
+        doctor:
+          populatedBilling.doctor,
+
+        appointment:
+          populatedBilling.appointment,
+
+        billing:
+          populatedBilling,
+      });
+
+      console.log(
+        "Billing created notification sent successfully."
+      );
+    } catch (notificationError) {
+      console.error(
+        "Billing created notification error:",
+        notificationError.message
+      );
+    }
+
 
     return res.status(201).json({
       message:
@@ -399,6 +484,7 @@ const createBilling = async (
     });
   }
 };
+
 const getBillings = async (
   req,
   res
@@ -466,12 +552,10 @@ const getBillingById =
         });
       }
 
-      // Correct old record if necessary
       await normalizeBillingRecord(
         billing
       );
 
-      // Read corrected record
       billing =
         await populateBilling(
           Billing.findById(
@@ -513,6 +597,9 @@ const updateBilling =
         });
       }
 
+      const oldPaymentStatus =
+        billing.paymentStatus;
+
       const {
         patient,
         doctor,
@@ -524,7 +611,9 @@ const updateBilling =
         discount,
         tax,
         notes,
+        paymentStatus,
       } = req.body;
+
       if (
         patient !== undefined
       ) {
@@ -563,6 +652,7 @@ const updateBilling =
         billing.doctor =
           doctor || null;
       }
+
       if (
         appointment !==
         undefined
@@ -627,6 +717,7 @@ const updateBilling =
         billing.dueDate =
           dueDate || null;
       }
+
       if (
         Array.isArray(items)
       ) {
@@ -672,6 +763,7 @@ const updateBilling =
         billing.items =
           cleanItems;
       }
+
       if (
         discount !== undefined
       ) {
@@ -683,6 +775,7 @@ const updateBilling =
             0
           );
       }
+
       if (
         tax !== undefined
       ) {
@@ -699,6 +792,17 @@ const updateBilling =
       ) {
         billing.notes =
           notes || "";
+      }
+
+      if (
+        paymentStatus ===
+        "Cancelled"
+      ) {
+        billing.paymentStatus =
+          "Cancelled";
+
+        billing.balanceAmount =
+          0;
       }
       const totals =
         calculateBillTotals(
@@ -728,9 +832,6 @@ const updateBilling =
           "Paid" &&
         paid <= 0
       ) {
-        /*
-         * Old Paid bill.
-         */
         paid =
           totals.totalAmount;
       }
@@ -745,6 +846,8 @@ const updateBilling =
 
       billing.amountPaid =
         paid;
+
+
       if (
         billing.paymentStatus ===
         "Cancelled"
@@ -759,6 +862,8 @@ const updateBilling =
             0
           );
       }
+
+
       if (
         billing.paymentStatus !==
         "Cancelled"
@@ -770,7 +875,9 @@ const updateBilling =
           );
       }
 
+
       await billing.save();
+
 
       const populatedBilling =
         await populateBilling(
@@ -778,6 +885,119 @@ const updateBilling =
             billing._id
           )
         );
+      try {
+        if (
+          populatedBilling.paymentStatus ===
+            "Cancelled" &&
+          oldPaymentStatus !==
+            "Cancelled"
+        ) {
+
+          await createPatientNotification({
+            patientId:
+              populatedBilling.patient._id,
+
+            type:
+              "billing",
+
+            title:
+              "Bill Cancelled",
+
+            message:
+              `Your bill ${populatedBilling.invoiceNumber} has been cancelled.`,
+
+            metadata: {
+              billingId:
+                populatedBilling._id,
+
+              invoiceNumber:
+                populatedBilling.invoiceNumber,
+
+              totalAmount:
+                populatedBilling.totalAmount,
+
+              paymentStatus:
+                "Cancelled",
+            },
+          });
+
+          await sendBillingCancelledEmail({
+            patient:
+              populatedBilling.patient,
+
+            doctor:
+              populatedBilling.doctor,
+
+            billing:
+              populatedBilling,
+          });
+
+        } else {
+
+          await createPatientNotification({
+            patientId:
+              populatedBilling.patient._id,
+
+            type:
+              "billing",
+
+            title:
+              "Bill Updated",
+
+            message:
+              `Your bill ${populatedBilling.invoiceNumber} has been updated. Total amount: ₹${Number(
+                populatedBilling.totalAmount || 0
+              ).toLocaleString(
+                "en-IN"
+              )}. Outstanding balance: ₹${Number(
+                populatedBilling.balanceAmount || 0
+              ).toLocaleString(
+                "en-IN"
+              )}.`,
+
+            metadata: {
+              billingId:
+                populatedBilling._id,
+
+              invoiceNumber:
+                populatedBilling.invoiceNumber,
+
+              totalAmount:
+                populatedBilling.totalAmount,
+
+              balanceAmount:
+                populatedBilling.balanceAmount,
+
+              paymentStatus:
+                populatedBilling.paymentStatus,
+            },
+          });
+
+          await sendBillingUpdatedEmail({
+            patient:
+              populatedBilling.patient,
+
+            doctor:
+              populatedBilling.doctor,
+
+            appointment:
+              populatedBilling.appointment,
+
+            billing:
+              populatedBilling,
+          });
+        }
+
+        console.log(
+          "Billing update notification sent successfully."
+        );
+      } catch (notificationError) {
+        console.error(
+          "Billing update notification error:",
+          notificationError.message
+        );
+      }
+
 
       return res.status(200).json({
         message:
@@ -801,7 +1021,6 @@ const updateBilling =
       });
     }
   };
-
 const recordPayment =
   async (req, res) => {
     try {
@@ -826,6 +1045,8 @@ const recordPayment =
             "Cancelled bills cannot receive payments.",
         });
       }
+
+
       if (
         billing.paymentStatus ===
           "Paid" &&
@@ -849,6 +1070,7 @@ const recordPayment =
         });
       }
 
+
       const {
         amount,
         paymentDate,
@@ -871,6 +1093,8 @@ const recordPayment =
             "Please enter a valid payment amount.",
         });
       }
+
+
       const currentPaid =
         Number(
           billing.amountPaid || 0
@@ -888,6 +1112,7 @@ const recordPayment =
           0
         );
 
+
       if (
         paymentAmount >
         currentBalance
@@ -899,6 +1124,8 @@ const recordPayment =
             )}.`,
         });
       }
+
+
       const finalPaymentDate =
         paymentDate
           ? new Date(
@@ -916,7 +1143,6 @@ const recordPayment =
             "Invalid payment date.",
         });
       }
-
       billing.payments.push({
         amount:
           paymentAmount,
@@ -939,9 +1165,12 @@ const recordPayment =
             notes || ""
           ).trim(),
       });
+
+
       billing.amountPaid =
         currentPaid +
         paymentAmount;
+
       billing.balanceAmount =
         Math.max(
           totalAmount -
@@ -960,7 +1189,9 @@ const recordPayment =
         billing.paymentMethod ||
         "Cash";
 
+
       await billing.save();
+
 
       const populatedBilling =
         await populateBilling(
@@ -968,6 +1199,110 @@ const recordPayment =
             billing._id
           )
         );
+      const savedPayment =
+        billing.payments[
+          billing.payments.length - 1
+        ];
+      try {
+
+        let notificationTitle =
+          "Payment Received";
+
+        let notificationMessage =
+          `Payment of ₹${paymentAmount.toLocaleString(
+            "en-IN"
+          )} has been received for bill ${populatedBilling.invoiceNumber}.`;
+
+        if (
+          populatedBilling.paymentStatus ===
+          "Paid"
+        ) {
+          notificationTitle =
+            "Bill Fully Paid";
+
+          notificationMessage +=
+            " Your bill has been fully paid. No outstanding balance remains.";
+        } else {
+          notificationTitle =
+            "Partial Payment Received";
+
+          notificationMessage +=
+            ` Outstanding balance: ₹${Number(
+              populatedBilling.balanceAmount || 0
+            ).toLocaleString(
+              "en-IN"
+            )}.`;
+        }
+
+
+        await createPatientNotification({
+          patientId:
+            populatedBilling.patient._id,
+
+          type:
+            "billing",
+
+          title:
+            notificationTitle,
+
+          message:
+            notificationMessage,
+
+          metadata: {
+            billingId:
+              populatedBilling._id,
+
+            invoiceNumber:
+              populatedBilling.invoiceNumber,
+
+            paymentAmount:
+              paymentAmount,
+
+            amountPaid:
+              populatedBilling.amountPaid,
+
+            balanceAmount:
+              populatedBilling.balanceAmount,
+
+            paymentStatus:
+              populatedBilling.paymentStatus,
+
+            paymentMethod:
+              paymentMethod ||
+              "Cash",
+
+            referenceNumber:
+              referenceNumber || "",
+          },
+        });
+
+
+        await sendPaymentReceivedEmail({
+          patient:
+            populatedBilling.patient,
+
+          doctor:
+            populatedBilling.doctor,
+
+          billing:
+            populatedBilling,
+
+          payment:
+            savedPayment,
+        });
+
+
+        console.log(
+          "Payment notification sent successfully."
+        );
+
+      } catch (notificationError) {
+        console.error(
+          "Payment notification error:",
+          notificationError.message
+        );
+      }
+
 
       return res.status(200).json({
         message:
@@ -995,9 +1330,12 @@ const recordPayment =
 const deleteBilling =
   async (req, res) => {
     try {
+
       const billing =
-        await Billing.findByIdAndDelete(
-          req.params.id
+        await populateBilling(
+          Billing.findById(
+            req.params.id
+          )
         );
 
       if (!billing) {
@@ -1007,10 +1345,70 @@ const deleteBilling =
         });
       }
 
+      await Billing.findByIdAndDelete(
+        req.params.id
+      );
+
+      try {
+
+        await createPatientNotification({
+          patientId:
+            billing.patient._id,
+
+          type:
+            "billing",
+
+          title:
+            "Bill Removed",
+
+          message:
+            `The billing record ${billing.invoiceNumber} has been removed from the Hospital Management System.`,
+
+          metadata: {
+            billingId:
+              billing._id,
+
+            invoiceNumber:
+              billing.invoiceNumber,
+
+            totalAmount:
+              billing.totalAmount,
+
+            paymentStatus:
+              billing.paymentStatus,
+          },
+        });
+
+
+        await sendBillingDeletedEmail({
+          patient:
+            billing.patient,
+
+          doctor:
+            billing.doctor,
+
+          billing:
+            billing,
+        });
+
+
+        console.log(
+          "Billing deletion notification sent successfully."
+        );
+
+      } catch (notificationError) {
+        console.error(
+          "Billing deletion notification error:",
+          notificationError.message
+        );
+      }
+
+
       return res.status(200).json({
         message:
           "Billing record deleted successfully.",
       });
+
     } catch (error) {
       console.error(
         "Delete billing error:",
@@ -1026,6 +1424,7 @@ const deleteBilling =
       });
     }
   };
+
 module.exports = {
   createBilling,
   getBillings,
