@@ -115,7 +115,8 @@ async function sendAppointmentEmail({
   });
 
   const location =
-    departmentLocation || "Please contact hospital reception";
+    departmentLocation ||
+    "Please contact hospital reception";
 
   const message = `Hello ${patient.fullName},
 
@@ -370,7 +371,9 @@ ${hospitalInfo.name}`;
   }
 
   if (!patientMessage || !doctorMessage) {
-    throw new Error(`Unsupported appointment status: ${status}`);
+    throw new Error(
+      `Unsupported appointment status: ${status}`
+    );
   }
 
   await sendEmail({
@@ -386,11 +389,265 @@ ${hospitalInfo.name}`;
   });
 }
 
+async function sendMedicalRecordCreatedEmail({
+  patient,
+  doctor,
+  record,
+}) {
+  const visitDate = new Date(
+    record.visitDate
+  ).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  const followUpDate = record.followUpDate
+    ? new Date(record.followUpDate).toLocaleDateString(
+        "en-IN",
+        {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }
+      )
+    : "Not scheduled";
+
+  const message = `Hello ${patient.fullName},
+
+A new medical record has been created for your visit.
+
+Medical Record Details
+----------------------
+Doctor: Dr. ${doctor.fullName}
+Specialization: ${doctor.specialization || "Not provided"}
+Department: ${doctor.department || "Not provided"}
+
+Visit Date:
+${visitDate}
+
+Symptoms:
+${record.symptoms || "Not provided"}
+
+Diagnosis:
+${record.diagnosis || "Not provided"}
+
+Treatment Plan:
+${record.treatmentPlan || "Not provided"}
+
+Notes:
+${record.notes || "Not provided"}
+
+Vital Information
+-----------------
+Blood Pressure: ${record.bloodPressure || "Not recorded"}
+Pulse Rate: ${
+    record.pulseRate !== null &&
+    record.pulseRate !== undefined
+      ? record.pulseRate
+      : "Not recorded"
+  }
+Temperature: ${
+    record.temperature !== null &&
+    record.temperature !== undefined
+      ? record.temperature
+      : "Not recorded"
+  }
+Oxygen Level: ${
+    record.oxygenLevel !== null &&
+    record.oxygenLevel !== undefined
+      ? record.oxygenLevel
+      : "Not recorded"
+  }
+Weight: ${
+    record.weight !== null &&
+    record.weight !== undefined
+      ? record.weight
+      : "Not recorded"
+  }
+
+Follow-up Date:
+${followUpDate}
+
+Status:
+${record.status || "Open"}
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+
+You can log in to the Hospital Management System to view your medical record.
+
+Regards,
+${hospitalInfo.name}`;
+
+  return sendEmail({
+    to: patient.email,
+    subject: `New Medical Record - ${hospitalInfo.name}`,
+    message,
+  });
+}
+async function sendMedicalRecordUpdatedEmail({
+  patient,
+  doctor,
+  record,
+}) {
+  const visitDate = new Date(
+    record.visitDate
+  ).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  const followUpDate = record.followUpDate
+    ? new Date(record.followUpDate).toLocaleDateString(
+        "en-IN",
+        {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }
+      )
+    : "Not scheduled";
+
+  const message = `Hello ${patient.fullName},
+
+Your medical record has been updated by the hospital.
+
+Updated Medical Record
+----------------------
+Doctor: Dr. ${doctor.fullName}
+Specialization: ${doctor.specialization || "Not provided"}
+Department: ${doctor.department || "Not provided"}
+
+Visit Date:
+${visitDate}
+
+Symptoms:
+${record.symptoms || "Not provided"}
+
+Diagnosis:
+${record.diagnosis || "Not provided"}
+
+Treatment Plan:
+${record.treatmentPlan || "Not provided"}
+
+Notes:
+${record.notes || "Not provided"}
+
+Vital Information
+-----------------
+Blood Pressure: ${record.bloodPressure || "Not recorded"}
+Pulse Rate: ${
+    record.pulseRate !== null &&
+    record.pulseRate !== undefined
+      ? record.pulseRate
+      : "Not recorded"
+  }
+Temperature: ${
+    record.temperature !== null &&
+    record.temperature !== undefined
+      ? record.temperature
+      : "Not recorded"
+  }
+Oxygen Level: ${
+    record.oxygenLevel !== null &&
+    record.oxygenLevel !== undefined
+      ? record.oxygenLevel
+      : "Not recorded"
+  }
+Weight: ${
+    record.weight !== null &&
+    record.weight !== undefined
+      ? record.weight
+      : "Not recorded"
+  }
+
+Follow-up Date:
+${followUpDate}
+
+Status:
+${record.status || "Open"}
+
+Please log in to the Hospital Management System to view the latest information.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+
+Regards,
+${hospitalInfo.name}`;
+
+  return sendEmail({
+    to: patient.email,
+    subject: `Medical Record Updated - ${hospitalInfo.name}`,
+    message,
+  });
+}
+
+async function sendMedicalRecordDeletedEmail({
+  patient,
+  doctor,
+  record,
+}) {
+  const visitDate = record.visitDate
+    ? new Date(record.visitDate).toLocaleDateString(
+        "en-IN",
+        {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }
+      )
+    : "Not available";
+
+  const message = `Hello ${patient.fullName},
+
+A medical record associated with your hospital visit has been removed from the Hospital Management System.
+
+Medical Record Details
+----------------------
+Doctor: Dr. ${doctor.fullName}
+Department: ${doctor.department || "Not provided"}
+Visit Date: ${visitDate}
+
+Diagnosis:
+${record.diagnosis || "Not provided"}
+
+If you believe this record was removed incorrectly or you need further information, please contact the hospital.
+
+Hospital Information
+--------------------
+Hospital: ${hospitalInfo.name}
+Address: ${hospitalInfo.address}
+Phone: ${hospitalInfo.phone}
+
+Regards,
+${hospitalInfo.name}`;
+
+  return sendEmail({
+    to: patient.email,
+    subject: `Medical Record Removed - ${hospitalInfo.name}`,
+    message,
+  });
+}
+
 module.exports = {
   createPatientNotification,
+
   sendWelcomeEmail,
   sendHospitalInformationEmail,
+
   sendAppointmentEmail,
   sendDoctorAppointmentEmail,
   sendAppointmentStatusEmail,
+
+  sendMedicalRecordCreatedEmail,
+  sendMedicalRecordUpdatedEmail,
+  sendMedicalRecordDeletedEmail,
 };

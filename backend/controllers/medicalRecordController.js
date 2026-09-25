@@ -3,9 +3,19 @@ const User = require("../models/User");
 const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
 
+const {
+  createPatientNotification,
+  sendMedicalRecordCreatedEmail,
+  sendMedicalRecordUpdatedEmail,
+  sendMedicalRecordDeletedEmail,
+} = require("../services/patientNotificationService");
+
 const populateRecord = (query) => {
   return query
-    .populate("patient", "fullName email phone role")
+    .populate(
+      "patient",
+      "fullName email phone role"
+    )
     .populate(
       "doctor",
       "fullName doctorId specialization department"
@@ -16,7 +26,6 @@ const populateRecord = (query) => {
     );
 };
 
-// CREATE
 const createMedicalRecord = async (req, res) => {
   try {
     const {
@@ -37,7 +46,12 @@ const createMedicalRecord = async (req, res) => {
       status = "Open",
     } = req.body;
 
-    if (!patient || !doctor || !visitDate || !diagnosis) {
+    if (
+      !patient ||
+      !doctor ||
+      !visitDate ||
+      !diagnosis
+    ) {
       return res.status(400).json({
         success: false,
         message:
@@ -62,7 +76,6 @@ const createMedicalRecord = async (req, res) => {
         message: "Doctor not found",
       });
     }
-
     if (appointment) {
       const appointmentExists =
         await Appointment.findById(appointment);
@@ -80,28 +93,46 @@ const createMedicalRecord = async (req, res) => {
       doctor,
       appointment: appointment || null,
       visitDate,
+
       symptoms: symptoms || "",
+
       diagnosis,
-      treatmentPlan: treatmentPlan || "",
+
+      treatmentPlan:
+        treatmentPlan || "",
+
       notes: notes || "",
-      bloodPressure: bloodPressure || "",
+
+      bloodPressure:
+        bloodPressure || "",
+
       pulseRate:
-        pulseRate === "" || pulseRate === undefined
+        pulseRate === "" ||
+        pulseRate === undefined
           ? null
           : Number(pulseRate),
+
       temperature:
-        temperature === "" || temperature === undefined
+        temperature === "" ||
+        temperature === undefined
           ? null
           : Number(temperature),
+
       oxygenLevel:
-        oxygenLevel === "" || oxygenLevel === undefined
+        oxygenLevel === "" ||
+        oxygenLevel === undefined
           ? null
           : Number(oxygenLevel),
+
       weight:
-        weight === "" || weight === undefined
+        weight === "" ||
+        weight === undefined
           ? null
           : Number(weight),
-      followUpDate: followUpDate || null,
+
+      followUpDate:
+        followUpDate || null,
+
       status,
     });
 
@@ -109,46 +140,93 @@ const createMedicalRecord = async (req, res) => {
       MedicalRecord.findById(record._id)
     );
 
+    try {
+      await createPatientNotification({
+        patientId: patientExists._id,
+        type: "medical_record",
+        title: "Medical Record Created",
+        message:
+          `A new medical record has been created by Dr. ${
+            doctorExists.fullName
+          }. Diagnosis: ${
+            diagnosis || "Not provided"
+          }.`,
+        metadata: {
+          recordId: record._id,
+          doctorId: doctorExists._id,
+          appointmentId:
+            appointment || null,
+        },
+      });
+    } catch (notificationError) {
+      console.error(
+        "Medical record create notification error:",
+        notificationError.message
+      );
+    }
+
+    try {
+      await sendMedicalRecordCreatedEmail({
+        patient: patientExists,
+        doctor: doctorExists,
+        record,
+      });
+    } catch (emailError) {
+      console.error(
+        "Medical record create email error:",
+        emailError.message
+      );
+    }
+
     res.status(201).json({
       success: true,
       message: "Medical record created successfully",
       record: result,
     });
   } catch (error) {
-    console.error("Create Medical Record Error:", error);
+    console.error(
+      "Create Medical Record Error:",
+      error
+    );
 
     res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to create medical record",
+        error.message ||
+        "Failed to create medical record",
     });
   }
 };
 
-// GET ALL
 const getMedicalRecords = async (req, res) => {
   try {
     const records = await populateRecord(
-      MedicalRecord.find().sort({ visitDate: -1 })
+      MedicalRecord.find().sort({
+        visitDate: -1,
+      })
     );
 
     res.status(200).json({
       success: true,
-      message: "Medical records fetched successfully",
+      message:
+        "Medical records fetched successfully",
       records,
     });
   } catch (error) {
-    console.error("Get Medical Records Error:", error);
+    console.error(
+      "Get Medical Records Error:",
+      error
+    );
 
     res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to fetch medical records",
+        error.message ||
+        "Failed to fetch medical records",
     });
   }
 };
 
-// GET ONE
 const getMedicalRecordById = async (req, res) => {
   try {
     const record = await populateRecord(
@@ -167,17 +245,20 @@ const getMedicalRecordById = async (req, res) => {
       record,
     });
   } catch (error) {
-    console.error("Get Medical Record Error:", error);
+    console.error(
+      "Get Medical Record Error:",
+      error
+    );
 
     res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to fetch medical record",
+        error.message ||
+        "Failed to fetch medical record",
     });
   }
 };
 
-// UPDATE
 const updateMedicalRecord = async (req, res) => {
   try {
     const record = await MedicalRecord.findById(
@@ -190,6 +271,9 @@ const updateMedicalRecord = async (req, res) => {
         message: "Medical record not found",
       });
     }
+
+    const oldPatientId = record.patient;
+    const oldDoctorId = record.doctor;
 
     const fields = [
       "patient",
@@ -247,33 +331,83 @@ const updateMedicalRecord = async (req, res) => {
 
     await record.save();
 
+    const patientExists = await User.findById(
+      record.patient
+    );
+
+    const doctorExists = await Doctor.findById(
+      record.doctor
+    );
+
     const result = await populateRecord(
       MedicalRecord.findById(record._id)
     );
 
+    if (patientExists && doctorExists) {
+      try {
+        await createPatientNotification({
+          patientId: patientExists._id,
+          type: "medical_record",
+          title: "Medical Record Updated",
+          message:
+            `Your medical record has been updated by Dr. ${
+              doctorExists.fullName
+            }.`,
+          metadata: {
+            recordId: record._id,
+            doctorId: doctorExists._id,
+            previousPatientId: oldPatientId,
+            previousDoctorId: oldDoctorId,
+          },
+        });
+      } catch (notificationError) {
+        console.error(
+          "Medical record update notification error:",
+          notificationError.message
+        );
+      }
+
+      try {
+        await sendMedicalRecordUpdatedEmail({
+          patient: patientExists,
+          doctor: doctorExists,
+          record,
+        });
+      } catch (emailError) {
+        console.error(
+          "Medical record update email error:",
+          emailError.message
+        );
+      }
+    }
+
     res.status(200).json({
       success: true,
-      message: "Medical record updated successfully",
+      message:
+        "Medical record updated successfully",
       record: result,
     });
   } catch (error) {
-    console.error("Update Medical Record Error:", error);
+    console.error(
+      "Update Medical Record Error:",
+      error
+    );
 
     res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to update medical record",
+        error.message ||
+        "Failed to update medical record",
     });
   }
 };
 
-// DELETE
 const deleteMedicalRecord = async (req, res) => {
   try {
-    const record =
-      await MedicalRecord.findByIdAndDelete(
-        req.params.id
-      );
+    
+    const record = await MedicalRecord.findById(
+      req.params.id
+    );
 
     if (!record) {
       return res.status(404).json({
@@ -282,17 +416,69 @@ const deleteMedicalRecord = async (req, res) => {
       });
     }
 
+    const patientExists = await User.findById(
+      record.patient
+    );
+
+    const doctorExists = await Doctor.findById(
+      record.doctor
+    );
+    await MedicalRecord.findByIdAndDelete(
+      req.params.id
+    );
+
+    if (patientExists) {
+      try {
+        await createPatientNotification({
+          patientId: patientExists._id,
+          type: "medical_record",
+          title: "Medical Record Removed",
+          message:
+            "A medical record associated with your hospital visit has been removed.",
+          metadata: {
+            recordId: record._id,
+            doctorId:
+              doctorExists?._id || null,
+          },
+        });
+      } catch (notificationError) {
+        console.error(
+          "Medical record delete notification error:",
+          notificationError.message
+        );
+      }
+
+      if (doctorExists) {
+        try {
+          await sendMedicalRecordDeletedEmail({
+            patient: patientExists,
+            doctor: doctorExists,
+            record,
+          });
+        } catch (emailError) {
+          console.error(
+            "Medical record delete email error:",
+            emailError.message
+          );
+        }
+      }
+    }
     res.status(200).json({
       success: true,
-      message: "Medical record deleted successfully",
+      message:
+        "Medical record deleted successfully",
     });
   } catch (error) {
-    console.error("Delete Medical Record Error:", error);
+    console.error(
+      "Delete Medical Record Error:",
+      error
+    );
 
     res.status(500).json({
       success: false,
       message:
-        error.message || "Failed to delete medical record",
+        error.message ||
+        "Failed to delete medical record",
     });
   }
 };
