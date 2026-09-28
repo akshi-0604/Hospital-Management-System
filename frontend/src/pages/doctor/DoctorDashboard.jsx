@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
+import NotificationBell from "../../components/notifications/NotificationBell";
 
 import "./DoctorDashboard.css";
 
@@ -7,6 +8,10 @@ function DoctorDashboard() {
   const [user, setUser] = useState(null);
   const [doctor, setDoctor] = useState(null);
   const [appointments, setAppointments] = useState([]);
+
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("doctorDashboardTheme") === "dark";
+  });
 
   const [loadingDoctor, setLoadingDoctor] =
     useState(true);
@@ -19,6 +24,13 @@ function DoctorDashboard() {
   useEffect(() => {
     loadLoggedInUser();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "doctorDashboardTheme",
+      darkMode ? "dark" : "light"
+    );
+  }, [darkMode]);
 
   useEffect(() => {
     if (user) {
@@ -525,12 +537,14 @@ function DoctorDashboard() {
 
 
   return (
-    <div className="doctor-dashboard-page">
+    <div
+      className={`doctor-dashboard-page ${darkMode ? "doctor-dark-mode" : "doctor-light-mode"
+        }`}
+    >
 
       <div className="doctor-dashboard-header">
 
-        <div>
-
+        <div className="doctor-dashboard-header-content">
           <h2>
             Welcome back,{" "}
             {doctor?.fullName ||
@@ -542,16 +556,39 @@ function DoctorDashboard() {
             Here is your professional and
             appointment overview.
           </p>
-
         </div>
 
-        <button
-          type="button"
-          className="doctor-refresh-button"
-          onClick={handleRefresh}
-        >
-          ↻ Refresh
-        </button>
+        <div className="doctor-header-actions">
+
+          <button
+            type="button"
+            className="doctor-theme-button"
+            onClick={() => setDarkMode((previous) => !previous)}
+            title={
+              darkMode
+                ? "Switch to light mode"
+                : "Switch to dark mode"
+            }
+            aria-label={
+              darkMode
+                ? "Switch to light mode"
+                : "Switch to dark mode"
+            }
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+
+          <NotificationBell />
+
+          <button
+            type="button"
+            className="doctor-refresh-button"
+            onClick={handleRefresh}
+          >
+            ↻ Refresh
+          </button>
+
+        </div>
 
       </div>
 

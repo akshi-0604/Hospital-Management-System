@@ -823,3 +823,150 @@
         align-items: flex-start;
     }
 }
+.doctor-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.doctor-dashboard-header-content {
+  flex: 1;
+}
+
+.doctor-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.doctor-theme-button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.doctor-theme-button:hover {
+  transform: translateY(-1px);
+}
+.doctor-dark-mode {
+  background: #111827;
+  color: #f9fafb;
+}
+
+.doctor-dark-mode .doctor-dashboard-header {
+  color: #f9fafb;
+}
+
+.doctor-dark-mode .doctor-dashboard-header h2 {
+  color: #f9fafb;
+}
+
+.doctor-dark-mode .doctor-dashboard-header p {
+  color: #cbd5e1;
+}
+
+.doctor-dark-mode .doctor-theme-button {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+.doctor-dark-mode .doctor-profile-card,
+.doctor-dark-mode .doctor-details-card,
+.doctor-dark-mode .doctor-summary-card,
+.doctor-dark-mode .doctor-dashboard-section,
+.doctor-dark-mode .next-appointment-card,
+.doctor-dark-mode .doctor-upcoming-card,
+.doctor-dark-mode .availability-panel {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+.doctor-dark-mode h3,
+.doctor-dark-mode h4 {
+  color: #f9fafb;
+}
+
+.doctor-dark-mode p {
+  color: #cbd5e1;
+}
+
+.doctor-dark-mode .doctor-detail-item label {
+  color: #94a3b8;
+}
+
+.doctor-dark-mode .doctor-detail-item strong {
+  color: #f9fafb;
+}
+.doctor-dark-mode .doctor-section-title {
+  color: #f9fafb;
+}
+.doctor-dark-mode .doctor-table-header {
+  background: #111827;
+  color: #cbd5e1;
+}
+
+.doctor-dark-mode .doctor-table-row {
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+.doctor-dark-mode .doctor-table-row:hover {
+  background: #273449;
+}
+
+.doctor-dark-mode .doctor-empty-state {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+.doctor-dark-mode .doctor-empty-state h4 {
+  color: #f9fafb;
+}
+
+.doctor-dark-mode .doctor-empty-state p {
+  color: #94a3b8;
+}
+
+.doctor-dark-mode .availability-panel {
+  background: #1f2937;
+}
+
+.doctor-dark-mode .availability-stats {
+  border-color: #374151;
+}
+
+.doctor-dark-mode .availability-stats span {
+  color: #94a3b8;
+}
+
+.doctor-dark-mode .availability-stats strong {
+  color: #f9fafb;
+}
+
+.doctor-dark-mode .doctor-dashboard-error {
+  background: #451a1a;
+  border-color: #7f1d1d;
+  color: #fecaca;
+}
+@media (max-width: 768px) {
+  .doctor-dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .doctor-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
