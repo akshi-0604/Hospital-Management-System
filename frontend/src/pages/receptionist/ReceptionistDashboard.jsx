@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 
+import NotificationBell from "../../components/notifications/NotificationBell";
+
 import "./ReceptionistDashboard.css";
 
 const EMPTY_APPOINTMENT = {
@@ -16,6 +18,14 @@ const EMPTY_APPOINTMENT = {
 
 function ReceptionistDashboard() {
     const [user, setUser] = useState(null);
+        const [theme, setTheme] = useState(() => {
+        return (
+            localStorage.getItem(
+                "receptionistDashboardTheme"
+            ) || "light"
+        );
+    });
+
     const [doctors, setDoctors] = useState([]);
     const [patients, setPatients] = useState([]);
     const [appointments, setAppointments] = useState([]);
@@ -49,6 +59,14 @@ function ReceptionistDashboard() {
         loadUser();
         loadDashboardData();
     }, []);
+
+        useEffect(() => {
+        localStorage.setItem(
+            "receptionistDashboardTheme",
+            theme
+        );
+    }, [theme]);
+
     function loadUser() {
         try {
             const storedUser = localStorage.getItem("user");
@@ -963,7 +981,13 @@ function ReceptionistDashboard() {
 
     if (loading) {
         return (
-            <div className="receptionist-dashboard-page">
+    <div
+        className={`receptionist-dashboard-page ${
+            theme === "dark"
+                ? "receptionist-dark-mode"
+                : "receptionist-light-mode"
+        }`}
+    >
 
                 <div className="receptionist-loading">
 
@@ -983,55 +1007,95 @@ function ReceptionistDashboard() {
 
             <div className="receptionist-header">
 
-                <div>
+    <div className="receptionist-header-content">
 
-                    <h2>
-                        Welcome back,{" "}
-                        {user?.fullName ||
-                            "Receptionist"}
-                    </h2>
+        <h2>
+            Welcome back,{" "}
+            {user?.fullName ||
+                "Receptionist"}
+        </h2>
 
-                    <p>
-                        Manage patients,
-                        doctors and
-                        appointments from
-                        one place.
-                    </p>
+        <p>
+            Manage patients,
+            doctors and
+            appointments from
+            one place.
+        </p>
 
-                </div>
+    </div>
 
+    <div className="receptionist-header-actions">
 
-                <div className="receptionist-header-actions">
+        {/* NOTIFICATION BELL */}
+        <NotificationBell />
 
-                    <button
-                        type="button"
-                        className="receptionist-refresh-button"
-                        onClick={
-                            handleRefresh
-                        }
-                        disabled={
-                            refreshing
-                        }
-                    >
-                        {refreshing
-                            ? "Refreshing..."
-                            : "↻ Refresh"}
-                    </button>
+        {/* DARK / LIGHT MODE */}
+        <button
+            type="button"
+            className="receptionist-theme-button"
+            onClick={() =>
+                setTheme(
+                    (previousTheme) =>
+                        previousTheme ===
+                        "light"
+                            ? "dark"
+                            : "light"
+                )
+            }
+            title={
+                theme === "light"
+                    ? "Switch to Dark Mode"
+                    : "Switch to Light Mode"
+            }
+            aria-label={
+                theme === "light"
+                    ? "Switch to Dark Mode"
+                    : "Switch to Light Mode"
+            }
+        >
+            <span className="receptionist-theme-icon">
+                {theme === "light"
+                    ? "🌙"
+                    : "☀️"}
+            </span>
 
+            <span>
+                {theme === "light"
+                    ? "Dark Mode"
+                    : "Light Mode"}
+            </span>
+        </button>
 
-                    <button
-                        type="button"
-                        className="receptionist-add-button"
-                        onClick={
-                            openAddAppointment
-                        }
-                    >
-                        + Create Appointment
-                    </button>
+        {/* REFRESH */}
+        <button
+            type="button"
+            className="receptionist-refresh-button"
+            onClick={
+                handleRefresh
+            }
+            disabled={
+                refreshing
+            }
+        >
+            {refreshing
+                ? "Refreshing..."
+                : "↻ Refresh"}
+        </button>
 
-                </div>
+        {/* CREATE APPOINTMENT */}
+        <button
+            type="button"
+            className="receptionist-add-button"
+            onClick={
+                openAddAppointment
+            }
+        >
+            + Create Appointment
+        </button>
 
-            </div>
+    </div>
+
+</div>
 
             {error && (
                 <div className="receptionist-error">
@@ -2024,11 +2088,6 @@ function ReceptionistDashboard() {
                 )}
 
             </div>
-
-
-            {/* =================================================
-                ADD APPOINTMENT MODAL
-            ================================================= */}
 
             {showAddModal && (
 

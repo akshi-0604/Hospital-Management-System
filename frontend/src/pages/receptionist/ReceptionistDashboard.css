@@ -1390,3 +1390,287 @@ input[readonly] {
         margin-top: 3px;
     }
 }
+
+.receptionist-header-content {
+    flex: 1;
+}
+
+.receptionist-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.receptionist-theme-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 42px;
+    padding: 0 14px;
+
+    border: 1px solid #d9e1ec;
+    border-radius: 10px;
+
+    background: #ffffff;
+    color: #263445;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.receptionist-theme-button:hover {
+    transform: translateY(-1px);
+}
+
+.receptionist-theme-icon {
+    font-size: 17px;
+    line-height: 1;
+}
+
+
+.receptionist-light-mode {
+    background: #f6f8fb;
+    color: #263445;
+}
+
+.receptionist-light-mode .receptionist-header {
+    background: #ffffff;
+}
+
+.receptionist-light-mode .receptionist-theme-button {
+    background: #ffffff;
+    color: #263445;
+    border-color: #d9e1ec;
+}
+.receptionist-dark-mode {
+    background: #111827;
+    color: #e5e7eb;
+}
+
+
+.receptionist-dark-mode .receptionist-header {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .receptionist-header h2 {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .receptionist-header p {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .receptionist-theme-button {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
+.receptionist-dark-mode .receptionist-section {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .receptionist-section-header h3 {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .receptionist-section-header p {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .receptionist-summary-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .receptionist-summary-card span {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .receptionist-summary-card strong {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .receptionist-summary-card p {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .receptionist-doctor-card {
+    background: #111827;
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .receptionist-doctor-card h4 {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .receptionist-doctor-card p {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .receptionist-doctor-details span {
+    color: #cbd5e1;
+}
+
+.receptionist-dark-mode .receptionist-empty-state {
+    background: #111827;
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .receptionist-empty-state h4 {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .receptionist-empty-state p {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .waiting-item,
+.receptionist-dark-mode .leave-item {
+    background: #111827;
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .waiting-info strong {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .waiting-info span,
+.receptionist-dark-mode .waiting-info small {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .today-appointment-item {
+    background: #111827;
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .today-appointment-info strong {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .today-appointment-info span,
+.receptionist-dark-mode .today-appointment-info small {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .today-appointment-time {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .receptionist-filter-bar input,
+.receptionist-dark-mode .receptionist-filter-bar select {
+    background: #111827;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
+
+.receptionist-dark-mode .receptionist-filter-bar input::placeholder {
+    color: #6b7280;
+}
+
+.receptionist-dark-mode .receptionist-table-wrapper {
+    background: #1f2937;
+}
+
+.receptionist-dark-mode .receptionist-table {
+    color: #e5e7eb;
+}
+
+.receptionist-dark-mode .receptionist-table th {
+    background: #111827;
+    color: #d1d5db;
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .receptionist-table td {
+    border-color: #374151;
+    color: #e5e7eb;
+}
+
+.receptionist-dark-mode .receptionist-table tbody tr:hover {
+    background: #273449;
+}
+
+.receptionist-dark-mode .receptionist-modal {
+    background: #1f2937;
+    color: #e5e7eb;
+}
+
+.receptionist-dark-mode .receptionist-modal-header {
+    border-color: #374151;
+}
+
+.receptionist-dark-mode .receptionist-modal-header h3 {
+    color: #f9fafb;
+}
+
+.receptionist-dark-mode .receptionist-modal-header p {
+    color: #9ca3af;
+}
+
+.receptionist-dark-mode .receptionist-modal-body {
+    background: #1f2937;
+}
+
+.receptionist-dark-mode .receptionist-form-group label {
+    color: #d1d5db;
+}
+
+.receptionist-dark-mode .receptionist-form-group input,
+.receptionist-dark-mode .receptionist-form-group select,
+.receptionist-dark-mode .receptionist-form-group textarea {
+    background: #111827;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
+
+.receptionist-dark-mode .receptionist-form-group input::placeholder,
+.receptionist-dark-mode .receptionist-form-group textarea::placeholder {
+    color: #6b7280;
+}
+
+.receptionist-dark-mode .receptionist-modal-footer {
+    border-color: #374151;
+    background: #1f2937;
+}
+
+@media (max-width: 900px) {
+    .receptionist-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .receptionist-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+    .receptionist-header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .receptionist-theme-button,
+    .receptionist-refresh-button,
+    .receptionist-add-button {
+        width: 100%;
+    }
+}

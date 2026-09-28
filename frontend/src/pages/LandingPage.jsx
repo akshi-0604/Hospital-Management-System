@@ -26,7 +26,6 @@ function LandingPage() {
         </nav>
 
         <div className="navbar-actions">
-          {/* THEME BUTTON */}
           <button
             type="button"
             className="landing-theme-button"

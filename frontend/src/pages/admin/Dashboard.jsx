@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 
+import NotificationBell from "../../components/notifications/NotificationBell";
+
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -15,9 +17,24 @@ function Dashboard() {
     const [error, setError] =
         useState("");
 
+    const [theme, setTheme] = useState(() => {
+        return (
+            localStorage.getItem(
+                "adminDashboardTheme"
+            ) || "light"
+        );
+    });
+
     useEffect(() => {
         loadDashboardData();
     }, []);
+
+    useEffect(() => {
+        localStorage.setItem(
+            "adminDashboardTheme",
+            theme
+        );
+    }, [theme]);
 
     async function loadDashboardData() {
         try {
@@ -601,7 +618,12 @@ function Dashboard() {
 
     if (loading) {
         return (
-            <div className="dashboard-page">
+            <div
+                className={`dashboard-page ${theme === "dark"
+                    ? "admin-dark-mode"
+                    : "admin-light-mode"
+                    }`}
+            >
                 <div className="dashboard-loading">
                     Loading dashboard...
                 </div>
@@ -609,12 +631,16 @@ function Dashboard() {
         );
     }
     return (
-        <div className="dashboard-page">
+        <div
+            className={`dashboard-page ${theme === "dark"
+                ? "admin-dark-mode"
+                : "admin-light-mode"
+                }`}
+        >
 
-            {/* HEADER */}
             <div className="dashboard-header">
 
-                <div>
+                <div className="dashboard-header-content">
                     <h1>
                         Hospital Overview
                     </h1>
@@ -626,19 +652,61 @@ function Dashboard() {
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    className="dashboard-refresh-button"
-                    onClick={
-                        handleRefresh
-                    }
-                >
-                    ↻ Refresh
-                </button>
+                <div className="dashboard-header-actions">
+
+                    {/* NOTIFICATION BELL */}
+                    <NotificationBell />
+
+                    {/* DARK / LIGHT MODE */}
+                    <button
+                        type="button"
+                        className="dashboard-theme-button"
+                        onClick={() =>
+                            setTheme(
+                                (previousTheme) =>
+                                    previousTheme === "light"
+                                        ? "dark"
+                                        : "light"
+                            )
+                        }
+                        title={
+                            theme === "light"
+                                ? "Switch to Dark Mode"
+                                : "Switch to Light Mode"
+                        }
+                        aria-label={
+                            theme === "light"
+                                ? "Switch to Dark Mode"
+                                : "Switch to Light Mode"
+                        }
+                    >
+                        <span className="dashboard-theme-icon">
+                            {theme === "light"
+                                ? "🌙"
+                                : "☀️"}
+                        </span>
+
+                        <span>
+                            {theme === "light"
+                                ? "Dark Mode"
+                                : "Light Mode"}
+                        </span>
+                    </button>
+
+                    {/* REFRESH */}
+                    <button
+                        type="button"
+                        className="dashboard-refresh-button"
+                        onClick={handleRefresh}
+                    >
+                        ↻ Refresh
+                    </button>
+
+                </div>
 
             </div>
 
-            {/* ERROR */}
+
             {error && (
                 <div className="dashboard-error">
                     {error}
