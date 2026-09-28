@@ -1,9 +1,12 @@
 const express = require("express");
 
 const {
-  getPatientNotifications,
+  getMyNotifications,
+  getUnreadNotificationCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  deleteNotification,
+  deleteAllReadNotifications,
 } = require("../controllers/notificationController");
 
 const {
@@ -13,9 +16,15 @@ const {
 const router = express.Router();
 
 router.get(
-  "/user/:userId",
+  "/",
   protectRoute,
-  getPatientNotifications
+  getMyNotifications
+);
+
+router.get(
+  "/unread-count",
+  protectRoute,
+  getUnreadNotificationCount
 );
 
 router.patch(
@@ -25,8 +34,21 @@ router.patch(
 );
 
 router.patch(
-  "/user/:userId/read-all",
+  "/read-all",
   protectRoute,
   markAllNotificationsAsRead
 );
+
+router.delete(
+  "/:id",
+  protectRoute,
+  deleteNotification
+);
+
+router.delete(
+  "/read/all",
+  protectRoute,
+  deleteAllReadNotifications
+);
+
 module.exports = router;

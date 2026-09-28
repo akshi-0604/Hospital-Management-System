@@ -30,6 +30,8 @@ import PatientDashboard from "../pages/patient/PatientDashboard";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
 
+import Notifications from "../pages/notifications/Notifications";
+
 import ProtectedRoute from "../components/ProtectedRoute";
 
 function AppRoutes() {
@@ -127,9 +129,7 @@ function AppRoutes() {
               path="settings"
               element={<Settings />}
             />
-
           </Route>
-
         </Route>
 
         <Route
@@ -174,7 +174,15 @@ function AppRoutes() {
             path="/receptionist"
             element={<ReceptionistDashboard />}
           />
+        </Route>
 
+        <Route
+          element={<ProtectedRoute />}
+        >
+          <Route
+            path="/notifications"
+            element={<Notifications />}
+          />
         </Route>
         <Route
           path="*"

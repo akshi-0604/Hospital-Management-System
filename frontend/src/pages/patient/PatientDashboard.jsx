@@ -4,6 +4,8 @@ import api from "../../api/axios";
 import "./PatientDashboard.css";
 
 import PatientNotifications from "../../components/patient/PatientNotifications";
+import NotificationBell from "../../components/notifications/NotificationBell";
+
 import { useTheme } from "../../context/ThemeContext";
 
 function PatientDashboard() {
@@ -734,6 +736,9 @@ function PatientDashboard() {
         </div>
 
         <div className="patient-header-actions">
+
+          <NotificationBell />
+
           <button
             type="button"
             className="patient-theme-button"
@@ -756,12 +761,11 @@ function PatientDashboard() {
           <button
             type="button"
             className="patient-refresh-button"
-            onClick={
-              handleRefresh
-            }
+            onClick={handleRefresh}
           >
             ↻ Refresh
           </button>
+
         </div>
 
       </div>

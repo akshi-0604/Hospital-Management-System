@@ -1,17 +1,8 @@
 const Notification = require("../models/Notification");
-const User = require("../models/User");
 
-const getPatientNotifications = async (req, res) => {
+const getMyNotifications = async (req, res) => {
   try {
-    const { userId } = req.params;
-
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "Patient not found",
-      });
-    }
+    const userId = req.user.userId;
 
     const notifications = await Notification.find({
       recipient: userId,
@@ -25,6 +16,7 @@ const getPatientNotifications = async (req, res) => {
     });
 
     res.status(200).json({
+      success: true,
       notifications,
       unreadCount,
     });
@@ -35,30 +27,68 @@ const getPatientNotifications = async (req, res) => {
     );
 
     res.status(500).json({
+      success: false,
       message: "Failed to fetch notifications",
-      error: error.message,
+    });
+  }
+};
+
+const getUnreadNotificationCount = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const unreadCount = await Notification.countDocuments({
+      recipient: userId,
+      read: false,
+    });
+
+    res.status(200).json({
+      success: true,
+      unreadCount,
+    });
+  } catch (error) {
+    console.error(
+      "Get unread notification count error:",
+      error.message
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch unread notification count",
     });
   }
 };
 
 const markNotificationAsRead = async (req, res) => {
   try {
+    const userId = req.user.userId;
     const { id } = req.params;
 
     const notification =
-      await Notification.findByIdAndUpdate(
-        id,
-        { read: true },
-        { new: true }
+      await Notification.findOneAndUpdate(
+        {
+          _id: id,
+          recipient: userId,
+        },
+        {
+          $set: {
+            read: true,
+          },
+        },
+        {
+          new: true,
+        }
       );
 
     if (!notification) {
       return res.status(404).json({
+        success: false,
         message: "Notification not found",
       });
     }
 
     res.status(200).json({
+      success: true,
       message: "Notification marked as read",
       notification,
     });
@@ -69,15 +99,15 @@ const markNotificationAsRead = async (req, res) => {
     );
 
     res.status(500).json({
+      success: false,
       message: "Failed to update notification",
-      error: error.message,
     });
   }
 };
 
 const markAllNotificationsAsRead = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.userId;
 
     await Notification.updateMany(
       {
@@ -92,6 +122,7 @@ const markAllNotificationsAsRead = async (req, res) => {
     );
 
     res.status(200).json({
+      success: true,
       message: "All notifications marked as read",
     });
   } catch (error) {
@@ -101,14 +132,78 @@ const markAllNotificationsAsRead = async (req, res) => {
     );
 
     res.status(500).json({
+      success: false,
       message: "Failed to update notifications",
-      error: error.message,
+    });
+  }
+};
+
+const deleteNotification = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { id } = req.params;
+
+    const notification =
+      await Notification.findOneAndDelete({
+        _id: id,
+        recipient: userId,
+      });
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Notification deleted",
+    });
+  } catch (error) {
+    console.error(
+      "Delete notification error:",
+      error.message
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete notification",
+    });
+  }
+};
+
+const deleteAllReadNotifications = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    await Notification.deleteMany({
+      recipient: userId,
+      read: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Read notifications deleted",
+    });
+  } catch (error) {
+    console.error(
+      "Delete read notifications error:",
+      error.message
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete read notifications",
     });
   }
 };
 
 module.exports = {
-  getPatientNotifications,
+  getMyNotifications,
+  getUnreadNotificationCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  deleteNotification,
+  deleteAllReadNotifications,
 };
