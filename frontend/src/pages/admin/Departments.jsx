@@ -23,7 +23,7 @@ function Departments() {
   const [statusFilter, setStatusFilter] = useState("All");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const departmentsPerPage = 10;
+const departmentsPerPage = 5;
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);

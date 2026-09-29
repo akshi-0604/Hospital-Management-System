@@ -51,7 +51,7 @@ function Appointments() {
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const appointmentsPerPage = 10;
+    const appointmentsPerPage = 5;
     const emptyAppointmentForm = {
         patient: "",
         doctor: "",
