@@ -23,6 +23,14 @@ function Appointments() {
     const [loading, setLoading] =
         useState(true);
 
+    // Pagination
+    const [currentPage, setCurrentPage] =
+        useState(1);
+    const [rowsPerPage, setRowsPerPage] =
+        useState(10);
+
+    const rowsPerPageOptions = [5, 10, 20];
+
     const [error, setError] =
         useState("");
     const [showAddModal, setShowAddModal] =
@@ -48,10 +56,6 @@ function Appointments() {
 
     const [formMessage, setFormMessage] =
         useState("");
-
-    // Pagination
-    const [currentPage, setCurrentPage] = useState(1);
-    const appointmentsPerPage = 5;
     const emptyAppointmentForm = {
         patient: "",
         doctor: "",
@@ -459,28 +463,89 @@ function Appointments() {
             status,
             date,
         ]);
-    const totalPages = Math.ceil(
-        filteredAppointments.length / appointmentsPerPage
+    const totalAppointments =
+        filteredAppointments.length;
+
+    const totalPages = Math.max(
+        1,
+        Math.ceil(
+            totalAppointments / rowsPerPage
+        )
     );
 
     const startIndex =
-        (currentPage - 1) * appointmentsPerPage;
+        (currentPage - 1) * rowsPerPage;
 
-    const endIndex =
-        startIndex + appointmentsPerPage;
+    const endIndex = Math.min(
+        startIndex + rowsPerPage,
+        totalAppointments
+    );
 
     const paginatedAppointments =
-        filteredAppointments.slice(startIndex, endIndex);
+        filteredAppointments.slice(
+            startIndex,
+            endIndex
+        );
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, status, date]);
+    }, [search, status, date, rowsPerPage]);
 
     useEffect(() => {
         if (totalPages > 0 && currentPage > totalPages) {
             setCurrentPage(totalPages);
         }
-    }, [currentPage, totalPages]);
+    }, [totalPages, currentPage]);
+
+    function getPageNumbers() {
+        const pages = [];
+        const maxVisiblePages = 5;
+
+        if (totalPages <= maxVisiblePages) {
+            for (let page = 1; page <= totalPages; page += 1) {
+                pages.push(page);
+            }
+            return pages;
+        }
+
+        pages.push(1);
+
+        let startPage = Math.max(2, currentPage - 1);
+        let endPage = Math.min(
+            totalPages - 1,
+            currentPage + 1
+        );
+
+        if (currentPage <= 3) {
+            startPage = 2;
+            endPage = 4;
+        }
+
+        if (currentPage >= totalPages - 2) {
+            startPage = totalPages - 3;
+            endPage = totalPages - 1;
+        }
+
+        if (startPage > 2) {
+            pages.push("...");
+        }
+
+        for (
+            let page = startPage;
+            page <= endPage;
+            page += 1
+        ) {
+            pages.push(page);
+        }
+
+        if (endPage < totalPages - 1) {
+            pages.push("...");
+        }
+
+        pages.push(totalPages);
+
+        return pages;
+    }
 
     function clearFilters() {
         setSearch("");
@@ -1199,53 +1264,83 @@ function Appointments() {
                 </div>
 
             )}
-            {!loading &&
-                filteredAppointments.length > 0 &&
-                totalPages > 1 && (
-                    <div className="appointments-pagination">
-                        <button
-                            type="button"
-                            className="pagination-button"
-                            onClick={() =>
-                                setCurrentPage((previous) =>
-                                    Math.max(previous - 1, 1)
-                                )
-                            }
-                            disabled={currentPage === 1}
-                        >
-                            ← Previous
-                        </button>
 
-                        <div className="pagination-pages">
-                            {Array.from(
-                                { length: totalPages },
-                                (_, index) => index + 1
-                            ).map((page) => (
-                                <button
-                                    key={page}
-                                    type="button"
-                                    className={`pagination-page ${
-                                        currentPage === page ? "active" : ""
-                                    }`}
-                                    onClick={() => setCurrentPage(page)}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+            {/* PAGINATION */}
+            {!loading &&
+                filteredAppointments.length > 0 && (
+                    <div className="appointments-pagination">
+                        <div className="appointments-pagination-info">
+                            Showing {startIndex + 1} to {endIndex} of {totalAppointments} appointments
                         </div>
 
-                        <button
-                            type="button"
-                            className="pagination-button"
-                            onClick={() =>
-                                setCurrentPage((previous) =>
-                                    Math.min(previous + 1, totalPages)
-                                )
-                            }
-                            disabled={currentPage === totalPages}
-                        >
-                            Next →
-                        </button>
+                        <div className="appointments-pagination-right">
+                            <div className="appointments-rows-control">
+                                <span>Show</span>
+                                <select
+                                    value={rowsPerPage}
+                                    onChange={(event) => {
+                                        setRowsPerPage(Number(event.target.value));
+                                        setCurrentPage(1);
+                                    }}
+                                >
+                                    {rowsPerPageOptions.map((option) => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="appointments-pagination-controls">
+                                <button
+                                    type="button"
+                                    className="appointments-pagination-button"
+                                    onClick={() =>
+                                        setCurrentPage((page) =>
+                                            Math.max(page - 1, 1)
+                                        )
+                                    }
+                                    disabled={currentPage === 1}
+                                >
+                                    ‹ Prev
+                                </button>
+
+                                {getPageNumbers().map((page, index) =>
+                                    page === "..." ? (
+                                        <span
+                                            key={`ellipsis-${index}`}
+                                            className="appointments-pagination-ellipsis"
+                                        >
+                                            ...
+                                        </span>
+                                    ) : (
+                                        <button
+                                            key={page}
+                                            type="button"
+                                            className={`appointments-pagination-number ${
+                                                currentPage === page ? "active" : ""
+                                            }`}
+                                            onClick={() => setCurrentPage(page)}
+                                        >
+                                            {page}
+                                        </button>
+                                    )
+                                )}
+
+                                <button
+                                    type="button"
+                                    className="appointments-pagination-button"
+                                    onClick={() =>
+                                        setCurrentPage((page) =>
+                                            Math.min(page + 1, totalPages)
+                                        )
+                                    }
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next ›
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -1854,6 +1949,8 @@ function Appointments() {
 
                         <div className="appointment-modal">
 
+                            {/* FIXED HEADER */}
+
                             <div className="modal-header">
 
                                 <div>
@@ -1884,6 +1981,9 @@ function Appointments() {
                                 </button>
 
                             </div>
+
+
+                            {/* SCROLLABLE BODY */}
 
                             <form
                                 onSubmit={
@@ -1960,6 +2060,9 @@ function Appointments() {
 
                                         </div>
 
+
+                                        {/* DOCTOR */}
+
                                         <div className="form-group">
 
                                             <label>
@@ -2011,6 +2114,9 @@ function Appointments() {
 
                                         </div>
 
+
+                                        {/* DEPARTMENT */}
+
                                         <div className="form-group">
 
                                             <label>
@@ -2033,6 +2139,9 @@ function Appointments() {
 
                                         </div>
 
+
+                                        {/* DATE */}
+
                                         <div className="form-group">
 
                                             <label>
@@ -2054,6 +2163,9 @@ function Appointments() {
 
                                         </div>
 
+
+                                        {/* TIME */}
+
                                         <div className="form-group">
 
                                             <label>
@@ -2074,6 +2186,9 @@ function Appointments() {
                                             />
 
                                         </div>
+
+
+                                        {/* STATUS */}
 
                                         <div className="form-group">
 
@@ -2113,6 +2228,8 @@ function Appointments() {
                                         </div>
 
 
+                                        {/* REASON */}
+
                                         <div className="form-group full-width">
 
                                             <label>
@@ -2133,6 +2250,9 @@ function Appointments() {
                                             />
 
                                         </div>
+
+
+                                        {/* NOTES */}
 
                                         <div className="form-group full-width">
 
@@ -2158,6 +2278,9 @@ function Appointments() {
                                     </div>
 
                                 </div>
+
+
+                                {/* FIXED FOOTER */}
 
                                 <div className="modal-footer">
 
