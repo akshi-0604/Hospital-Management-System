@@ -22,15 +22,16 @@ function Departments() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-const departmentsPerPage = 5;
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const rowsPerPageOptions = [5, 10, 20];
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const [selectedDepartment, setSelectedDepartment] =
-    useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
 
   const [formData, setFormData] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -39,7 +40,7 @@ const departmentsPerPage = 5;
       setLoading(true);
       setError("");
 
-      const response = await api.get("/departments");
+      const response = await api.get("/departments")
 
       setDepartments(response.data.departments || []);
     } catch (err) {
@@ -47,16 +48,15 @@ const departmentsPerPage = 5;
 
       setError(
         err.response?.data?.message ||
-          "Failed to load departments"
+        "Failed to load departments"
       );
     } finally {
       setLoading(false);
     }
   };
-
   const fetchDoctors = async () => {
     try {
-      const response = await api.get("/doctors");
+      const response = await api.get("/doctors")
 
       setDoctors(response.data.doctors || []);
     } catch (err) {
@@ -68,21 +68,18 @@ const departmentsPerPage = 5;
     fetchDepartments();
     fetchDoctors();
   }, []);
-
   const filteredDepartments = useMemo(() => {
     return departments.filter((department) => {
-      const searchText = search.toLowerCase();
-
       const matchesSearch =
         department.name
           ?.toLowerCase()
-          .includes(searchText) ||
+          .includes(search.toLowerCase()) ||
         department.code
           ?.toLowerCase()
-          .includes(searchText) ||
+          .includes(search.toLowerCase()) ||
         department.location
           ?.toLowerCase()
-          .includes(searchText);
+          .includes(search.toLowerCase());
 
       const matchesStatus =
         statusFilter === "All" ||
@@ -91,35 +88,7 @@ const departmentsPerPage = 5;
       return matchesSearch && matchesStatus;
     });
   }, [departments, search, statusFilter]);
-
   const totalDepartments = departments.length;
-
-  const totalPages = Math.ceil(
-    filteredDepartments.length / departmentsPerPage
-  );
-
-  const startIndex =
-    (currentPage - 1) * departmentsPerPage;
-
-  const endIndex =
-    startIndex + departmentsPerPage;
-
-  const paginatedDepartments =
-    filteredDepartments.slice(startIndex, endIndex);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, statusFilter]);
-
-  useEffect(() => {
-    if (totalPages > 0 && currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-
-    if (totalPages === 0 && currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }, [totalPages, currentPage]);
 
   const activeDepartments = departments.filter(
     (department) => department.status === "Active"
@@ -129,12 +98,89 @@ const departmentsPerPage = 5;
     (department) => department.status === "Inactive"
   ).length;
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredDepartments.length / rowsPerPage)
+  );
+
+  const startIndex =
+    (currentPage - 1) * rowsPerPage;
+
+  const endIndex = Math.min(
+    startIndex + rowsPerPage,
+    filteredDepartments.length
+  );
+
+  const paginatedDepartments = filteredDepartments.slice(
+    startIndex,
+    endIndex
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter, rowsPerPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let page = 1; page <= totalPages; page += 1) {
+        pages.push(page);
+      }
+      return pages;
+    }
+
+    pages.push(1);
+
+    let startPage = Math.max(2, currentPage - 1);
+    let endPage = Math.min(
+      totalPages - 1,
+      currentPage + 1
+    );
+
+    if (currentPage <= 3) {
+      startPage = 2;
+      endPage = 4;
+    }
+
+    if (currentPage >= totalPages - 2) {
+      startPage = totalPages - 3;
+      endPage = totalPages - 1;
+    }
+
+    if (startPage > 2) {
+      pages.push("...");
+    }
+
+    for (
+      let page = startPage;
+      page <= endPage;
+      page += 1
+    ) {
+      pages.push(page);
+    }
+
+    if (endPage < totalPages - 1) {
+      pages.push("...");
+    }
+
+    pages.push(totalPages);
+
+    return pages;
+  };
+
   const totalAssignedDoctors = departments.reduce(
     (total, department) =>
       total + (department.doctors?.length || 0),
     0
   );
-
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -143,7 +189,6 @@ const departmentsPerPage = 5;
       [name]: value,
     }));
   };
-
   const handleDoctorToggle = (doctorId) => {
     setFormData((prev) => {
       const alreadySelected =
@@ -164,7 +209,7 @@ const departmentsPerPage = 5;
 
       const updatedHeadDoctor =
         prev.headDoctor &&
-        !updatedDoctors.includes(prev.headDoctor)
+          !updatedDoctors.includes(prev.headDoctor)
           ? ""
           : prev.headDoctor;
 
@@ -175,7 +220,6 @@ const departmentsPerPage = 5;
       };
     });
   };
-
   const handleHeadDoctorChange = (event) => {
     const doctorId = event.target.value;
 
@@ -184,18 +228,15 @@ const departmentsPerPage = 5;
       headDoctor: doctorId,
 
       doctors:
-        doctorId &&
-        !prev.doctors.includes(doctorId)
+        doctorId && !prev.doctors.includes(doctorId)
           ? [...prev.doctors, doctorId]
           : prev.doctors,
     }));
   };
-
   const openAddModal = () => {
     setFormData(emptyForm);
     setShowAddModal(true);
   };
-
   const openEditModal = (department) => {
     setSelectedDepartment(department);
 
@@ -204,32 +245,25 @@ const departmentsPerPage = 5;
       code: department.code || "",
       description: department.description || "",
       location: department.location || "",
-      headDoctor:
-        department.headDoctor?._id || "",
+      headDoctor: department.headDoctor?._id || "",
       doctors:
-        department.doctors?.map(
-          (doctor) => doctor._id
-        ) || [],
+        department.doctors?.map((doctor) => doctor._id) || [],
       status: department.status || "Active",
     });
 
     setShowEditModal(true);
   };
-
   const openViewModal = (department) => {
     setSelectedDepartment(department);
     setShowViewModal(true);
   };
-
   const closeModals = () => {
     setShowAddModal(false);
     setShowViewModal(false);
     setShowEditModal(false);
-
     setSelectedDepartment(null);
     setFormData(emptyForm);
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -243,15 +277,8 @@ const departmentsPerPage = 5;
       return;
     }
 
-    if (
-      formData.headDoctor &&
-      !formData.doctors.includes(
-        formData.headDoctor
-      )
-    ) {
-      alert(
-        "Head doctor must also be selected as a department doctor"
-      );
+    if (formData.headDoctor && !formData.doctors.includes(formData.headDoctor)) {
+      alert("Head doctor must also be selected as a department doctor");
       return;
     }
 
@@ -260,21 +287,15 @@ const departmentsPerPage = 5;
 
       const payload = {
         name: formData.name.trim(),
-        code: formData.code
-          .trim()
-          .toUpperCase(),
+        code: formData.code.trim().toUpperCase(),
         description: formData.description.trim(),
         location: formData.location.trim(),
-        headDoctor:
-          formData.headDoctor || null,
+        headDoctor: formData.headDoctor || null,
         doctors: formData.doctors,
         status: formData.status,
       };
 
-      if (
-        showEditModal &&
-        selectedDepartment
-      ) {
+      if (showEditModal && selectedDepartment) {
         await api.put(
           `/departments/${selectedDepartment._id}`,
           payload
@@ -282,92 +303,41 @@ const departmentsPerPage = 5;
 
         alert("Department updated successfully");
       } else {
-        await api.post(
-          "/departments",
-          payload
-        );
+        await api.post("/departments", payload);
 
         alert("Department created successfully");
       }
 
       closeModals();
       setCurrentPage(1);
-
-      await fetchDepartments();
-      await fetchDoctors();
+      fetchDepartments();
+      fetchDoctors();
     } catch (err) {
-      console.error(
-        "Save department error:",
-        err
-      );
+      console.error("Save department error:", err);
 
       alert(
         err.response?.data?.message ||
-          "Failed to save department"
+        "Failed to save department"
       );
     } finally {
       setSaving(false);
     }
   };
-
-  const handleRefresh = async () => {
+  const handleRefresh = () => {
     setCurrentPage(1);
-
-    await fetchDepartments();
-    await fetchDoctors();
-  };
-
-  const handleClearFilters = () => {
-    setSearch("");
-    setStatusFilter("All");
-    setCurrentPage(1);
-  };
-  const getPageNumbers = () => {
-    const pages = [];
-
-    const maxVisiblePages = 5;
-
-    let startPage = Math.max(
-      1,
-      currentPage - 2
-    );
-
-    let endPage = Math.min(
-      totalPages,
-      startPage + maxVisiblePages - 1
-    );
-
-    if (
-      endPage - startPage <
-      maxVisiblePages - 1
-    ) {
-      startPage = Math.max(
-        1,
-        endPage - maxVisiblePages + 1
-      );
-    }
-
-    for (
-      let page = startPage;
-      page <= endPage;
-      page++
-    ) {
-      pages.push(page);
-    }
-
-    return pages;
+    fetchDepartments();
+    fetchDoctors();
   };
 
   return (
     <div className="departments-page">
-
+      {/* Header */}
       <div className="departments-header">
         <div>
           <h1>Departments</h1>
-
           <p>
-            Manage hospital departments,
-            department heads and assigned doctors.
+            Manage hospital departments, department heads
+            and assigned doctors.
           </p>
         </div>
 
@@ -390,120 +360,85 @@ const departmentsPerPage = 5;
         </div>
       </div>
 
+      {/* Summary Cards */}
       <div className="department-summary">
-
         <div className="summary-card">
           <span>Total Departments</span>
-
-          <strong>
-            {totalDepartments}
-          </strong>
-
-          <small>
-            Registered departments
-          </small>
+          <strong>{totalDepartments}</strong>
+          <small>Registered departments</small>
         </div>
 
         <div className="summary-card">
           <span>Active Departments</span>
-
-          <strong>
-            {activeDepartments}
-          </strong>
-
-          <small>
-            Currently active
-          </small>
+          <strong>{activeDepartments}</strong>
+          <small>Currently active</small>
         </div>
 
         <div className="summary-card">
           <span>Inactive Departments</span>
-
-          <strong>
-            {inactiveDepartments}
-          </strong>
-
-          <small>
-            Temporarily unavailable
-          </small>
+          <strong>{inactiveDepartments}</strong>
+          <small>Temporarily unavailable</small>
         </div>
 
         <div className="summary-card">
           <span>Doctors Assigned</span>
-
-          <strong>
-            {totalAssignedDoctors}
-          </strong>
-
-          <small>
-            Across departments
-          </small>
+          <strong>{totalAssignedDoctors}</strong>
+          <small>Across departments</small>
         </div>
-
       </div>
 
+      {/* Filters */}
       <div className="department-filters">
-
         <input
           type="text"
           placeholder="Search department, code or location..."
           value={search}
-          onChange={(event) =>
-            setSearch(event.target.value)
-          }
+          onChange={(event) => setSearch(event.target.value)}
         />
 
         <select
           value={statusFilter}
           onChange={(event) =>
-            setStatusFilter(
-              event.target.value
-            )
+            setStatusFilter(event.target.value)
           }
         >
-          <option value="All">
-            All Status
-          </option>
-
-          <option value="Active">
-            Active
-          </option>
-
-          <option value="Inactive">
-            Inactive
-          </option>
+          <option value="All">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
         </select>
 
         <button
           type="button"
-          onClick={handleClearFilters}
+          onClick={() => {
+            setSearch("");
+            setStatusFilter("All");
+            setCurrentPage(1);
+          }}
         >
           Clear
         </button>
-
       </div>
 
+      {/* Error */}
       {error && (
         <div className="department-error">
           {error}
         </div>
       )}
 
+      {/* Table */}
       <div className="department-table-card">
-
         {loading ? (
           <div className="department-loading">
             Loading departments...
           </div>
-        ) : paginatedDepartments.length === 0 ? (
+        ) : filteredDepartments.length === 0 ? (
           <div className="department-empty">
             No departments found.
           </div>
         ) : (
           <div className="department-table-wrapper">
-
             <table className="department-table">
-
               <thead>
                 <tr>
                   <th>Department</th>
@@ -517,202 +452,164 @@ const departmentsPerPage = 5;
               </thead>
 
               <tbody>
-
-                {paginatedDepartments.map(
-                  (department) => (
-                    <tr key={department._id}>
-
-                      <td>
-                        <div className="department-name-cell">
-
-                          <div className="department-icon">
-                            ▦
-                          </div>
-
-                          <div>
-                            <strong>
-                              {department.name}
-                            </strong>
-
-                            <span>
-                              {department.description ||
-                                "No description"}
-                            </span>
-                          </div>
-
+                {paginatedDepartments.map((department) => (
+                  <tr key={department._id}>
+                    <td>
+                      <div className="department-name-cell">
+                        <div className="department-icon">
+                          ▦
                         </div>
-                      </td>
 
-                      <td>
-                        <span className="department-code">
-                          {department.code}
-                        </span>
-                      </td>
+                        <div>
+                          <strong>{department.name}</strong>
 
-                      <td>
-                        {department.location ||
-                          "-"}
-                      </td>
+                          <span>
+                            {department.description ||
+                              "No description"}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
 
-                      <td>
-                        {department.headDoctor
-                          ?.fullName ||
-                          "Not assigned"}
-                      </td>
+                    <td>
+                      <span className="department-code">
+                        {department.code}
+                      </span>
+                    </td>
 
-                      <td>
-                        <span className="doctor-count">
-                          {department.doctors
-                            ?.length || 0}
-                        </span>
-                      </td>
+                    <td>
+                      {department.location || "-"}
+                    </td>
 
-                      <td>
-                        <span
-                          className={`department-status ${department.status?.toLowerCase()}`}
+                    <td>
+                      {department.headDoctor?.fullName ||
+                        "Not assigned"}
+                    </td>
+
+                    <td>
+                      <span className="doctor-count">
+                        {department.doctors?.length || 0}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span
+                        className={`department-status ${department.status?.toLowerCase()}`}
+                      >
+                        {department.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="department-actions">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openViewModal(department)
+                          }
                         >
-                          {department.status}
-                        </span>
-                      </td>
+                          View
+                        </button>
 
-                      <td>
-                        <div className="department-actions">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openEditModal(department)
+                          }
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      {!loading &&
+        filteredDepartments.length > 0 && (
+          <div className="department-pagination">
+            <div className="department-pagination-info">
+              Showing {startIndex + 1} to {endIndex} of {filteredDepartments.length} departments
+            </div>
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              openViewModal(
-                                department
-                              )
-                            }
-                          >
-                            View
-                          </button>
+            <div className="department-pagination-right">
+              <div className="department-rows-control">
+                <span>Show</span>
+                <select
+                  value={rowsPerPage}
+                  onChange={(event) => {
+                    setRowsPerPage(Number(event.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  {rowsPerPageOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              openEditModal(
-                                department
-                              )
-                            }
-                          >
-                            Edit
-                          </button>
+              <div className="department-pagination-controls">
+                <button
+                  type="button"
+                  className="department-pagination-button"
+                  onClick={() =>
+                    setCurrentPage((page) =>
+                      Math.max(page - 1, 1)
+                    )
+                  }
+                  disabled={currentPage === 1}
+                >
+                  ‹ Prev
+                </button>
 
-                        </div>
-                      </td>
-
-                    </tr>
+                {getPageNumbers().map((page, index) =>
+                  page === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="department-pagination-ellipsis"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={page}
+                      type="button"
+                      className={`department-pagination-number ${
+                        currentPage === page ? "active" : ""
+                      }`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
                   )
                 )}
 
-              </tbody>
-
-            </table>
-
+                <button
+                  type="button"
+                  className="department-pagination-button"
+                  onClick={() =>
+                    setCurrentPage((page) =>
+                      Math.min(page + 1, totalPages)
+                    )
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Next ›
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
-        {!loading &&
-          filteredDepartments.length > 0 &&
-          totalPages > 1 && (
-            <div className="department-pagination">
-
-              <div className="pagination-info">
-                Showing{" "}
-                <strong>
-                  {startIndex + 1}
-                </strong>{" "}
-                -{" "}
-                <strong>
-                  {Math.min(
-                    endIndex,
-                    filteredDepartments.length
-                  )}
-                </strong>{" "}
-                of{" "}
-                <strong>
-                  {filteredDepartments.length}
-                </strong>{" "}
-                departments
-              </div>
-
-              <div className="pagination-controls">
-
-                <button
-                  type="button"
-                  className="pagination-button"
-                  disabled={currentPage === 1}
-                  onClick={() =>
-                    setCurrentPage(
-                      (page) =>
-                        Math.max(
-                          page - 1,
-                          1
-                        )
-                    )
-                  }
-                >
-                  ← Previous
-                </button>
-
-                <div className="pagination-pages">
-
-                  {getPageNumbers().map(
-                    (page) => (
-                      <button
-                        key={page}
-                        type="button"
-                        className={`pagination-page ${
-                          currentPage === page
-                            ? "active"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          setCurrentPage(page)
-                        }
-                      >
-                        {page}
-                      </button>
-                    )
-                  )}
-
-                </div>
-
-                <button
-                  type="button"
-                  className="pagination-button"
-                  disabled={
-                    currentPage === totalPages
-                  }
-                  onClick={() =>
-                    setCurrentPage(
-                      (page) =>
-                        Math.min(
-                          page + 1,
-                          totalPages
-                        )
-                    )
-                  }
-                >
-                  Next →
-                </button>
-
-              </div>
-
-            </div>
-          )}
-
-      </div>
-
       {(showAddModal || showEditModal) && (
         <div className="department-modal-overlay">
-
           <div className="department-modal">
-
             <div className="department-modal-header">
-
               <div>
                 <h2>
                   {showEditModal
@@ -734,18 +631,14 @@ const departmentsPerPage = 5;
               >
                 ×
               </button>
-
             </div>
 
             <form
               onSubmit={handleSubmit}
               className="department-form"
             >
-
               <div className="form-row">
-
                 <div className="form-group">
-
                   <label>
                     Department Name *
                   </label>
@@ -757,11 +650,9 @@ const departmentsPerPage = 5;
                     placeholder="Example: Cardiology"
                     required
                   />
-
                 </div>
 
                 <div className="form-group">
-
                   <label>
                     Department Code *
                   </label>
@@ -773,16 +664,11 @@ const departmentsPerPage = 5;
                     placeholder="Example: CARD"
                     required
                   />
-
                 </div>
-
               </div>
 
               <div className="form-group">
-
-                <label>
-                  Description
-                </label>
+                <label>Description</label>
 
                 <textarea
                   name="description"
@@ -791,16 +677,11 @@ const departmentsPerPage = 5;
                   placeholder="Describe the department..."
                   rows="3"
                 />
-
               </div>
 
               <div className="form-row">
-
                 <div className="form-group">
-
-                  <label>
-                    Location / Floor
-                  </label>
+                  <label>Location / Floor</label>
 
                   <input
                     name="location"
@@ -808,124 +689,99 @@ const departmentsPerPage = 5;
                     onChange={handleChange}
                     placeholder="Example: Block A - 2nd Floor"
                   />
-
                 </div>
 
                 <div className="form-group">
-
-                  <label>
-                    Department Head
-                  </label>
+                  <label>Department Head</label>
 
                   <select
                     value={formData.headDoctor}
-                    onChange={
-                      handleHeadDoctorChange
-                    }
+                    onChange={handleHeadDoctorChange}
                   >
-
                     <option value="">
                       Not assigned
                     </option>
 
-                    {doctors.map(
-                      (doctor) => (
-                        <option
-                          key={doctor._id}
-                          value={doctor._id}
-                        >
-                          {doctor.fullName} -{" "}
-                          {doctor.specialization}
-                        </option>
-                      )
-                    )}
-
+                    {doctors.map((doctor) => (
+                      <option
+                        key={doctor._id}
+                        value={doctor._id}
+                      >
+                        {doctor.fullName} -{" "}
+                        {doctor.specialization}
+                      </option>
+                    ))}
                   </select>
-
                 </div>
-
               </div>
 
+              {/* MULTIPLE DOCTORS */}
               <div className="form-group">
-
                 <label>
                   Doctors in Department
-
                   <span className="field-count">
-                    {formData.doctors.length}{" "}
-                    selected
+                    {formData.doctors.length} selected
                   </span>
                 </label>
 
                 <div className="doctor-selection-box">
-
                   {doctors.length === 0 ? (
                     <p className="no-doctors-message">
                       No doctors available.
                     </p>
                   ) : (
-                    doctors.map(
-                      (doctor) => {
-
-                        const isSelected =
-                          formData.doctors.includes(
-                            doctor._id
-                          );
-
-                        const isHead =
-                          formData.headDoctor ===
-                          doctor._id;
-
-                        return (
-                          <label
-                            key={doctor._id}
-                            className={`doctor-selection-item ${
-                              isSelected
-                                ? "selected"
-                                : ""
-                            }`}
-                          >
-
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() =>
-                                handleDoctorToggle(
-                                  doctor._id
-                                )
-                              }
-                            />
-
-                            <div className="doctor-selection-info">
-
-                              <strong>
-                                {doctor.fullName}
-                              </strong>
-
-                              <span>
-                                {doctor.specialization ||
-                                  "Specialist"}{" "}
-                                •{" "}
-                                {doctor.department ||
-                                  "No department"}
-                              </span>
-
-                            </div>
-
-                            {isHead && (
-                              <span className="head-badge">
-                                Head
-                              </span>
-                            )}
-
-                          </label>
+                    doctors.map((doctor) => {
+                      const isSelected =
+                        formData.doctors.includes(
+                          doctor._id
                         );
-                      }
-                    )
+
+                      const isHead =
+                        formData.headDoctor ===
+                        doctor._id;
+
+                      return (
+                        <label
+                          key={doctor._id}
+                          className={`doctor-selection-item ${isSelected
+                              ? "selected"
+                              : ""
+                            }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() =>
+                              handleDoctorToggle(
+                                doctor._id
+                              )
+                            }
+                          />
+
+                          <div className="doctor-selection-info">
+                            <strong>
+                              {doctor.fullName}
+                            </strong>
+
+                            <span>
+                              {doctor.specialization ||
+                                "Specialist"}{" "}
+                              •{" "}
+                              {doctor.department ||
+                                "No department"}
+                            </span>
+                          </div>
+
+                          {isHead && (
+                            <span className="head-badge">
+                              Head
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })
                   )}
-
                 </div>
-
               </div>
 
               <div className="doctor-help-text">
@@ -935,17 +791,13 @@ const departmentsPerPage = 5;
               </div>
 
               <div className="form-group status-group">
-
-                <label>
-                  Status
-                </label>
+                <label>Status</label>
 
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
                 >
-
                   <option value="Active">
                     Active
                   </option>
@@ -953,13 +805,10 @@ const departmentsPerPage = 5;
                   <option value="Inactive">
                     Inactive
                   </option>
-
                 </select>
-
               </div>
 
               <div className="department-modal-footer">
-
                 <button
                   type="button"
                   className="cancel-button"
@@ -976,212 +825,160 @@ const departmentsPerPage = 5;
                   {saving
                     ? "Saving..."
                     : showEditModal
-                    ? "Update Department"
-                    : "Save Department"}
+                      ? "Update Department"
+                      : "Save Department"}
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
       )}
+      {showViewModal && selectedDepartment && (
+        <div className="department-modal-overlay">
+          <div className="department-modal view-modal">
+            <div className="department-modal-header">
+              <div>
+                <h2>
+                  {selectedDepartment.name}
+                </h2>
 
-      {showViewModal &&
-        selectedDepartment && (
-          <div className="department-modal-overlay">
-
-            <div className="department-modal view-modal">
-
-              <div className="department-modal-header">
-
-                <div>
-                  <h2>
-                    {selectedDepartment.name}
-                  </h2>
-
-                  <p>
-                    Department details and assigned doctors
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  className="modal-close"
-                  onClick={closeModals}
-                >
-                  ×
-                </button>
-
+                <p>
+                  Department details and assigned doctors
+                </p>
               </div>
 
-              <div className="department-details">
+              <button
+                type="button"
+                className="modal-close"
+                onClick={closeModals}
+              >
+                ×
+              </button>
+            </div>
 
-                <div className="detail-grid">
-
-                  <div>
-                    <span>
-                      Department Code
-                    </span>
-
-                    <strong>
-                      {selectedDepartment.code}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Location
-                    </span>
-
-                    <strong>
-                      {selectedDepartment.location ||
-                        "Not specified"}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Status
-                    </span>
-
-                    <strong>
-                      {selectedDepartment.status}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      Total Doctors
-                    </span>
-
-                    <strong>
-                      {selectedDepartment.doctors
-                        ?.length || 0}
-                    </strong>
-                  </div>
-
+            <div className="department-details">
+              <div className="detail-grid">
+                <div>
+                  <span>Department Code</span>
+                  <strong>
+                    {selectedDepartment.code}
+                  </strong>
                 </div>
 
-                <div className="view-section">
-
-                  <h3>
-                    Department Head
-                  </h3>
-
-                  <div className="head-doctor-card">
-
-                    <strong>
-                      {selectedDepartment.headDoctor
-                        ?.fullName ||
-                        "Not assigned"}
-                    </strong>
-
-                    {selectedDepartment.headDoctor && (
-                      <span>
-                        {
-                          selectedDepartment
-                            .headDoctor
-                            .specialization
-                        }
-                      </span>
-                    )}
-
-                  </div>
-
+                <div>
+                  <span>Location</span>
+                  <strong>
+                    {selectedDepartment.location ||
+                      "Not specified"}
+                  </strong>
                 </div>
 
-                <div className="view-section">
+                <div>
+                  <span>Status</span>
+                  <strong>
+                    {selectedDepartment.status}
+                  </strong>
+                </div>
 
-                  <h3>
-                    Doctors in Department (
+                <div>
+                  <span>Total Doctors</span>
+                  <strong>
                     {selectedDepartment.doctors
                       ?.length || 0}
-                    )
-                  </h3>
+                  </strong>
+                </div>
+              </div>
 
+              <div className="view-section">
+                <h3>Department Head</h3>
+
+                <div className="head-doctor-card">
+                  <strong>
+                    {selectedDepartment.headDoctor
+                      ?.fullName ||
+                      "Not assigned"}
+                  </strong>
+
+                  {selectedDepartment.headDoctor && (
+                    <span>
+                      {
+                        selectedDepartment.headDoctor
+                          .specialization
+                      }
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="view-section">
+                <h3>
+                  Doctors in Department (
                   {selectedDepartment.doctors
-                    ?.length > 0 ? (
-                    <div className="assigned-doctors-list">
+                    ?.length || 0}
+                  )
+                </h3>
 
-                      {selectedDepartment.doctors.map(
-                        (doctor) => (
-                          <div
-                            className="assigned-doctor-card"
-                            key={doctor._id}
-                          >
+                {selectedDepartment.doctors?.length >
+                  0 ? (
+                  <div className="assigned-doctors-list">
+                    {selectedDepartment.doctors.map(
+                      (doctor) => (
+                        <div
+                          className="assigned-doctor-card"
+                          key={doctor._id}
+                        >
+                          <div>
+                            <strong>
+                              {doctor.fullName}
+                            </strong>
 
-                            <div>
+                            <span>
+                              {doctor.specialization ||
+                                "Specialist"}
+                            </span>
+                          </div>
 
-                              <strong>
-                                {doctor.fullName}
-                              </strong>
-
-                              <span>
-                                {doctor.specialization ||
-                                  "Specialist"}
-                              </span>
-
-                            </div>
-
-                            {selectedDepartment
-                              .headDoctor
-                              ?._id ===
-                              doctor._id && (
+                          {selectedDepartment.headDoctor
+                            ?._id === doctor._id && (
                               <span className="head-badge">
                                 Head
                               </span>
                             )}
-
-                          </div>
-                        )
-                      )}
-
-                    </div>
-                  ) : (
-                    <p className="no-assigned-doctors">
-                      No doctors assigned to this
-                      department.
-                    </p>
-                  )}
-
-                </div>
-
-                {selectedDepartment.description && (
-                  <div className="view-section">
-
-                    <h3>
-                      Description
-                    </h3>
-
-                    <p className="description-text">
-                      {selectedDepartment.description}
-                    </p>
-
+                        </div>
+                      )
+                    )}
                   </div>
+                ) : (
+                  <p className="no-assigned-doctors">
+                    No doctors assigned to this
+                    department.
+                  </p>
                 )}
-
               </div>
 
-              <div className="department-modal-footer">
+              {selectedDepartment.description && (
+                <div className="view-section">
+                  <h3>Description</h3>
 
-                <button
-                  type="button"
-                  className="cancel-button"
-                  onClick={closeModals}
-                >
-                  Close
-                </button>
-
-              </div>
-
+                  <p className="description-text">
+                    {selectedDepartment.description}
+                  </p>
+                </div>
+              )}
             </div>
 
+            <div className="department-modal-footer">
+              <button
+                type="button"
+                className="cancel-button"
+                onClick={closeModals}
+              >
+                Close
+              </button>
+            </div>
           </div>
-        )}
-
+        </div>
+      )}
     </div>
   );
 }
