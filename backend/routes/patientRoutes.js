@@ -1,33 +1,33 @@
 const express = require("express");
 
 const {
-  getPatients,
-  getPatientById,
+    getPatients,
+    getPatientById,
 } = require("../controllers/patientController");
 
 const {
-  protectRoute,
-  allowRoles,
+    protectRoute,
+    allowRoles,
 } = require("../middleware/authMiddleware");
 
 const router = express.Router();
-
-
-// Get all patients
 router.get(
-  "/",
-  protectRoute,
-  allowRoles("admin"),
-  getPatients
+    "/",
+    protectRoute,
+    allowRoles(
+        "admin",
+        "receptionist"
+    ),
+    getPatients
 );
-
-
-// Get one patient
 router.get(
-  "/:id",
-  protectRoute,
-  allowRoles("admin"),
-  getPatientById
+    "/:id",
+    protectRoute,
+    allowRoles(
+        "admin",
+        "receptionist"
+    ),
+    getPatientById
 );
 
 
