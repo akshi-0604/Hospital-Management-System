@@ -3,10 +3,14 @@ import api from "../../api/axios";
 
 import "./PatientDashboard.css";
 
-import PatientNotifications from "../../components/patient/PatientNotifications";
 import NotificationBell from "../../components/notifications/NotificationBell";
 
 import { useTheme } from "../../context/ThemeContext";
+const API_BASE_URL =
+  "https://hospital-management-system-nvjt.onrender.com/api";
+
+const DOCTORS_URL = `${API_BASE_URL}/doctors`;
+const APPOINTMENTS_URL = `${API_BASE_URL}/appointments`;
 
 function PatientDashboard() {
   const { theme, toggleTheme } = useTheme();
@@ -75,7 +79,7 @@ function PatientDashboard() {
       setLoadingDoctors(true);
 
       const response =
-        await api.get("/doctors");
+        await api.get(DOCTORS_URL);
 
       console.log(
         "Patient dashboard doctors:",
@@ -125,7 +129,7 @@ function PatientDashboard() {
 
       const response =
         await api.get(
-          "/appointments"
+          APPOINTMENTS_URL
         );
 
       console.log(
@@ -615,7 +619,7 @@ function PatientDashboard() {
 
       const response =
         await api.post(
-          "/appointments",
+          APPOINTMENTS_URL,
           {
             patient:
               patientId,
@@ -761,11 +765,12 @@ function PatientDashboard() {
           <button
             type="button"
             className="patient-refresh-button"
-            onClick={handleRefresh}
+            onClick={
+              handleRefresh
+            }
           >
             ↻ Refresh
           </button>
-
         </div>
 
       </div>
@@ -882,13 +887,6 @@ function PatientDashboard() {
         </div>
 
       </div>
-
-      <PatientNotifications
-        userId={
-          user?.id ||
-          user?._id
-        }
-      />
 
       <div className="patient-booking-banner">
 
