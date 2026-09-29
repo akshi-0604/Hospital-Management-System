@@ -29,7 +29,10 @@ function protectRoute(req, res, next) {
 
     next();
   } catch (error) {
-    console.error("AUTHENTICATION ERROR:", error.message);
+    console.error(
+      "AUTHENTICATION ERROR:",
+      error.message
+    );
 
     return res.status(401).json({
       success: false,
@@ -37,6 +40,7 @@ function protectRoute(req, res, next) {
     });
   }
 }
+
 
 function allowRoles(...allowedRoles) {
   return (req, res, next) => {
@@ -47,16 +51,44 @@ function allowRoles(...allowedRoles) {
       });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    const userRole = String(
+      req.user.role || ""
+    )
+      .trim()
+      .toLowerCase();
+
+    const normalizedAllowedRoles =
+      allowedRoles.map((role) =>
+        String(role)
+          .trim()
+          .toLowerCase()
+      );
+
+    console.log(
+      "ROLE CHECK:",
+      {
+        userRole,
+        allowedRoles:
+          normalizedAllowedRoles,
+      }
+    );
+
+    if (
+      !normalizedAllowedRoles.includes(
+        userRole
+      )
+    ) {
       return res.status(403).json({
         success: false,
-        message: "You do not have permission to access this resource.",
+        message:
+          "You do not have permission to access this resource.",
       });
     }
 
     next();
   };
 }
+
 
 module.exports = {
   protectRoute,
