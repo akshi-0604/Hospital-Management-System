@@ -48,6 +48,10 @@ function Appointments() {
 
     const [formMessage, setFormMessage] =
         useState("");
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const appointmentsPerPage = 10;
     const emptyAppointmentForm = {
         patient: "",
         doctor: "",
@@ -455,10 +459,34 @@ function Appointments() {
             status,
             date,
         ]);
+    const totalPages = Math.ceil(
+        filteredAppointments.length / appointmentsPerPage
+    );
+
+    const startIndex =
+        (currentPage - 1) * appointmentsPerPage;
+
+    const endIndex =
+        startIndex + appointmentsPerPage;
+
+    const paginatedAppointments =
+        filteredAppointments.slice(startIndex, endIndex);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, status, date]);
+
+    useEffect(() => {
+        if (totalPages > 0 && currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
+
     function clearFilters() {
         setSearch("");
         setStatus("all");
         setDate("");
+        setCurrentPage(1);
     }
     function openAddModal() {
         setAppointmentForm({
@@ -568,6 +596,7 @@ function Appointments() {
                 "Appointment created successfully."
             );
 
+            setCurrentPage(1);
             await fetchAppointments();
 
             setTimeout(() => {
@@ -793,6 +822,7 @@ function Appointments() {
                 "Appointment updated successfully."
             );
 
+            setCurrentPage(1);
             await fetchAppointments();
 
             setTimeout(() => {
@@ -1052,7 +1082,7 @@ function Appointments() {
 
                         {/* TABLE ROWS */}
 
-                        {filteredAppointments.map(
+                        {paginatedAppointments.map(
                             (appointment) => (
 
                                 <div
@@ -1169,6 +1199,56 @@ function Appointments() {
                 </div>
 
             )}
+            {!loading &&
+                filteredAppointments.length > 0 &&
+                totalPages > 1 && (
+                    <div className="appointments-pagination">
+                        <button
+                            type="button"
+                            className="pagination-button"
+                            onClick={() =>
+                                setCurrentPage((previous) =>
+                                    Math.max(previous - 1, 1)
+                                )
+                            }
+                            disabled={currentPage === 1}
+                        >
+                            ← Previous
+                        </button>
+
+                        <div className="pagination-pages">
+                            {Array.from(
+                                { length: totalPages },
+                                (_, index) => index + 1
+                            ).map((page) => (
+                                <button
+                                    key={page}
+                                    type="button"
+                                    className={`pagination-page ${
+                                        currentPage === page ? "active" : ""
+                                    }`}
+                                    onClick={() => setCurrentPage(page)}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            type="button"
+                            className="pagination-button"
+                            onClick={() =>
+                                setCurrentPage((previous) =>
+                                    Math.min(previous + 1, totalPages)
+                                )
+                            }
+                            disabled={currentPage === totalPages}
+                        >
+                            Next →
+                        </button>
+                    </div>
+                )}
+
             {showAddModal && (
 
                 <div
@@ -1774,8 +1854,6 @@ function Appointments() {
 
                         <div className="appointment-modal">
 
-                            {/* FIXED HEADER */}
-
                             <div className="modal-header">
 
                                 <div>
@@ -1806,9 +1884,6 @@ function Appointments() {
                                 </button>
 
                             </div>
-
-
-                            {/* SCROLLABLE BODY */}
 
                             <form
                                 onSubmit={
@@ -1885,9 +1960,6 @@ function Appointments() {
 
                                         </div>
 
-
-                                        {/* DOCTOR */}
-
                                         <div className="form-group">
 
                                             <label>
@@ -1939,9 +2011,6 @@ function Appointments() {
 
                                         </div>
 
-
-                                        {/* DEPARTMENT */}
-
                                         <div className="form-group">
 
                                             <label>
@@ -1964,9 +2033,6 @@ function Appointments() {
 
                                         </div>
 
-
-                                        {/* DATE */}
-
                                         <div className="form-group">
 
                                             <label>
@@ -1988,9 +2054,6 @@ function Appointments() {
 
                                         </div>
 
-
-                                        {/* TIME */}
-
                                         <div className="form-group">
 
                                             <label>
@@ -2011,9 +2074,6 @@ function Appointments() {
                                             />
 
                                         </div>
-
-
-                                        {/* STATUS */}
 
                                         <div className="form-group">
 
@@ -2053,8 +2113,6 @@ function Appointments() {
                                         </div>
 
 
-                                        {/* REASON */}
-
                                         <div className="form-group full-width">
 
                                             <label>
@@ -2075,9 +2133,6 @@ function Appointments() {
                                             />
 
                                         </div>
-
-
-                                        {/* NOTES */}
 
                                         <div className="form-group full-width">
 
@@ -2103,9 +2158,6 @@ function Appointments() {
                                     </div>
 
                                 </div>
-
-
-                                {/* FIXED FOOTER */}
 
                                 <div className="modal-footer">
 

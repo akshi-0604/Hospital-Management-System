@@ -1215,3 +1215,68 @@
     }
 
 }
+.appointments-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 16px 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.pagination-pages {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pagination-button,
+.pagination-page {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled),
+.pagination-page:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.pagination-page.active {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .appointments-pagination {
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .pagination-pages {
+        order: 2;
+        width: 100%;
+    }
+
+    .pagination-button {
+        width: 100%;
+    }
+}
