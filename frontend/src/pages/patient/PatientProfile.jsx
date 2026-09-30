@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import api from "../../api/axios";
 import "./PatientProfile.css";
 
 function PatientProfile() {
-  const [user, setUser] = useState(null);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -12,7 +10,7 @@ function PatientProfile() {
     loadProfile();
   }, []);
 
-  const loadProfile = async () => {
+  const loadProfile = () => {
     setLoading(true);
     setError("");
 
@@ -23,60 +21,24 @@ function PatientProfile() {
 
       if (!storedUser) {
         setError("User information not found. Please login again.");
+        setPatient(null);
         return;
       }
 
-      setUser(storedUser);
-
-      const patientId =
-        storedUser._id ||
-        storedUser.id ||
-        storedUser.userId;
-
-      if (!patientId) {
-        setError("Unable to identify the logged-in patient.");
-        return;
-      }
-
-      const response = await api.get("/patients");
-
-      const patients = response.data?.patients || [];
-
-      const loggedInPatient = patients.find((item) => {
-        return String(item._id) === String(patientId);
-      });
-
-      if (loggedInPatient) {
-        setPatient(loggedInPatient);
-      } else {
-        // If patient details are not found in /patients,
-        // still show the information available in localStorage.
-        setPatient(storedUser);
-      }
+      setPatient(storedUser);
     } catch (error) {
       console.error("Load patient profile error:", error);
-
-      setError(
-        error.response?.data?.message ||
-          "Unable to load profile details."
-      );
-
-      // Fallback to localStorage user
-      const storedUser = JSON.parse(
-        localStorage.getItem("user") || "null"
-      );
-
-      if (storedUser) {
-        setUser(storedUser);
-        setPatient(storedUser);
-      }
+      setError("Unable to load profile details.");
+      setPatient(null);
     } finally {
       setLoading(false);
     }
   };
 
   const getValue = (value) => {
-    return value && String(value).trim()
+    return value !== undefined &&
+      value !== null &&
+      String(value).trim() !== ""
       ? value
       : "Not provided";
   };
@@ -92,8 +54,8 @@ function PatientProfile() {
       }`.trim();
     }
 
-    if (user?.fullName) {
-      return user.fullName;
+    if (patient?.name) {
+      return patient.name;
     }
 
     return "Patient";
@@ -141,10 +103,13 @@ function PatientProfile() {
 
   return (
     <div className="patient-profile-page">
+      {/* Header */}
       <div className="patient-profile-header">
         <div>
           <h1>My Profile</h1>
-          <p>View your personal and contact information.</p>
+          <p>
+            View your personal and contact information.
+          </p>
         </div>
 
         <button
@@ -156,6 +121,7 @@ function PatientProfile() {
         </button>
       </div>
 
+      {/* Error */}
       {error && (
         <div className="patient-profile-error">
           {error}
@@ -172,9 +138,7 @@ function PatientProfile() {
           <h2>{getFullName()}</h2>
 
           <p>
-            {getValue(
-              patient?.email || user?.email
-            )}
+            {getValue(patient?.email)}
           </p>
 
           <span className="patient-profile-role">
@@ -197,13 +161,17 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Full Name
             </span>
-            <strong>{getFullName()}</strong>
+
+            <strong>
+              {getFullName()}
+            </strong>
           </div>
 
           <div className="patient-profile-field">
             <span className="patient-profile-label">
               Gender
             </span>
+
             <strong>
               {getValue(patient?.gender)}
             </strong>
@@ -213,6 +181,7 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Date of Birth
             </span>
+
             <strong>
               {formatDate(patient?.dateOfBirth)}
             </strong>
@@ -222,6 +191,7 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Age
             </span>
+
             <strong>
               {getValue(patient?.age)}
             </strong>
@@ -243,10 +213,9 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Email Address
             </span>
+
             <strong>
-              {getValue(
-                patient?.email || user?.email
-              )}
+              {getValue(patient?.email)}
             </strong>
           </div>
 
@@ -254,11 +223,11 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Phone Number
             </span>
+
             <strong>
               {getValue(
                 patient?.phone ||
-                  patient?.phoneNumber ||
-                  user?.phone
+                patient?.phoneNumber
               )}
             </strong>
           </div>
@@ -267,6 +236,7 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Address
             </span>
+
             <strong>
               {getValue(patient?.address)}
             </strong>
@@ -288,6 +258,7 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Blood Group
             </span>
+
             <strong>
               {getValue(patient?.bloodGroup)}
             </strong>
@@ -297,6 +268,7 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Emergency Contact
             </span>
+
             <strong>
               {getValue(
                 patient?.emergencyContact
@@ -308,6 +280,7 @@ function PatientProfile() {
             <span className="patient-profile-label">
               Medical History
             </span>
+
             <strong>
               {getValue(
                 patient?.medicalHistory
