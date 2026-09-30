@@ -28,6 +28,11 @@ import Settings from "../pages/admin/Settings";
 import PatientLayout from "../pages/patient/PatientLayout";
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import PatientAppointments from "../pages/patient/PatientAppointments";
+import PatientMedicalRecords from "../pages/patient/PatientMedicalRecords";
+import PatientPrescriptions from "../pages/patient/PatientPrescriptions";
+import PatientLaboratory from "../pages/patient/PatientLaboratory";
+import PatientBilling from "../pages/patient/PatientBilling";
+import PatientProfile from "../pages/patient/PatientProfile";
 
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
@@ -168,46 +173,28 @@ function AppRoutes() {
             <Route
               path="medical-records"
               element={
-                <div>
-                  Patient Medical Records
-                </div>
+                <PatientMedicalRecords />
               }
             />
 
             <Route
               path="prescriptions"
-              element={
-                <div>
-                  Patient Prescriptions
-                </div>
-              }
+              element={<PatientPrescriptions />}
             />
 
             <Route
               path="laboratory"
-              element={
-                <div>
-                  Patient Laboratory
-                </div>
-              }
+              element={<PatientLaboratory />}
             />
 
             <Route
               path="billing"
-              element={
-                <div>
-                  Patient Billing
-                </div>
-              }
+              element={<PatientBilling />}
             />
 
             <Route
               path="profile"
-              element={
-                <div>
-                  Patient Profile
-                </div>
-              }
+              element={<PatientProfile />}
             />
 
             <Route

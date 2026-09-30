@@ -1,0 +1,921 @@
+.patient-billing-page {
+    padding: 28px 32px;
+
+    min-height: calc(100vh - 80px);
+
+    background: var(--hms-page-bg);
+
+    color: var(--hms-text-primary);
+
+    box-sizing: border-box;
+
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease;
+}
+
+.patient-billing-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 20px;
+
+    margin-bottom: 22px;
+}
+
+.patient-billing-header h1 {
+    margin: 0;
+
+    color: var(--hms-text-primary);
+
+    font-size: 30px;
+
+    font-weight: 700;
+}
+
+.patient-billing-header p {
+    margin: 7px 0 0;
+
+    color: var(--hms-text-secondary);
+
+    font-size: 14px;
+}
+
+
+/* SUMMARY */
+
+.patient-billing-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+}
+
+.patient-billing-summary-card {
+    padding: 17px 18px;
+
+    background: var(--hms-card-bg);
+
+    border: 1px solid var(--hms-border);
+
+    border-radius: 10px;
+
+    box-shadow: var(--hms-shadow);
+
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.patient-billing-summary-card:hover {
+    box-shadow:
+        0 6px 18px rgba(37, 60, 82, 0.08);
+}
+
+.patient-billing-summary-card span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--hms-text-secondary);
+
+    font-size: 13px;
+}
+
+.patient-billing-summary-card strong {
+    display: block;
+
+    color: var(--hms-text-primary);
+
+    font-size: 23px;
+}
+
+.patient-billing-summary-card small {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--hms-text-muted);
+
+    font-size: 11px;
+}
+
+
+/* TOOLBAR */
+
+.patient-billing-toolbar {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        190px
+        100px;
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+}
+
+.patient-billing-toolbar input,
+.patient-billing-toolbar select,
+.patient-billing-toolbar button {
+    height: 45px;
+
+    box-sizing: border-box;
+
+    border: 1px solid var(--hms-border);
+
+    border-radius: 8px;
+
+    background: var(--hms-input-bg);
+
+    color: var(--hms-text-primary);
+
+    padding: 0 13px;
+
+    font-size: 14px;
+
+    transition:
+        background-color 0.25s ease,
+        border-color 0.2s ease,
+        color 0.25s ease;
+}
+
+.patient-billing-toolbar input::placeholder {
+    color: var(--hms-text-muted);
+}
+
+.patient-billing-toolbar input:focus,
+.patient-billing-toolbar select:focus {
+    border-color: var(--hms-primary);
+
+    outline: none;
+
+    box-shadow:
+        0 0 0 3px var(--hms-primary-light);
+}
+
+.patient-billing-toolbar button {
+    cursor: pointer;
+
+    font-weight: 700;
+
+    color: var(--hms-text-secondary);
+}
+
+.patient-billing-toolbar button:hover {
+    border-color: var(--hms-primary);
+
+    color: var(--hms-primary);
+
+    background: var(--hms-primary-light);
+}
+
+
+/* ERROR */
+
+.patient-billing-error {
+    margin-bottom: 16px;
+
+    padding: 12px 15px;
+
+    border-radius: 8px;
+
+    border: 1px solid var(--hms-danger-text);
+
+    background: var(--hms-danger-bg);
+
+    color: var(--hms-danger-text);
+
+    font-size: 13px;
+}
+
+
+/* TABLE */
+
+.patient-billing-table-card {
+    overflow: hidden;
+
+    background: var(--hms-card-bg);
+
+    border: 1px solid var(--hms-border);
+
+    border-radius: 11px;
+
+    box-shadow: var(--hms-shadow);
+
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.patient-billing-table-wrapper {
+    overflow-x: auto;
+}
+
+.patient-billing-table {
+    width: 100%;
+
+    min-width: 1250px;
+
+    border-collapse: collapse;
+}
+
+.patient-billing-table th {
+    padding: 16px;
+
+    text-align: left;
+
+    background: var(--hms-table-header);
+
+    color: var(--hms-text-secondary);
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    border-bottom: 1px solid var(--hms-border);
+
+    white-space: nowrap;
+}
+
+.patient-billing-table td {
+    padding: 17px 16px;
+
+    border-bottom: 1px solid var(--hms-border-light);
+
+    color: var(--hms-text-secondary);
+
+    font-size: 14px;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.patient-billing-table tr:last-child td {
+    border-bottom: none;
+}
+
+.patient-billing-table tbody tr:hover {
+    background: var(--hms-primary-light);
+}
+
+.patient-billing-table strong {
+    color: var(--hms-text-primary);
+}
+
+.patient-paid-amount-cell strong {
+    color: var(--hms-success-text);
+}
+
+.patient-balance-amount-cell strong {
+    color: var(--hms-warning-text);
+}
+
+
+/* PAYMENT STATUS */
+
+.patient-payment-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 5px 11px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.patient-payment-status.paid {
+    background: var(--hms-success-bg);
+
+    color: var(--hms-success-text);
+}
+
+.patient-payment-status.pending {
+    background: var(--hms-warning-bg);
+
+    color: var(--hms-warning-text);
+}
+
+.patient-payment-status.partially-paid {
+    background: var(--hms-info-bg);
+
+    color: var(--hms-info-text);
+}
+
+.patient-payment-status.cancelled {
+    background: var(--hms-danger-bg);
+
+    color: var(--hms-danger-text);
+}
+
+
+/* VIEW BUTTON */
+
+.patient-view-bill-button {
+    padding: 8px 12px;
+
+    border: 1px solid var(--hms-primary);
+
+    border-radius: 7px;
+
+    background: var(--hms-input-bg);
+
+    color: var(--hms-primary);
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.patient-view-bill-button:hover {
+    background: var(--hms-primary-light);
+
+    transform: translateY(-1px);
+}
+
+
+/* EMPTY */
+
+.patient-billing-empty {
+    padding: 60px 20px;
+
+    text-align: center;
+
+    color: var(--hms-text-secondary);
+}
+
+.patient-billing-empty strong,
+.patient-billing-empty span {
+    display: block;
+}
+
+.patient-billing-empty span {
+    margin-top: 6px;
+
+    font-size: 13px;
+
+    color: var(--hms-text-muted);
+}
+
+
+/* MODAL */
+
+.patient-billing-modal-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background: var(--hms-overlay);
+}
+
+.patient-billing-modal {
+    width: min(850px, 100%);
+
+    max-height: 92vh;
+
+    overflow-y: auto;
+
+    border-radius: 14px;
+
+    border: 1px solid var(--hms-border);
+
+    background: var(--hms-card-bg);
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.22);
+
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+
+/* MODAL HEADER */
+
+.patient-billing-modal-header {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 5;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 22px 26px;
+
+    background: var(--hms-card-bg);
+
+    border-bottom: 1px solid var(--hms-border);
+
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.patient-billing-modal-header h2 {
+    margin: 0;
+
+    color: var(--hms-text-primary);
+}
+
+.patient-billing-modal-header p {
+    margin: 5px 0 0;
+
+    color: var(--hms-text-secondary);
+
+    font-size: 13px;
+}
+
+.patient-billing-close-button {
+    width: 38px;
+
+    height: 38px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: var(--hms-table-header);
+
+    color: var(--hms-text-secondary);
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.patient-billing-close-button:hover {
+    background: var(--hms-danger-bg);
+
+    color: var(--hms-danger-text);
+}
+
+
+/* DETAILS */
+
+.patient-billing-details {
+    padding: 25px 26px;
+}
+
+.patient-billing-detail-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 12px;
+
+    margin-bottom: 24px;
+}
+
+.patient-billing-detail-grid > div {
+    padding: 14px;
+
+    border: 1px solid var(--hms-border);
+
+    border-radius: 9px;
+
+    background: var(--hms-table-header);
+
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.patient-billing-detail-grid span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: var(--hms-text-muted);
+
+    font-size: 11px;
+}
+
+.patient-billing-detail-grid strong {
+    color: var(--hms-text-primary);
+
+    font-size: 14px;
+}
+
+.patient-view-paid-amount {
+    color: var(--hms-success-text) !important;
+}
+
+.patient-view-balance-amount {
+    color: var(--hms-warning-text) !important;
+}
+
+
+/* BILLING ITEMS */
+
+.patient-invoice-items h3,
+.patient-billing-view-notes h3,
+.patient-payment-history-section h3 {
+    margin: 0 0 10px;
+
+    color: var(--hms-text-primary);
+
+    font-size: 15px;
+}
+
+.patient-invoice-item-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 13px;
+
+    border-bottom: 1px solid var(--hms-border-light);
+}
+
+.patient-invoice-item-row div strong,
+.patient-invoice-item-row div span {
+    display: block;
+}
+
+.patient-invoice-item-row div strong {
+    color: var(--hms-text-primary);
+}
+
+.patient-invoice-item-row div span {
+    margin-top: 3px;
+
+    color: var(--hms-text-secondary);
+
+    font-size: 12px;
+}
+
+.patient-invoice-item-row > strong {
+    color: var(--hms-text-primary);
+}
+
+
+/* TOTALS */
+
+.patient-invoice-totals {
+    width: min(400px, 100%);
+
+    margin: 20px 0 24px auto;
+
+    border-top: 1px solid var(--hms-border);
+}
+
+.patient-invoice-totals > div {
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 10px 0;
+}
+
+.patient-invoice-totals span {
+    color: var(--hms-text-secondary);
+}
+
+.patient-invoice-totals strong {
+    color: var(--hms-text-primary);
+}
+
+.patient-invoice-grand-total {
+    padding-top: 13px !important;
+
+    border-top: 1px solid var(--hms-border);
+}
+
+.patient-invoice-grand-total strong {
+    color: var(--hms-primary);
+
+    font-size: 20px;
+}
+
+.patient-invoice-paid-total strong {
+    color: var(--hms-success-text);
+}
+
+.patient-invoice-balance-total {
+    padding-top: 13px !important;
+
+    border-top: 1px solid var(--hms-border);
+}
+
+.patient-invoice-balance-total strong {
+    color: var(--hms-warning-text);
+
+    font-size: 18px;
+}
+
+
+/* PAYMENT HISTORY */
+
+.patient-payment-history-section {
+    margin-top: 24px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid var(--hms-border);
+}
+
+.patient-payment-history-heading {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 14px;
+}
+
+.patient-payment-history-heading h3 {
+    margin-bottom: 4px;
+}
+
+.patient-payment-history-heading p {
+    margin: 0;
+
+    color: var(--hms-text-muted);
+
+    font-size: 12px;
+}
+
+.patient-no-payment-history {
+    padding: 20px;
+
+    border: 1px dashed var(--hms-border);
+
+    border-radius: 9px;
+
+    background: var(--hms-table-header);
+
+    color: var(--hms-text-muted);
+
+    text-align: center;
+
+    font-size: 13px;
+}
+
+.patient-payment-history-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.patient-payment-history-card {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 13px 15px;
+
+    border: 1px solid var(--hms-border);
+
+    border-radius: 9px;
+
+    background: var(--hms-table-header);
+
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.patient-payment-history-card > div {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.patient-payment-history-card span {
+    color: var(--hms-text-muted);
+
+    font-size: 11px;
+}
+
+.patient-payment-history-card strong {
+    color: var(--hms-text-primary);
+
+    font-size: 13px;
+}
+
+.patient-payment-history-card
+    .patient-payment-history-amount {
+    color: var(--hms-success-text);
+
+    font-size: 16px;
+}
+
+
+/* NOTES */
+
+.patient-billing-view-notes {
+    margin-bottom: 10px;
+}
+
+.patient-billing-view-notes p {
+    margin: 0;
+
+    color: var(--hms-text-secondary);
+
+    line-height: 1.6;
+}
+
+
+/* FOOTER */
+
+.patient-billing-modal-footer {
+    position: sticky;
+
+    bottom: 0;
+
+    z-index: 5;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    padding: 18px 26px 24px;
+
+    border-top: 1px solid var(--hms-border);
+
+    background: var(--hms-card-bg);
+
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.patient-cancel-bill-button {
+    padding: 11px 18px;
+
+    border-radius: 8px;
+
+    border: 1px solid var(--hms-border);
+
+    background: var(--hms-input-bg);
+
+    color: var(--hms-text-secondary);
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.patient-cancel-bill-button:hover {
+    background: var(--hms-table-header);
+
+    color: var(--hms-text-primary);
+}
+
+
+/* DARK MODE */
+
+:root[data-theme="dark"]
+.patient-billing-modal {
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="dark"]
+.patient-billing-summary-card:hover {
+    box-shadow:
+        0 7px 20px rgba(0, 0, 0, 0.25);
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1200px) {
+    .patient-billing-summary {
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+
+    .patient-billing-page {
+        padding: 20px;
+    }
+
+    .patient-billing-summary {
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .patient-billing-toolbar {
+        grid-template-columns:
+            1fr;
+    }
+
+    .patient-billing-detail-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+    .patient-invoice-totals {
+        width: 100%;
+    }
+
+    .patient-payment-history-card {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 550px) {
+
+    .patient-billing-summary {
+        grid-template-columns:
+            1fr;
+    }
+
+    .patient-billing-page {
+        padding: 15px;
+    }
+
+    .patient-billing-details {
+        padding-left: 18px;
+
+        padding-right: 18px;
+    }
+
+    .patient-billing-modal-footer {
+        padding-left: 18px;
+
+        padding-right: 18px;
+    }
+
+    .patient-billing-modal-header {
+        padding-left: 18px;
+
+        padding-right: 18px;
+    }
+
+    .patient-invoice-item-row {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+}
