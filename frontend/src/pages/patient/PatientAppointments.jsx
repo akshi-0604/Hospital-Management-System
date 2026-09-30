@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-
-import { api } from "../../api/axios";
-
+import api from "../../api/axios";
 import "./PatientAppointments.css";
 
 const API_BASE_URL =
