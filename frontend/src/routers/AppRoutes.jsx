@@ -11,7 +11,6 @@ import Register from "../pages/auth/Register";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 
-
 import AdminLayout from "../layouts/AdminLayout";
 
 import Dashboard from "../pages/admin/Dashboard";
@@ -26,7 +25,9 @@ import Laboratory from "../pages/admin/Laboratory";
 import Billing from "../pages/admin/Billing";
 import Settings from "../pages/admin/Settings";
 
+import PatientLayout from "../layouts/PatientLayout";
 import PatientDashboard from "../pages/patient/PatientDashboard";
+
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
 
@@ -69,7 +70,6 @@ function AppRoutes() {
             />
           }
         >
-
           <Route
             path="/admin"
             element={<AdminLayout />}
@@ -129,6 +129,7 @@ function AppRoutes() {
               path="settings"
               element={<Settings />}
             />
+
           </Route>
         </Route>
 
@@ -142,11 +143,85 @@ function AppRoutes() {
 
           <Route
             path="/patient"
-            element={<PatientDashboard />}
-          />
+            element={<PatientLayout />}
+          >
+
+            {/* /patient */}
+            <Route
+              index
+              element={
+                <Navigate
+                  to="/patient/dashboard"
+                  replace
+                />
+              }
+            />
+            <Route
+              path="dashboard"
+              element={<PatientDashboard />}
+            />
+            <Route
+              path="appointments"
+              element={
+                <div>
+                  Patient Appointments
+                </div>
+              }
+            />
+
+            <Route
+              path="medical-records"
+              element={
+                <div>
+                  Patient Medical Records
+                </div>
+              }
+            />
+
+            <Route
+              path="prescriptions"
+              element={
+                <div>
+                  Patient Prescriptions
+                </div>
+              }
+            />
+
+            <Route
+              path="laboratory"
+              element={
+                <div>
+                  Patient Laboratory
+                </div>
+              }
+            />
+
+            <Route
+              path="billing"
+              element={
+                <div>
+                  Patient Billing
+                </div>
+              }
+            />
+
+            <Route
+              path="profile"
+              element={
+                <div>
+                  Patient Profile
+                </div>
+              }
+            />
+
+            <Route
+              path="notifications"
+              element={<Notifications />}
+            />
+
+          </Route>
 
         </Route>
-
         <Route
           element={
             <ProtectedRoute
@@ -174,19 +249,27 @@ function AppRoutes() {
             path="/receptionist"
             element={<ReceptionistDashboard />}
           />
+
         </Route>
 
         <Route
           element={<ProtectedRoute />}
         >
+
           <Route
             path="/notifications"
             element={<Notifications />}
           />
+
         </Route>
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
         />
 
       </Routes>

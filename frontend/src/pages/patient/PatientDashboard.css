@@ -1212,3 +1212,16 @@
         padding-right: 16px;
     }
 }
+.patient-dashboard {
+  min-height: 100vh;
+  background: #f5f8fb;
+}
+
+
+.patient-dashboard-main {
+  margin-left: 270px;
+
+  min-height: 100vh;
+
+  padding: 24px;
+}
