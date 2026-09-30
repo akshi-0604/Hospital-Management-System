@@ -25,8 +25,9 @@ import Laboratory from "../pages/admin/Laboratory";
 import Billing from "../pages/admin/Billing";
 import Settings from "../pages/admin/Settings";
 
-import PatientLayout from "../layouts/PatientLayout";
+import PatientLayout from "../pages/patient/PatientLayout";
 import PatientDashboard from "../pages/patient/PatientDashboard";
+import PatientAppointments from "../pages/patient/PatientAppointments";
 
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
@@ -140,13 +141,10 @@ function AppRoutes() {
             />
           }
         >
-
           <Route
             path="/patient"
             element={<PatientLayout />}
           >
-
-            {/* /patient */}
             <Route
               index
               element={
@@ -156,17 +154,15 @@ function AppRoutes() {
                 />
               }
             />
+
             <Route
               path="dashboard"
               element={<PatientDashboard />}
             />
+
             <Route
               path="appointments"
-              element={
-                <div>
-                  Patient Appointments
-                </div>
-              }
+              element={<PatientAppointments />}
             />
 
             <Route
@@ -218,9 +214,7 @@ function AppRoutes() {
               path="notifications"
               element={<Notifications />}
             />
-
           </Route>
-
         </Route>
         <Route
           element={
