@@ -35,8 +35,14 @@ import PatientBilling from "../pages/patient/PatientBilling";
 import PatientProfile from "../pages/patient/PatientProfile";
 
 import DoctorLayout from "../pages/doctor/DoctorLayout";
-import DoctorAppointments from "../pages/doctor/DoctorAppointments";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
+import DoctorAppointments from "../pages/doctor/DoctorAppointments";
+import DoctorPatients from "../pages/doctor/DoctorPatients";
+import DoctorMedicalRecords from "../pages/doctor/DoctorMedicalRecords";
+import DoctorPrescriptions from "../pages/doctor/DoctorPrescriptions";
+import DoctorLaboratory from "../pages/doctor/DoctorLaboratory";
+import DoctorProfile from "../pages/doctor/DoctorProfile";
+import DoctorQuickActions from "../pages/doctor/DoctorQuickActions";
 
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
 
@@ -236,6 +242,41 @@ function AppRoutes() {
             <Route
               path="appointments"
               element={<DoctorAppointments />}
+            />
+
+            <Route
+              path="patients"
+              element={<DoctorPatients />}
+            />
+
+            <Route
+              path="medical-records"
+              element={<DoctorMedicalRecords />}
+            />
+
+            <Route
+              path="prescriptions"
+              element={<DoctorPrescriptions />}
+            />
+
+            <Route
+              path="laboratory"
+              element={<DoctorLaboratory />}
+            />
+
+            <Route
+              path="profile"
+              element={<DoctorProfile />}
+            />
+
+            <Route
+              path="quick-actions"
+              element={<DoctorQuickActions />}
+            />
+
+            <Route
+              path="notifications"
+              element={<Notifications />}
             />
           </Route>
         </Route>

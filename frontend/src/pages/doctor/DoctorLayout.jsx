@@ -1,5 +1,10 @@
+import {
+  NavLink,
+  Outlet,
+  useNavigate,
+} from "react-router-dom";
+
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import NotificationBell from "../../components/notifications/NotificationBell";
 
@@ -18,7 +23,10 @@ function DoctorLayout() {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error("Unable to load doctor user:", error);
+      console.error(
+        "Unable to load doctor user:",
+        error
+      );
     }
   }, []);
 
@@ -26,280 +34,158 @@ function DoctorLayout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
-    navigate("/login");
+    navigate("/login", {
+      replace: true,
+    });
   }
 
-  function getInitial() {
-    return (
-      user?.fullName?.charAt(0)?.toUpperCase() ||
-      user?.name?.charAt(0)?.toUpperCase() ||
-      "D"
-    );
-  }
-
-  function getUserName() {
-    return (
-      user?.fullName ||
-      user?.name ||
-      "Doctor"
-    );
+  function getLinkClass({ isActive }) {
+    return isActive
+      ? "doctor-sidebar-link active"
+      : "doctor-sidebar-link";
   }
 
   return (
     <div className="doctor-layout">
       <aside className="doctor-sidebar">
-
         <div className="doctor-sidebar-brand">
+          
 
-          <div className="doctor-brand-icon">
-            🏥
-          </div>
-
-          <div className="doctor-brand-text">
-            <h2>Hospital HMS</h2>
+          <div>
+            <strong>Hospital HMS</strong>
             <span>Doctor Portal</span>
           </div>
-
         </div>
 
         <nav className="doctor-sidebar-nav">
-
-          <div className="doctor-nav-section-title">
-            MAIN MENU
-          </div>
-
           <NavLink
             to="/doctor/dashboard"
-            className={({ isActive }) =>
-              `doctor-nav-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={getLinkClass}
           >
-            <span className="doctor-nav-icon">
-              🏠
-            </span>
-
-            <span>
-              Overview
-            </span>
+            
+            Overview
           </NavLink>
 
           <NavLink
             to="/doctor/appointments"
-            className={({ isActive }) =>
-              `doctor-nav-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={getLinkClass}
           >
-            <span className="doctor-nav-icon">
-              📅
-            </span>
-
-            <span>
-              Appointments
-            </span>
+            
+            Appointments
           </NavLink>
 
           <NavLink
             to="/doctor/patients"
-            className={({ isActive }) =>
-              `doctor-nav-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={getLinkClass}
           >
-            <span className="doctor-nav-icon">
-              👥
-            </span>
-
-            <span>
-              Patients
-            </span>
+            
+            Patients
           </NavLink>
 
           <NavLink
             to="/doctor/medical-records"
-            className={({ isActive }) =>
-              `doctor-nav-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={getLinkClass}
           >
-            <span className="doctor-nav-icon">
-              📋
-            </span>
-
-            <span>
-              Medical Records
-            </span>
+            
+            Medical Records
           </NavLink>
 
           <NavLink
             to="/doctor/prescriptions"
-            className={({ isActive }) =>
-              `doctor-nav-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={getLinkClass}
           >
-            <span className="doctor-nav-icon">
-              💊
-            </span>
+            
+            Prescriptions
+          </NavLink>
 
-            <span>
-              Prescriptions
-            </span>
+          <NavLink
+            to="/doctor/laboratory"
+            className={getLinkClass}
+          >
+            
+            Laboratory
           </NavLink>
 
           <NavLink
             to="/doctor/profile"
-            className={({ isActive }) =>
-              `doctor-nav-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={getLinkClass}
           >
-            <span className="doctor-nav-icon">
-              👤
-            </span>
-
-            <span>
-              Profile
-            </span>
+            
+            Profile
           </NavLink>
 
-          <div className="doctor-nav-section-title doctor-quick-title">
-            QUICK ACTIONS
-          </div>
-
           <NavLink
-            to="/doctor/dashboard"
-            className="doctor-nav-link doctor-quick-link"
+            to="/doctor/quick-actions"
+            className={getLinkClass}
           >
-            <span className="doctor-nav-icon">
-              ⚡
-            </span>
-
-            <span>
-              Quick Actions
-            </span>
+            
+            Quick Actions
           </NavLink>
 
           <NavLink
             to="/doctor/notifications"
-            className={({ isActive }) =>
-              `doctor-nav-link ${
-                isActive ? "active" : ""
-              }`
-            }
+            className={getLinkClass}
           >
-            <span className="doctor-nav-icon">
-              🔔
-            </span>
-
-            <span>
-              Notifications
-            </span>
+            
+            Notifications
           </NavLink>
-
         </nav>
-        <div className="doctor-sidebar-footer">
 
-          <div className="doctor-sidebar-user">
-
-            <div className="doctor-sidebar-avatar">
-              {getInitial()}
-            </div>
-
-            <div className="doctor-sidebar-user-info">
-
-              <strong>
-                {getUserName()}
-              </strong>
-
-              <span>
-                Doctor
-              </span>
-
-            </div>
-
-          </div>
-
+        <div className="doctor-sidebar-bottom">
           <button
             type="button"
             className="doctor-logout-button"
             onClick={handleLogout}
           >
-            <span className="doctor-nav-icon">
-              🚪
-            </span>
-
-            <span>
-              Logout
-            </span>
+            Logout
           </button>
-
         </div>
-
       </aside>
 
-      <div className="doctor-main-area">
-
+      <div className="doctor-main">
         <header className="doctor-topbar">
+          <div>
+            <h2>Doctor Dashboard</h2>
 
-          <div className="doctor-topbar-left">
-
-            <div>
-              <h1>
-                Doctor Portal
-              </h1>
-
-              <p>
-                Manage your appointments,
-                patients and clinical records.
-              </p>
-            </div>
-
+            <span>
+              Welcome,{" "}
+              {user?.fullName ||
+                user?.name ||
+                "Doctor"}
+            </span>
           </div>
 
           <div className="doctor-topbar-right">
-
             <NotificationBell />
 
-            <div className="doctor-topbar-user">
-
-              <div className="doctor-topbar-avatar">
-                {getInitial()}
+            <div className="doctor-user-info">
+              <div className="doctor-user-avatar">
+                {(
+                  user?.fullName ||
+                  user?.name ||
+                  "D"
+                )
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
 
-              <div className="doctor-topbar-user-info">
-
+              <div>
                 <strong>
-                  {getUserName()}
+                  {user?.fullName ||
+                    user?.name ||
+                    "Doctor"}
                 </strong>
 
-                <span>
-                  Doctor
-                </span>
-
+                <span>Doctor</span>
               </div>
-
             </div>
-
           </div>
-
         </header>
 
-        <main className="doctor-page-content">
-
+        <main className="doctor-content">
           <Outlet />
-
         </main>
-
       </div>
-
     </div>
   );
 }
