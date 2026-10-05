@@ -1,193 +1,250 @@
-import {
-  NavLink,
-  Outlet,
-  useNavigate,
-} from "react-router-dom";
-
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import NotificationBell from "../../components/notifications/NotificationBell";
-
 import "./DoctorLayout.css";
 
-function DoctorLayout() {
+const DoctorLayout = () => {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error("Error reading user data:", error);
       }
-    } catch (error) {
-      console.error(
-        "Unable to load doctor user:",
-        error
-      );
     }
   }, []);
 
-  function handleLogout() {
+  const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
-    navigate("/login", {
-      replace: true,
-    });
-  }
+    navigate("/login", { replace: true });
+  };
 
-  function getLinkClass({ isActive }) {
-    return isActive
-      ? "doctor-sidebar-link active"
-      : "doctor-sidebar-link";
-  }
+  const getInitials = () => {
+    if (!user) return "D";
+
+    const name =
+      user.fullName ||
+      user.name ||
+      user.username ||
+      "Doctor";
+
+    const words = name.trim().split(" ");
+
+    if (words.length >= 2) {
+      return (
+        words[0].charAt(0) +
+        words[words.length - 1].charAt(0)
+      ).toUpperCase();
+    }
+
+    return name.charAt(0).toUpperCase();
+  };
+
+  const getDisplayName = () => {
+    if (!user) return "Doctor";
+
+    return (
+      user.fullName ||
+      user.name ||
+      user.username ||
+      "Doctor"
+    );
+  };
 
   return (
     <div className="doctor-layout">
-      <aside className="doctor-sidebar">
-        <div className="doctor-sidebar-brand">
-          
 
-          <div>
-            <strong>Hospital HMS</strong>
+      {/* ================= SIDEBAR ================= */}
+      <aside className="doctor-sidebar">
+
+        {/* Logo / Hospital Name */}
+        <div className="doctor-sidebar-header">
+          <div className="doctor-logo-icon">
+            🏥
+          </div>
+
+          <div className="doctor-logo-text">
+            <h2>Hospital HMS</h2>
             <span>Doctor Portal</span>
           </div>
         </div>
 
+        {/* Navigation */}
         <nav className="doctor-sidebar-nav">
+
+          <div className="doctor-nav-section-title">
+            MAIN MENU
+          </div>
+
           <NavLink
             to="/doctor/dashboard"
-            className={getLinkClass}
+            className={({ isActive }) =>
+              `doctor-nav-link ${
+                isActive ? "doctor-nav-link-active" : ""
+              }`
+            }
           >
-            
-            Overview
+            <span className="doctor-nav-icon">🏠</span>
+            <span>Overview</span>
           </NavLink>
 
           <NavLink
             to="/doctor/appointments"
-            className={getLinkClass}
+            className={({ isActive }) =>
+              `doctor-nav-link ${
+                isActive ? "doctor-nav-link-active" : ""
+              }`
+            }
           >
-            
-            Appointments
+            <span className="doctor-nav-icon">📅</span>
+            <span>Appointments</span>
           </NavLink>
 
           <NavLink
             to="/doctor/patients"
-            className={getLinkClass}
+            className={({ isActive }) =>
+              `doctor-nav-link ${
+                isActive ? "doctor-nav-link-active" : ""
+              }`
+            }
           >
-            
-            Patients
+            <span className="doctor-nav-icon">👥</span>
+            <span>Patients</span>
           </NavLink>
 
           <NavLink
             to="/doctor/medical-records"
-            className={getLinkClass}
+            className={({ isActive }) =>
+              `doctor-nav-link ${
+                isActive ? "doctor-nav-link-active" : ""
+              }`
+            }
           >
-            
-            Medical Records
+            <span className="doctor-nav-icon">📋</span>
+            <span>Medical Records</span>
           </NavLink>
 
           <NavLink
             to="/doctor/prescriptions"
-            className={getLinkClass}
+            className={({ isActive }) =>
+              `doctor-nav-link ${
+                isActive ? "doctor-nav-link-active" : ""
+              }`
+            }
           >
-            
-            Prescriptions
+            <span className="doctor-nav-icon">💊</span>
+            <span>Prescriptions</span>
           </NavLink>
 
-          <NavLink
-            to="/doctor/laboratory"
-            className={getLinkClass}
-          >
-            
-            Laboratory
-          </NavLink>
+          <div className="doctor-nav-section-title doctor-nav-section-spacing">
+            ACCOUNT
+          </div>
 
           <NavLink
             to="/doctor/profile"
-            className={getLinkClass}
+            className={({ isActive }) =>
+              `doctor-nav-link ${
+                isActive ? "doctor-nav-link-active" : ""
+              }`
+            }
           >
-            
-            Profile
-          </NavLink>
-
-          <NavLink
-            to="/doctor/quick-actions"
-            className={getLinkClass}
-          >
-            
-            Quick Actions
+            <span className="doctor-nav-icon">👤</span>
+            <span>Profile</span>
           </NavLink>
 
           <NavLink
             to="/doctor/notifications"
-            className={getLinkClass}
+            className={({ isActive }) =>
+              `doctor-nav-link ${
+                isActive ? "doctor-nav-link-active" : ""
+              }`
+            }
           >
-            
-            Notifications
+            <span className="doctor-nav-icon">🔔</span>
+            <span>Notifications</span>
           </NavLink>
+
+          {/* Quick Actions */}
+          <NavLink
+            to="/doctor/dashboard"
+            className="doctor-nav-link"
+          >
+            <span className="doctor-nav-icon">⚡</span>
+            <span>Quick Actions</span>
+          </NavLink>
+
         </nav>
 
-        <div className="doctor-sidebar-bottom">
+        {/* Logout */}
+        <div className="doctor-sidebar-footer">
           <button
             type="button"
             className="doctor-logout-button"
             onClick={handleLogout}
           >
-            Logout
+            <span className="doctor-nav-icon">🚪</span>
+            <span>Logout</span>
           </button>
         </div>
+
       </aside>
 
+      {/* ================= MAIN AREA ================= */}
       <div className="doctor-main">
-        <header className="doctor-topbar">
-          <div>
-            <h2>Doctor Dashboard</h2>
 
-            <span>
-              Welcome,{" "}
-              {user?.fullName ||
-                user?.name ||
-                "Doctor"}
-            </span>
+        {/* TOP HEADER */}
+        <header className="doctor-topbar">
+
+          <div className="doctor-topbar-left">
+            <div>
+              <span className="doctor-topbar-label">
+                Doctor Portal
+              </span>
+
+              <h3>
+                Hospital Management System
+              </h3>
+            </div>
           </div>
 
           <div className="doctor-topbar-right">
+
             <NotificationBell />
 
             <div className="doctor-user-info">
               <div className="doctor-user-avatar">
-                {(
-                  user?.fullName ||
-                  user?.name ||
-                  "D"
-                )
-                  .charAt(0)
-                  .toUpperCase()}
+                {getInitials()}
               </div>
 
-              <div>
-                <strong>
-                  {user?.fullName ||
-                    user?.name ||
-                    "Doctor"}
-                </strong>
-
+              <div className="doctor-user-details">
+                <strong>{getDisplayName()}</strong>
                 <span>Doctor</span>
               </div>
             </div>
+
           </div>
+
         </header>
 
+        {/* PAGE CONTENT */}
         <main className="doctor-content">
           <Outlet />
         </main>
+
       </div>
+
     </div>
   );
-}
+};
 
 export default DoctorLayout;
