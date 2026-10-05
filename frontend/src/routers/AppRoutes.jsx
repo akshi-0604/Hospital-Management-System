@@ -34,7 +34,10 @@ import PatientLaboratory from "../pages/patient/PatientLaboratory";
 import PatientBilling from "../pages/patient/PatientBilling";
 import PatientProfile from "../pages/patient/PatientProfile";
 
+import DoctorLayout from "../pages/doctor/DoctorLayout";
+import DoctorAppointments from "../pages/doctor/DoctorAppointments";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
+
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
 
 import Notifications from "../pages/notifications/Notifications";
@@ -203,6 +206,7 @@ function AppRoutes() {
             />
           </Route>
         </Route>
+
         <Route
           element={
             <ProtectedRoute
@@ -210,12 +214,30 @@ function AppRoutes() {
             />
           }
         >
-
           <Route
             path="/doctor"
-            element={<DoctorDashboard />}
-          />
+            element={<DoctorLayout />}
+          >
+            <Route
+              index
+              element={
+                <Navigate
+                  to="/doctor/dashboard"
+                  replace
+                />
+              }
+            />
 
+            <Route
+              path="dashboard"
+              element={<DoctorDashboard />}
+            />
+
+            <Route
+              path="appointments"
+              element={<DoctorAppointments />}
+            />
+          </Route>
         </Route>
 
         <Route
