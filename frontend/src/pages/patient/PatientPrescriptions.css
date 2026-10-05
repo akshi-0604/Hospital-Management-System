@@ -701,3 +701,105 @@
         width: 100%;
     }
 }
+
+.patient-prescription-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.patient-view-prescription-button {
+  border: 1px solid #dbe4f0;
+  background: #eef4ff;
+  color: #2563eb;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-view-prescription-button:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.patient-view-prescription-button:active {
+  transform: translateY(0);
+}
+
+.patient-download-prescription-button {
+  border: 1px solid #bbf7d0;
+  background: #ecfdf3;
+  color: #15803d;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-download-prescription-button:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-1px);
+}
+
+.patient-download-prescription-button:active {
+  transform: translateY(0);
+}
+
+.patient-prescription-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.patient-prescription-close-footer-button {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  padding: 9px 18px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-prescription-close-footer-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+@media (max-width: 768px) {
+
+  .patient-prescription-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .patient-view-prescription-button,
+  .patient-download-prescription-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .patient-prescription-modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .patient-prescription-modal-footer
+    .patient-download-prescription-button,
+  .patient-prescription-modal-footer
+    .patient-prescription-close-footer-button {
+    flex: 1;
+    min-width: 120px;
+  }
+}

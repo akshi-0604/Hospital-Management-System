@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import api from "../../api/axios";
 import "./PatientBilling.css";
 
@@ -264,12 +266,445 @@ function PatientBilling() {
     setShowViewModal(false);
   }
 
+  function handleDownloadBilling(bill) {
+    if (!bill) {
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    const patientName =
+      bill.patient?.fullName ||
+      "Patient";
+
+    const doctorName =
+      bill.doctor?.fullName ||
+      "Not assigned";
+
+    const invoiceNumber =
+      bill.invoiceNumber ||
+      bill._id ||
+      "Invoice";
+
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+
+    doc.text(
+      "Hospital Management System",
+      105,
+      20,
+      {
+        align: "center",
+      }
+    );
+
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "normal");
+
+    doc.text(
+      "Billing Invoice",
+      105,
+      30,
+      {
+        align: "center",
+      }
+    );
+
+    doc.setDrawColor(
+      200,
+      200,
+      200
+    );
+
+    doc.line(
+      15,
+      36,
+      195,
+      36
+    );
+
+    doc.setFontSize(11);
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.text(
+      "Invoice Details",
+      15,
+      48
+    );
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.text(
+      `Invoice Number: ${invoiceNumber}`,
+      15,
+      58
+    );
+
+    doc.text(
+      `Invoice Date: ${formatDate(
+        bill.invoiceDate
+      )}`,
+      15,
+      66
+    );
+
+    doc.text(
+      `Due Date: ${formatDate(
+        bill.dueDate
+      )}`,
+      15,
+      74
+    );
+
+    doc.text(
+      `Payment Status: ${
+        bill.paymentStatus || "-"
+      }`,
+      15,
+      82
+    );
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.text(
+      "Patient Information",
+      110,
+      48
+    );
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.text(
+      `Patient: ${patientName}`,
+      110,
+      58
+    );
+
+    doc.text(
+      `Doctor: ${doctorName}`,
+      110,
+      66
+    );
+
+    doc.text(
+      `Payment Method: ${
+        bill.paymentMethod || "-"
+      }`,
+      110,
+      74
+    );
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.text(
+      "Billing Items",
+      15,
+      98
+    );
+
+    const items = Array.isArray(
+      bill.items
+    )
+      ? bill.items
+      : [];
+
+    const tableRows =
+      items.length > 0
+        ? items.map((item) => [
+            item.description ||
+              "-",
+            item.category ||
+              "-",
+            formatCurrency(
+              item.amount
+            ),
+          ])
+        : [
+            [
+              "No billing items",
+              "-",
+              formatCurrency(0),
+            ],
+          ];
+
+    autoTable(doc, {
+      startY: 104,
+
+      head: [
+        [
+          "Description",
+          "Category",
+          "Amount",
+        ],
+      ],
+
+      body: tableRows,
+
+      theme: "grid",
+
+      styles: {
+        fontSize: 10,
+        cellPadding: 4,
+      },
+
+      headStyles: {
+        fontStyle: "bold",
+      },
+
+      columnStyles: {
+        2: {
+          halign: "right",
+        },
+      },
+    });
+
+    let currentY =
+      doc.lastAutoTable.finalY +
+      12;
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.text(
+      "Payment Summary",
+      15,
+      currentY
+    );
+
+    currentY += 10;
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.text(
+      `Subtotal: ${formatCurrency(
+        bill.subtotal
+      )}`,
+      15,
+      currentY
+    );
+
+    currentY += 7;
+
+    doc.text(
+      `Discount: ${formatCurrency(
+        bill.discount
+      )}`,
+      15,
+      currentY
+    );
+
+    currentY += 7;
+
+    doc.text(
+      `Tax: ${formatCurrency(
+        bill.tax
+      )}`,
+      15,
+      currentY
+    );
+
+    currentY += 7;
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.text(
+      `Total Amount: ${formatCurrency(
+        bill.totalAmount
+      )}`,
+      15,
+      currentY
+    );
+
+    currentY += 7;
+
+    doc.text(
+      `Amount Paid: ${formatCurrency(
+        getAmountPaid(bill)
+      )}`,
+      15,
+      currentY
+    );
+
+    currentY += 7;
+
+    doc.text(
+      `Balance Due: ${formatCurrency(
+        getBalanceAmount(bill)
+      )}`,
+      15,
+      currentY
+    );
+
+    const paymentHistory =
+      getPaymentHistory(bill);
+
+    if (
+      paymentHistory.length > 0
+    ) {
+      currentY += 16;
+
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
+      doc.text(
+        "Payment History",
+        15,
+        currentY
+      );
+
+      const paymentRows =
+        paymentHistory.map(
+          (payment) => [
+            formatDateTime(
+              payment.paymentDate
+            ),
+
+            formatCurrency(
+              payment.amount
+            ),
+
+            payment.paymentMethod ||
+              "-",
+
+            payment.referenceNumber ||
+              "-",
+          ]
+        );
+
+      autoTable(doc, {
+        startY: currentY + 6,
+
+        head: [
+          [
+            "Payment Date",
+            "Amount",
+            "Method",
+            "Reference",
+          ],
+        ],
+
+        body: paymentRows,
+
+        theme: "grid",
+
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+        },
+
+        headStyles: {
+          fontStyle: "bold",
+        },
+      });
+
+      currentY =
+        doc.lastAutoTable.finalY +
+        12;
+    }
+
+    if (bill.notes) {
+      doc.setFont(
+        "helvetica",
+        "bold"
+      );
+
+      doc.text(
+        "Notes",
+        15,
+        currentY
+      );
+
+      doc.setFont(
+        "helvetica",
+        "normal"
+      );
+
+      const noteLines =
+        doc.splitTextToSize(
+          bill.notes,
+          175
+        );
+
+      doc.text(
+        noteLines,
+        15,
+        currentY + 8
+      );
+    }
+
+    doc.setFontSize(9);
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.text(
+      `Generated on: ${formatDateTime(
+        new Date()
+      )}`,
+      15,
+      285
+    );
+
+    doc.text(
+      "Hospital Management System",
+      195,
+      285,
+      {
+        align: "right",
+      }
+    );
+
+    const safePatientName =
+      patientName
+        .replace(
+          /[^a-z0-9]/gi,
+          "_"
+        )
+        .replace(
+          /_+/g,
+          "_"
+        );
+
+    doc.save(
+      `Billing_${invoiceNumber}_${safePatientName}.pdf`
+    );
+  }
+
   return (
     <div className="patient-billing-page">
 
       <div className="patient-billing-header">
         <div>
-          <h1>My Billing</h1>
+          <h1>
+            My Billing
+          </h1>
 
           <p>
             View your invoices, payments
@@ -278,12 +713,12 @@ function PatientBilling() {
         </div>
       </div>
 
-      {/* SUMMARY */}
-
       <div className="patient-billing-summary">
 
         <div className="patient-billing-summary-card">
-          <span>Total Bills</span>
+          <span>
+            Total Bills
+          </span>
 
           <strong>
             {totalBills}
@@ -295,7 +730,9 @@ function PatientBilling() {
         </div>
 
         <div className="patient-billing-summary-card">
-          <span>Paid Bills</span>
+          <span>
+            Paid Bills
+          </span>
 
           <strong>
             {paidBills}
@@ -307,7 +744,9 @@ function PatientBilling() {
         </div>
 
         <div className="patient-billing-summary-card">
-          <span>Partially Paid</span>
+          <span>
+            Partially Paid
+          </span>
 
           <strong>
             {partiallyPaidBills}
@@ -319,7 +758,9 @@ function PatientBilling() {
         </div>
 
         <div className="patient-billing-summary-card">
-          <span>Pending Bills</span>
+          <span>
+            Pending Bills
+          </span>
 
           <strong>
             {pendingBills}
@@ -331,7 +772,9 @@ function PatientBilling() {
         </div>
 
         <div className="patient-billing-summary-card">
-          <span>Paid Amount</span>
+          <span>
+            Paid Amount
+          </span>
 
           <strong>
             {formatCurrency(
@@ -345,8 +788,6 @@ function PatientBilling() {
         </div>
 
       </div>
-
-      {/* TOOLBAR */}
 
       <div className="patient-billing-toolbar">
 
@@ -407,8 +848,6 @@ function PatientBilling() {
         </div>
       )}
 
-      {/* TABLE */}
-
       <div className="patient-billing-table-card">
 
         {loading ? (
@@ -435,15 +874,41 @@ function PatientBilling() {
 
               <thead>
                 <tr>
-                  <th>Invoice</th>
-                  <th>Doctor</th>
-                  <th>Invoice Date</th>
-                  <th>Total</th>
-                  <th>Paid</th>
-                  <th>Balance</th>
-                  <th>Payment</th>
-                  <th>Method</th>
-                  <th>Action</th>
+                  <th>
+                    Invoice
+                  </th>
+
+                  <th>
+                    Doctor
+                  </th>
+
+                  <th>
+                    Invoice Date
+                  </th>
+
+                  <th>
+                    Total
+                  </th>
+
+                  <th>
+                    Paid
+                  </th>
+
+                  <th>
+                    Balance
+                  </th>
+
+                  <th>
+                    Payment
+                  </th>
+
+                  <th>
+                    Method
+                  </th>
+
+                  <th>
+                    Action
+                  </th>
                 </tr>
               </thead>
 
@@ -451,7 +916,9 @@ function PatientBilling() {
 
                 {filteredBillings.map(
                   (bill) => (
-                    <tr key={bill._id}>
+                    <tr
+                      key={bill._id}
+                    >
 
                       <td>
                         <strong>
@@ -529,20 +996,36 @@ function PatientBilling() {
                         }
                       </td>
 
+                      {/* ACTION */}
+
                       <td>
+                        <div className="patient-billing-actions">
 
-                        <button
-                          type="button"
-                          className="patient-view-bill-button"
-                          onClick={() =>
-                            openViewModal(
-                              bill
-                            )
-                          }
-                        >
-                          View
-                        </button>
+                          <button
+                            type="button"
+                            className="patient-view-bill-button"
+                            onClick={() =>
+                              openViewModal(
+                                bill
+                              )
+                            }
+                          >
+                            View
+                          </button>
 
+                          <button
+                            type="button"
+                            className="patient-download-bill-button"
+                            onClick={() =>
+                              handleDownloadBilling(
+                                bill
+                              )
+                            }
+                          >
+                            Download
+                          </button>
+
+                        </div>
                       </td>
 
                     </tr>
@@ -557,8 +1040,6 @@ function PatientBilling() {
         )}
 
       </div>
-
-      {/* VIEW BILL MODAL */}
 
       {showViewModal &&
         selectedBilling && (
@@ -575,6 +1056,8 @@ function PatientBilling() {
           >
 
             <div className="patient-billing-modal">
+
+              {/* MODAL HEADER */}
 
               <div className="patient-billing-modal-header">
 
@@ -605,8 +1088,6 @@ function PatientBilling() {
               </div>
 
               <div className="patient-billing-details">
-
-                {/* BASIC DETAILS */}
 
                 <div className="patient-billing-detail-grid">
 
@@ -732,8 +1213,6 @@ function PatientBilling() {
 
                 </div>
 
-                {/* BILLING ITEMS */}
-
                 <div className="patient-invoice-items">
 
                   <h3>
@@ -744,7 +1223,10 @@ function PatientBilling() {
                     selectedBilling.items
                   ) &&
                     selectedBilling.items.map(
-                      (item, index) => (
+                      (
+                        item,
+                        index
+                      ) => (
                         <div
                           className="patient-invoice-item-row"
                           key={
@@ -779,9 +1261,17 @@ function PatientBilling() {
                       )
                     )}
 
-                </div>
+                  {(!Array.isArray(
+                    selectedBilling.items
+                  ) ||
+                    selectedBilling.items
+                      .length === 0) && (
+                    <div className="patient-no-payment-history">
+                      No billing items available.
+                    </div>
+                  )}
 
-                {/* TOTALS */}
+                </div>
 
                 <div className="patient-invoice-totals">
 
@@ -869,8 +1359,6 @@ function PatientBilling() {
                   </div>
 
                 </div>
-
-                {/* PAYMENT HISTORY */}
 
                 <div className="patient-payment-history-section">
 
@@ -962,8 +1450,6 @@ function PatientBilling() {
 
                 </div>
 
-                {/* NOTES */}
-
                 <div className="patient-billing-view-notes">
 
                   <h3>
@@ -982,6 +1468,18 @@ function PatientBilling() {
               </div>
 
               <div className="patient-billing-modal-footer">
+
+                <button
+                  type="button"
+                  className="patient-download-bill-button"
+                  onClick={() =>
+                    handleDownloadBilling(
+                      selectedBilling
+                    )
+                  }
+                >
+                  Download PDF
+                </button>
 
                 <button
                   type="button"
@@ -1005,4 +1503,3 @@ function PatientBilling() {
 }
 
 export default PatientBilling;
-

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import "./PatientPrescriptions.css";
 
 const APPOINTMENTS_URL = "/prescriptions";
@@ -117,6 +119,26 @@ function PatientPrescriptions() {
     });
   }
 
+  function formatDateTime(value) {
+    if (!value) {
+      return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+
+    return date.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   function getDoctorName(prescription) {
     return (
       prescription?.doctor?.fullName ||
@@ -194,11 +216,336 @@ function PatientPrescriptions() {
     setShowViewModal(false);
   }
 
+  function handleDownloadPrescription(prescription) {
+    if (!prescription) {
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    const patientName =
+      prescription?.patient?.fullName ||
+      "Patient";
+
+    const doctorName =
+      getDoctorName(prescription);
+
+    const department =
+      getDepartment(prescription);
+
+    const diagnosis =
+      prescription?.diagnosis ||
+      "-";
+
+    const prescriptionDate =
+      formatDate(
+        prescription?.prescriptionDate
+      );
+
+    const status =
+      prescription?.status ||
+      "-";
+
+    const notes =
+      prescription?.notes ||
+      "No additional notes.";
+
+    const generatedDate =
+      formatDateTime(new Date());
+
+    /*
+      Header
+    */
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+
+    doc.text(
+      "Hospital Management System",
+      105,
+      20,
+      {
+        align: "center",
+      }
+    );
+
+    doc.setFontSize(14);
+
+    doc.text(
+      "Prescription",
+      105,
+      29,
+      {
+        align: "center",
+      }
+    );
+
+    doc.setDrawColor(
+      180,
+      180,
+      180
+    );
+
+    doc.line(
+      15,
+      35,
+      195,
+      35
+    );
+
+    /*
+      Patient / Prescription Details
+    */
+    autoTable(doc, {
+      startY: 43,
+      theme: "grid",
+
+      head: [
+        [
+          "Patient Information",
+          "Prescription Information",
+        ],
+      ],
+
+      body: [
+        [
+          `Patient: ${patientName}`,
+          `Doctor: ${doctorName}`,
+        ],
+        [
+          `Department: ${department}`,
+          `Date: ${prescriptionDate}`,
+        ],
+        [
+          `Diagnosis: ${diagnosis}`,
+          `Status: ${status}`,
+        ],
+        [
+          `Generated: ${generatedDate}`,
+          `Appointment: ${
+            prescription?.appointment
+              ? "Linked"
+              : "Not linked"
+          }`,
+        ],
+      ],
+
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+
+      headStyles: {
+        fontStyle: "bold",
+      },
+
+      columnStyles: {
+        0: {
+          cellWidth: 88,
+        },
+
+        1: {
+          cellWidth: 88,
+        },
+      },
+    });
+
+    /*
+      Medicines
+    */
+    let currentY =
+      doc.lastAutoTable.finalY + 12;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+
+    doc.text(
+      "Prescribed Medicines",
+      15,
+      currentY
+    );
+
+    const medicines =
+      Array.isArray(
+        prescription?.medications
+      )
+        ? prescription.medications
+        : [];
+
+    const medicineRows =
+      medicines.length > 0
+        ? medicines.map(
+            (medicine, index) => [
+              index + 1,
+              medicine?.medicineName ||
+                "-",
+              medicine?.dosage ||
+                "-",
+              medicine?.frequency ||
+                "-",
+              medicine?.duration ||
+                "-",
+              medicine?.instructions ||
+                "-",
+            ]
+          )
+        : [
+            [
+              "-",
+              "No medicine details available",
+              "-",
+              "-",
+              "-",
+              "-",
+            ],
+          ];
+
+    autoTable(doc, {
+      startY: currentY + 5,
+
+      theme: "grid",
+
+      head: [
+        [
+          "#",
+          "Medicine",
+          "Dosage",
+          "Frequency",
+          "Duration",
+          "Instructions",
+        ],
+      ],
+
+      body: medicineRows,
+
+      styles: {
+        fontSize: 8,
+        cellPadding: 4,
+        overflow: "linebreak",
+      },
+
+      headStyles: {
+        fontStyle: "bold",
+      },
+
+      columnStyles: {
+        0: {
+          cellWidth: 10,
+        },
+
+        1: {
+          cellWidth: 35,
+        },
+
+        2: {
+          cellWidth: 25,
+        },
+
+        3: {
+          cellWidth: 28,
+        },
+
+        4: {
+          cellWidth: 25,
+        },
+
+        5: {
+          cellWidth: 57,
+        },
+      },
+    });
+
+    /*
+      Notes
+    */
+    currentY =
+      doc.lastAutoTable.finalY + 12;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+
+    doc.text(
+      "Notes",
+      15,
+      currentY
+    );
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+
+    const noteLines =
+      doc.splitTextToSize(
+        notes,
+        175
+      );
+
+    doc.text(
+      noteLines,
+      15,
+      currentY + 7
+    );
+
+    /*
+      Footer
+    */
+    const pageHeight =
+      doc.internal.pageSize.height;
+
+    doc.setDrawColor(
+      200,
+      200,
+      200
+    );
+
+    doc.line(
+      15,
+      pageHeight - 20,
+      195,
+      pageHeight - 20
+    );
+
+    doc.setFontSize(8);
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.text(
+      "Hospital Management System - Prescription",
+      105,
+      pageHeight - 12,
+      {
+        align: "center",
+      }
+    );
+
+    /*
+      Safe filename
+    */
+    const safePatientName =
+      patientName
+        .replace(/[^a-z0-9]/gi, "_")
+        .replace(/_+/g, "_");
+
+    const safeDate =
+      prescriptionDate
+        .replace(/[^a-z0-9]/gi, "_")
+        .replace(/_+/g, "_");
+
+    const fileName =
+      `Prescription_${safePatientName}_${safeDate}.pdf`;
+
+    doc.save(fileName);
+  }
+
   return (
     <div className="patient-prescriptions-page">
+
       <div className="patient-prescriptions-header">
+
         <div>
-          <h1>Prescriptions</h1>
+          <h1>
+            Prescriptions
+          </h1>
 
           <p>
             View your prescribed medicines and
@@ -214,9 +561,11 @@ function PatientPrescriptions() {
         >
           ↻ Refresh
         </button>
+
       </div>
 
       <div className="patient-prescription-summary">
+
         <div className="patient-prescription-summary-card">
           <span>
             Total Prescriptions
@@ -246,9 +595,11 @@ function PatientPrescriptions() {
             {completedPrescriptions}
           </strong>
         </div>
+
       </div>
 
       <div className="patient-prescriptions-toolbar">
+
         <input
           type="text"
           placeholder="Search doctor, department or diagnosis..."
@@ -282,6 +633,7 @@ function PatientPrescriptions() {
             Cancelled
           </option>
         </select>
+
       </div>
 
       {error && (
@@ -291,8 +643,10 @@ function PatientPrescriptions() {
       )}
 
       <div className="patient-prescriptions-table-card">
+
         {loading ? (
           <div className="patient-prescription-empty">
+
             <strong>
               Loading prescriptions...
             </strong>
@@ -301,10 +655,12 @@ function PatientPrescriptions() {
               Please wait while your prescription
               records are loaded.
             </span>
+
           </div>
         ) : filteredPrescriptions.length ===
           0 ? (
           <div className="patient-prescription-empty">
+
             <strong>
               No prescriptions found
             </strong>
@@ -313,10 +669,13 @@ function PatientPrescriptions() {
               Your prescription records will
               appear here when available.
             </span>
+
           </div>
         ) : (
           <div className="patient-prescriptions-table-wrapper">
+
             <table className="patient-prescriptions-table">
+
               <thead>
                 <tr>
                   <th>Doctor</th>
@@ -330,6 +689,7 @@ function PatientPrescriptions() {
               </thead>
 
               <tbody>
+
                 {filteredPrescriptions.map(
                   (prescription) => (
                     <tr
@@ -337,6 +697,7 @@ function PatientPrescriptions() {
                         prescription._id
                       }
                     >
+
                       <td>
                         <strong>
                           {getDoctorName(
@@ -382,32 +743,58 @@ function PatientPrescriptions() {
                       </td>
 
                       <td>
-                        <button
-                          type="button"
-                          className="patient-view-prescription-button"
-                          onClick={() =>
-                            openViewModal(
-                              prescription
-                            )
-                          }
-                        >
-                          View
-                        </button>
+
+                        <div className="patient-prescription-actions">
+
+                          <button
+                            type="button"
+                            className="patient-view-prescription-button"
+                            onClick={() =>
+                              openViewModal(
+                                prescription
+                              )
+                            }
+                          >
+                            View
+                          </button>
+
+                          <button
+                            type="button"
+                            className="patient-download-prescription-button"
+                            onClick={() =>
+                              handleDownloadPrescription(
+                                prescription
+                              )
+                            }
+                          >
+                            Download
+                          </button>
+
+                        </div>
+
                       </td>
+
                     </tr>
                   )
                 )}
+
               </tbody>
+
             </table>
+
           </div>
         )}
+
       </div>
 
       {showViewModal &&
         selectedPrescription && (
           <div className="patient-prescription-modal-overlay">
+
             <div className="patient-prescription-modal">
+
               <div className="patient-prescription-modal-header">
+
                 <div>
                   <h2>
                     Prescription Details
@@ -428,10 +815,26 @@ function PatientPrescriptions() {
                 >
                   ×
                 </button>
+
               </div>
 
               <div className="patient-prescription-details">
+
                 <div className="patient-prescription-detail-grid">
+
+                  <div>
+                    <span>
+                      Patient
+                    </span>
+
+                    <strong>
+                      {selectedPrescription
+                        .patient
+                        ?.fullName ||
+                        "-"}
+                    </strong>
+                  </div>
+
                   <div>
                     <span>
                       Doctor
@@ -505,14 +908,17 @@ function PatientPrescriptions() {
                           : "Not linked"}
                     </strong>
                   </div>
+
                 </div>
 
                 <div className="patient-prescription-view-section">
+
                   <h3>
                     Medicines
                   </h3>
 
                   <div className="patient-medicine-view-list">
+
                     {Array.isArray(
                       selectedPrescription.medications
                     ) &&
@@ -530,7 +936,9 @@ function PatientPrescriptions() {
                               index
                             }
                           >
+
                             <div>
+
                               <strong>
                                 {
                                   medicine.medicineName
@@ -547,6 +955,7 @@ function PatientPrescriptions() {
                                 {medicine.duration ||
                                   "-"}
                               </span>
+
                             </div>
 
                             {medicine.instructions && (
@@ -556,6 +965,7 @@ function PatientPrescriptions() {
                                 }
                               </small>
                             )}
+
                           </div>
                         )
                       )
@@ -565,10 +975,13 @@ function PatientPrescriptions() {
                         available.
                       </div>
                     )}
+
                   </div>
+
                 </div>
 
                 <div className="patient-prescription-view-section">
+
                   <h3>
                     Notes
                   </h3>
@@ -577,10 +990,25 @@ function PatientPrescriptions() {
                     {selectedPrescription.notes ||
                       "No additional notes."}
                   </p>
+
                 </div>
+
               </div>
 
               <div className="patient-prescription-modal-footer">
+
+                <button
+                  type="button"
+                  className="patient-download-prescription-button"
+                  onClick={() =>
+                    handleDownloadPrescription(
+                      selectedPrescription
+                    )
+                  }
+                >
+                  Download PDF
+                </button>
+
                 <button
                   type="button"
                   className="patient-prescription-close-footer-button"
@@ -590,13 +1018,16 @@ function PatientPrescriptions() {
                 >
                   Close
                 </button>
+
               </div>
+
             </div>
+
           </div>
         )}
+
     </div>
   );
 }
 
 export default PatientPrescriptions;
-

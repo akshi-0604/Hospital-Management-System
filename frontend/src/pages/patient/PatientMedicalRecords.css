@@ -538,7 +538,6 @@
     transform: translateY(-1px);
 }
 
-/* DARK MODE */
 
 :root[data-theme="dark"]
 .patient-medical-modal {
@@ -553,7 +552,6 @@ tr:hover {
     background: var(--hms-primary-light);
 }
 
-/* RESPONSIVE */
 
 @media (max-width: 1000px) {
     .patient-medical-records-table {
@@ -630,3 +628,75 @@ tr:hover {
     }
 }
 
+.patient-medical-record-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.patient-view-record-button {
+  border: 1px solid #dbe4f0;
+  background: #eef4ff;
+  color: #2563eb;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-view-record-button:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.patient-download-record-button {
+  border: 1px solid #bbf7d0;
+  background: #ecfdf3;
+  color: #15803d;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-download-record-button:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-1px);
+}
+
+.patient-download-record-button:active,
+.patient-view-record-button:active {
+  transform: translateY(0);
+}
+
+.patient-medical-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .patient-medical-record-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .patient-view-record-button,
+  .patient-download-record-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .patient-medical-modal-footer {
+    flex-wrap: wrap;
+  }
+}

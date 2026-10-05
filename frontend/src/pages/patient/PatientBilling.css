@@ -919,3 +919,75 @@
         flex-direction: column;
     }
 }
+
+.patient-billing-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.patient-view-bill-button {
+  border: 1px solid #dbe4f0;
+  background: #eef4ff;
+  color: #2563eb;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-view-bill-button:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+.patient-download-bill-button {
+  border: 1px solid #bbf7d0;
+  background: #ecfdf3;
+  color: #15803d;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-download-bill-button:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-1px);
+}
+
+.patient-download-bill-button:active,
+.patient-view-bill-button:active {
+  transform: translateY(0);
+}
+
+.patient-billing-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .patient-billing-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .patient-view-bill-button,
+  .patient-download-bill-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .patient-billing-modal-footer {
+    flex-wrap: wrap;
+  }
+}

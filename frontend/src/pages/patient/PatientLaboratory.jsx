@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import "./PatientLaboratory.css";
 
 function PatientLaboratory() {
@@ -143,6 +145,26 @@ function PatientLaboratory() {
     });
   }
 
+  function formatDateTime(value) {
+    if (!value) {
+      return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+
+    return date.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   function getStatusClass(status) {
     return (
       status
@@ -159,6 +181,246 @@ function PatientLaboratory() {
   function closeViewModal() {
     setSelectedLaboratory(null);
     setShowViewModal(false);
+  }
+
+  function handleDownloadLaboratory(laboratory) {
+    if (!laboratory) {
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    const patientName =
+      laboratory.patient?.fullName ||
+      "Patient";
+
+    const doctorName =
+      laboratory.doctor?.fullName ||
+      "Unknown Doctor";
+
+    const department =
+      laboratory.doctor?.department ||
+      "-";
+
+    const testName =
+      laboratory.testName ||
+      "Laboratory Test";
+
+    const category =
+      laboratory.category ||
+      "-";
+
+    const testDate =
+      formatDate(laboratory.testDate);
+
+    const status =
+      laboratory.status ||
+      "-";
+
+    const result =
+      laboratory.result ||
+      "Pending";
+
+    const unit =
+      laboratory.unit ||
+      "-";
+
+    const referenceRange =
+      laboratory.referenceRange ||
+      "-";
+
+    const notes =
+      laboratory.notes ||
+      "-";
+
+    const generatedDate =
+      formatDateTime(new Date());
+
+    /*
+      Header
+    */
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text(
+      "Hospital Management System",
+      105,
+      20,
+      { align: "center" }
+    );
+
+    doc.setFontSize(14);
+    doc.text(
+      "Laboratory Report",
+      105,
+      29,
+      { align: "center" }
+    );
+
+    doc.setDrawColor(180, 180, 180);
+    doc.line(
+      15,
+      35,
+      195,
+      35
+    );
+
+    /*
+      Patient and Test Information
+    */
+    autoTable(doc, {
+      startY: 43,
+      theme: "grid",
+      head: [
+        [
+          "Patient Information",
+          "Test Information",
+        ],
+      ],
+      body: [
+        [
+          `Patient: ${patientName}`,
+          `Test: ${testName}`,
+        ],
+        [
+          `Doctor: ${doctorName}`,
+          `Category: ${category}`,
+        ],
+        [
+          `Department: ${department}`,
+          `Test Date: ${testDate}`,
+        ],
+        [
+          `Status: ${status}`,
+          `Generated: ${generatedDate}`,
+        ],
+      ],
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fontStyle: "bold",
+      },
+      columnStyles: {
+        0: {
+          cellWidth: 88,
+        },
+        1: {
+          cellWidth: 88,
+        },
+      },
+    });
+
+    /*
+      Result Section
+    */
+    let currentY =
+      doc.lastAutoTable.finalY + 12;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text(
+      "Test Result",
+      15,
+      currentY
+    );
+
+    autoTable(doc, {
+      startY: currentY + 5,
+      theme: "grid",
+      head: [
+        [
+          "Result",
+          "Unit",
+          "Reference Range",
+        ],
+      ],
+      body: [
+        [
+          result,
+          unit,
+          referenceRange,
+        ],
+      ],
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fontStyle: "bold",
+      },
+    });
+
+    /*
+      Notes
+    */
+    currentY =
+      doc.lastAutoTable.finalY + 12;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text(
+      "Notes",
+      15,
+      currentY
+    );
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+
+    const noteLines =
+      doc.splitTextToSize(
+        notes,
+        175
+      );
+
+    doc.text(
+      noteLines,
+      15,
+      currentY + 7
+    );
+
+    /*
+      Footer
+    */
+    const pageHeight =
+      doc.internal.pageSize.height;
+
+    doc.setDrawColor(200, 200, 200);
+    doc.line(
+      15,
+      pageHeight - 20,
+      195,
+      pageHeight - 20
+    );
+
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+
+    doc.text(
+      "Hospital Management System - Laboratory Report",
+      105,
+      pageHeight - 12,
+      { align: "center" }
+    );
+
+    /*
+      Safe filename
+    */
+    const safePatientName =
+      patientName
+        .replace(/[^a-z0-9]/gi, "_")
+        .replace(/_+/g, "_");
+
+    const safeDate =
+      testDate
+        .replace(/[^a-z0-9]/gi, "_")
+        .replace(/_+/g, "_");
+
+    const fileName =
+      `Laboratory_Report_${safePatientName}_${safeDate}.pdf`;
+
+    doc.save(fileName);
   }
 
   const totalTests =
@@ -378,17 +640,33 @@ function PatientLaboratory() {
                       </td>
 
                       <td>
-                        <button
-                          type="button"
-                          className="patient-view-lab-button"
-                          onClick={() =>
-                            openViewModal(
-                              item
-                            )
-                          }
-                        >
-                          View
-                        </button>
+                        <div className="patient-lab-actions">
+
+                          <button
+                            type="button"
+                            className="patient-view-lab-button"
+                            onClick={() =>
+                              openViewModal(
+                                item
+                              )
+                            }
+                          >
+                            View
+                          </button>
+
+                          <button
+                            type="button"
+                            className="patient-download-lab-button"
+                            onClick={() =>
+                              handleDownloadLaboratory(
+                                item
+                              )
+                            }
+                          >
+                            Download
+                          </button>
+
+                        </div>
                       </td>
 
                     </tr>
@@ -583,6 +861,18 @@ function PatientLaboratory() {
               </div>
 
               <div className="patient-lab-modal-footer">
+
+                <button
+                  type="button"
+                  className="patient-download-lab-button"
+                  onClick={() =>
+                    handleDownloadLaboratory(
+                      selectedLaboratory
+                    )
+                  }
+                >
+                  Download PDF
+                </button>
 
                 <button
                   type="button"

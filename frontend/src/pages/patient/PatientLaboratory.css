@@ -597,3 +597,107 @@
         width: 100%;
     }
 }
+
+.patient-lab-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.patient-view-lab-button {
+  border: 1px solid #dbe4f0;
+  background: #eef4ff;
+  color: #2563eb;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-view-lab-button:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.patient-view-lab-button:active {
+  transform: translateY(0);
+}
+
+
+.patient-download-lab-button {
+  border: 1px solid #bbf7d0;
+  background: #ecfdf3;
+  color: #15803d;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-download-lab-button:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-1px);
+}
+
+.patient-download-lab-button:active {
+  transform: translateY(0);
+}
+
+.patient-lab-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+
+.patient-cancel-lab-button {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  padding: 9px 18px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.patient-cancel-lab-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+@media (max-width: 768px) {
+
+  .patient-lab-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .patient-view-lab-button,
+  .patient-download-lab-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .patient-lab-modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .patient-lab-modal-footer
+    .patient-download-lab-button,
+  .patient-lab-modal-footer
+    .patient-cancel-lab-button {
+    flex: 1;
+    min-width: 120px;
+  }
+}

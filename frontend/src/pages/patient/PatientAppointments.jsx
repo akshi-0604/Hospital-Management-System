@@ -716,9 +716,6 @@ function PatientAppointments() {
       <div className="patient-appointments-summary">
 
         <div className="patient-appointment-summary-card">
-          <div className="summary-icon">
-            📅
-          </div>
 
           <div>
             <span>
@@ -732,9 +729,6 @@ function PatientAppointments() {
         </div>
 
         <div className="patient-appointment-summary-card">
-          <div className="summary-icon">
-            ⏳
-          </div>
 
           <div>
             <span>
@@ -748,9 +742,6 @@ function PatientAppointments() {
         </div>
 
         <div className="patient-appointment-summary-card">
-          <div className="summary-icon">
-            ✓
-          </div>
 
           <div>
             <span>
@@ -764,9 +755,6 @@ function PatientAppointments() {
         </div>
 
         <div className="patient-appointment-summary-card">
-          <div className="summary-icon">
-            ✔
-          </div>
 
           <div>
             <span>
@@ -802,10 +790,6 @@ function PatientAppointments() {
         <div className="patient-appointments-filters">
 
           <div className="patient-appointment-search">
-
-            <span>
-              🔍
-            </span>
 
             <input
               type="text"
