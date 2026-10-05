@@ -64,22 +64,16 @@ const DoctorLayout = () => {
   return (
     <div className="doctor-layout">
 
-      {/* ================= SIDEBAR ================= */}
       <aside className="doctor-sidebar">
 
-        {/* Logo / Hospital Name */}
         <div className="doctor-sidebar-header">
-          <div className="doctor-logo-icon">
-            🏥
-          </div>
-
+          
           <div className="doctor-logo-text">
             <h2>Hospital HMS</h2>
             <span>Doctor Portal</span>
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="doctor-sidebar-nav">
 
           <div className="doctor-nav-section-title">
@@ -94,7 +88,6 @@ const DoctorLayout = () => {
               }`
             }
           >
-            <span className="doctor-nav-icon">🏠</span>
             <span>Overview</span>
           </NavLink>
 
@@ -106,7 +99,6 @@ const DoctorLayout = () => {
               }`
             }
           >
-            <span className="doctor-nav-icon">📅</span>
             <span>Appointments</span>
           </NavLink>
 
@@ -118,7 +110,6 @@ const DoctorLayout = () => {
               }`
             }
           >
-            <span className="doctor-nav-icon">👥</span>
             <span>Patients</span>
           </NavLink>
 
@@ -130,7 +121,6 @@ const DoctorLayout = () => {
               }`
             }
           >
-            <span className="doctor-nav-icon">📋</span>
             <span>Medical Records</span>
           </NavLink>
 
@@ -142,7 +132,6 @@ const DoctorLayout = () => {
               }`
             }
           >
-            <span className="doctor-nav-icon">💊</span>
             <span>Prescriptions</span>
           </NavLink>
 
@@ -158,7 +147,6 @@ const DoctorLayout = () => {
               }`
             }
           >
-            <span className="doctor-nav-icon">👤</span>
             <span>Profile</span>
           </NavLink>
 
@@ -170,39 +158,32 @@ const DoctorLayout = () => {
               }`
             }
           >
-            <span className="doctor-nav-icon">🔔</span>
             <span>Notifications</span>
           </NavLink>
 
-          {/* Quick Actions */}
           <NavLink
             to="/doctor/dashboard"
             className="doctor-nav-link"
           >
-            <span className="doctor-nav-icon">⚡</span>
             <span>Quick Actions</span>
           </NavLink>
 
         </nav>
 
-        {/* Logout */}
         <div className="doctor-sidebar-footer">
           <button
             type="button"
             className="doctor-logout-button"
             onClick={handleLogout}
           >
-            <span className="doctor-nav-icon">🚪</span>
             <span>Logout</span>
           </button>
         </div>
 
       </aside>
 
-      {/* ================= MAIN AREA ================= */}
       <div className="doctor-main">
 
-        {/* TOP HEADER */}
         <header className="doctor-topbar">
 
           <div className="doctor-topbar-left">
@@ -236,7 +217,6 @@ const DoctorLayout = () => {
 
         </header>
 
-        {/* PAGE CONTENT */}
         <main className="doctor-content">
           <Outlet />
         </main>
