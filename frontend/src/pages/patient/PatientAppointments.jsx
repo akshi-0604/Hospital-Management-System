@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import api from "../../api/axios";
 import "./PatientAppointments.css";
 
@@ -17,6 +19,10 @@ function PatientAppointments() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+
+  // Selected appointment for View modal
+  const [selectedAppointment, setSelectedAppointment] =
+    useState(null);
 
   useEffect(() => {
     loadUser();
@@ -298,6 +304,296 @@ function PatientAppointments() {
     return "pending";
   }
 
+  /*
+   * GET PATIENT NAME
+   */
+  function getPatientName() {
+    if (!user) {
+      return "Patient";
+    }
+
+    return (
+      user.fullName ||
+      user.name ||
+      `${user.firstName || ""} ${
+        user.lastName || ""
+      }`.trim() ||
+      "Patient"
+    );
+  }
+
+  /*
+   * GET PATIENT EMAIL
+   */
+  function getPatientEmail() {
+    return (
+      user?.email ||
+      "—"
+    );
+  }
+
+  /*
+   * VIEW APPOINTMENT
+   */
+  function handleViewAppointment(
+    appointment
+  ) {
+    setSelectedAppointment(
+      appointment
+    );
+  }
+
+  /*
+   * CLOSE VIEW MODAL
+   */
+  function handleCloseView() {
+    setSelectedAppointment(null);
+  }
+
+  /*
+   * DOWNLOAD SINGLE APPOINTMENT PDF
+   */
+  function handleDownloadAppointment(
+    appointment
+  ) {
+    try {
+      const doc = new jsPDF();
+
+      const patientName =
+        getPatientName();
+
+      const patientEmail =
+        getPatientEmail();
+
+      const doctorName =
+        getDoctorName(
+          appointment
+        );
+
+      const department =
+        getDepartment(
+          appointment
+        );
+
+      const appointmentDate =
+        formatDate(
+          getAppointmentDate(
+            appointment
+          )
+        );
+
+      const appointmentTime =
+        formatTime(
+          getAppointmentTime(
+            appointment
+          )
+        );
+
+      const reason =
+        getReason(
+          appointment
+        );
+
+      const status =
+        getStatus(
+          appointment
+        );
+
+      const generatedDate =
+        new Date().toLocaleDateString(
+          "en-IN",
+          {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }
+        );
+
+      /*
+       * PDF HEADER
+       */
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text(
+        "Hospital Management System",
+        105,
+        20,
+        { align: "center" }
+      );
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        "Patient Appointment Details",
+        105,
+        30,
+        { align: "center" }
+      );
+
+      /*
+       * PATIENT DETAILS
+       */
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+
+      doc.text(
+        "Patient Information",
+        14,
+        45
+      );
+
+      autoTable(doc, {
+        startY: 50,
+        head: [
+          [
+            "Field",
+            "Details",
+          ],
+        ],
+        body: [
+          [
+            "Patient Name",
+            patientName,
+          ],
+          [
+            "Email",
+            patientEmail,
+          ],
+        ],
+        theme: "grid",
+        styles: {
+          fontSize: 10,
+          cellPadding: 4,
+        },
+        headStyles: {
+          fontStyle: "bold",
+        },
+      });
+
+      /*
+       * APPOINTMENT DETAILS
+       */
+      const appointmentTableStart =
+        doc.lastAutoTable.finalY + 12;
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+
+      doc.text(
+        "Appointment Information",
+        14,
+        appointmentTableStart
+      );
+
+      autoTable(doc, {
+        startY:
+          appointmentTableStart + 5,
+        head: [
+          [
+            "Field",
+            "Details",
+          ],
+        ],
+        body: [
+          [
+            "Doctor",
+            `Dr. ${doctorName}`,
+          ],
+          [
+            "Department",
+            department,
+          ],
+          [
+            "Appointment Date",
+            appointmentDate,
+          ],
+          [
+            "Appointment Time",
+            appointmentTime,
+          ],
+          [
+            "Reason",
+            reason,
+          ],
+          [
+            "Status",
+            status,
+          ],
+        ],
+        theme: "grid",
+        styles: {
+          fontSize: 10,
+          cellPadding: 4,
+        },
+        headStyles: {
+          fontStyle: "bold",
+        },
+      });
+
+      /*
+       * FOOTER
+       */
+      const footerY =
+        doc.lastAutoTable.finalY + 18;
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+
+      doc.text(
+        `Generated on: ${generatedDate}`,
+        14,
+        footerY
+      );
+
+      doc.text(
+        "This document was generated from the Hospital Management System.",
+        14,
+        footerY + 7
+      );
+
+      /*
+       * SAFE FILE NAME
+       */
+      const safePatientName =
+        patientName
+          .replace(
+            /[^a-zA-Z0-9]+/g,
+            "_"
+          )
+          .replace(
+            /^_+|_+$/g,
+            ""
+          );
+
+      const safeDate =
+        String(
+          getAppointmentDate(
+            appointment
+          )
+        )
+          .split("T")[0]
+          .replace(
+            /[^0-9-]/g,
+            ""
+          ) ||
+        "appointment";
+
+      const fileName =
+        `Appointment_${safePatientName}_${safeDate}.pdf`;
+
+      doc.save(fileName);
+    } catch (error) {
+      console.error(
+        "Unable to generate appointment PDF:",
+        error
+      );
+
+      setError(
+        "Unable to download appointment PDF."
+      );
+    }
+  }
+
   const filteredAppointments =
     useMemo(() => {
       return appointments.filter(
@@ -409,7 +705,6 @@ function PatientAppointments() {
 
       </div>
 
-
       {/* ERROR */}
       {error && (
         <div className="patient-appointments-error">
@@ -417,12 +712,10 @@ function PatientAppointments() {
         </div>
       )}
 
-
       {/* SUMMARY CARDS */}
       <div className="patient-appointments-summary">
 
         <div className="patient-appointment-summary-card">
-
           <div className="summary-icon">
             📅
           </div>
@@ -436,12 +729,9 @@ function PatientAppointments() {
               {totalAppointments}
             </strong>
           </div>
-
         </div>
 
-
         <div className="patient-appointment-summary-card">
-
           <div className="summary-icon">
             ⏳
           </div>
@@ -455,12 +745,9 @@ function PatientAppointments() {
               {pendingAppointments}
             </strong>
           </div>
-
         </div>
 
-
         <div className="patient-appointment-summary-card">
-
           <div className="summary-icon">
             ✓
           </div>
@@ -474,12 +761,9 @@ function PatientAppointments() {
               {confirmedAppointments}
             </strong>
           </div>
-
         </div>
 
-
         <div className="patient-appointment-summary-card">
-
           <div className="summary-icon">
             ✔
           </div>
@@ -493,11 +777,9 @@ function PatientAppointments() {
               {completedAppointments}
             </strong>
           </div>
-
         </div>
 
       </div>
-
 
       {/* APPOINTMENTS SECTION */}
       <div className="patient-appointments-section">
@@ -515,7 +797,6 @@ function PatientAppointments() {
           </div>
 
         </div>
-
 
         {/* FILTERS */}
         <div className="patient-appointments-filters">
@@ -538,7 +819,6 @@ function PatientAppointments() {
             />
 
           </div>
-
 
           <select
             value={statusFilter}
@@ -575,15 +855,16 @@ function PatientAppointments() {
 
         </div>
 
-
         {/* LOADING */}
         {loading ? (
           <div className="patient-appointments-loading">
+
             <div className="patient-appointments-spinner"></div>
 
             <p>
               Loading your appointments...
             </p>
+
           </div>
         ) : filteredAppointments.length === 0 ? (
 
@@ -640,6 +921,10 @@ function PatientAppointments() {
                     Status
                   </th>
 
+                  <th>
+                    Action
+                  </th>
+
                 </tr>
               </thead>
 
@@ -678,13 +963,11 @@ function PatientAppointments() {
                         </div>
                       </td>
 
-
                       <td>
                         {getDepartment(
                           appointment
                         )}
                       </td>
-
 
                       <td>
                         {formatDate(
@@ -694,7 +977,6 @@ function PatientAppointments() {
                         )}
                       </td>
 
-
                       <td>
                         {formatTime(
                           getAppointmentTime(
@@ -702,7 +984,6 @@ function PatientAppointments() {
                           )
                         )}
                       </td>
-
 
                       <td>
                         <span className="patient-appointment-reason">
@@ -712,9 +993,7 @@ function PatientAppointments() {
                         </span>
                       </td>
 
-
                       <td>
-
                         <span
                           className={`patient-appointment-status ${getStatusClass(
                             getStatus(
@@ -726,7 +1005,37 @@ function PatientAppointments() {
                             appointment
                           )}
                         </span>
+                      </td>
 
+                      {/* ACTION */}
+                      <td>
+                        <div className="patient-appointment-actions">
+
+                          <button
+                            type="button"
+                            className="patient-appointment-view-btn"
+                            onClick={() =>
+                              handleViewAppointment(
+                                appointment
+                              )
+                            }
+                          >
+                            View
+                          </button>
+
+                          <button
+                            type="button"
+                            className="patient-appointment-download-btn"
+                            onClick={() =>
+                              handleDownloadAppointment(
+                                appointment
+                              )
+                            }
+                          >
+                            Download
+                          </button>
+
+                        </div>
                       </td>
 
                     </tr>
@@ -743,6 +1052,182 @@ function PatientAppointments() {
         )}
 
       </div>
+
+      {/* VIEW APPOINTMENT MODAL */}
+      {selectedAppointment && (
+        <div
+          className="patient-appointment-modal-overlay"
+          onClick={handleCloseView}
+        >
+
+          <div
+            className="patient-appointment-modal"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div className="patient-appointment-modal-header">
+
+              <div>
+                <h2>
+                  Appointment Details
+                </h2>
+
+                <p>
+                  View your appointment information.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="patient-appointment-modal-close"
+                onClick={handleCloseView}
+              >
+                ×
+              </button>
+
+            </div>
+
+            <div className="patient-appointment-modal-body">
+
+              <div className="patient-appointment-detail-grid">
+
+                <div className="patient-appointment-detail-item">
+                  <span>
+                    Patient Name
+                  </span>
+
+                  <strong>
+                    {getPatientName()}
+                  </strong>
+                </div>
+
+                <div className="patient-appointment-detail-item">
+                  <span>
+                    Email
+                  </span>
+
+                  <strong>
+                    {getPatientEmail()}
+                  </strong>
+                </div>
+
+                <div className="patient-appointment-detail-item">
+                  <span>
+                    Doctor
+                  </span>
+
+                  <strong>
+                    Dr.{" "}
+                    {getDoctorName(
+                      selectedAppointment
+                    )}
+                  </strong>
+                </div>
+
+                <div className="patient-appointment-detail-item">
+                  <span>
+                    Department
+                  </span>
+
+                  <strong>
+                    {getDepartment(
+                      selectedAppointment
+                    )}
+                  </strong>
+                </div>
+
+                <div className="patient-appointment-detail-item">
+                  <span>
+                    Appointment Date
+                  </span>
+
+                  <strong>
+                    {formatDate(
+                      getAppointmentDate(
+                        selectedAppointment
+                      )
+                    )}
+                  </strong>
+                </div>
+
+                <div className="patient-appointment-detail-item">
+                  <span>
+                    Appointment Time
+                  </span>
+
+                  <strong>
+                    {formatTime(
+                      getAppointmentTime(
+                        selectedAppointment
+                      )
+                    )}
+                  </strong>
+                </div>
+
+                <div className="patient-appointment-detail-item patient-appointment-detail-full">
+                  <span>
+                    Reason
+                  </span>
+
+                  <strong>
+                    {getReason(
+                      selectedAppointment
+                    )}
+                  </strong>
+                </div>
+
+                <div className="patient-appointment-detail-item">
+                  <span>
+                    Status
+                  </span>
+
+                  <strong
+                    className={`patient-appointment-status ${getStatusClass(
+                      getStatus(
+                        selectedAppointment
+                      )
+                    )}`}
+                  >
+                    {getStatus(
+                      selectedAppointment
+                    )}
+                  </strong>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div className="patient-appointment-modal-footer">
+
+              <button
+                type="button"
+                className="patient-appointment-modal-download"
+                onClick={() =>
+                  handleDownloadAppointment(
+                    selectedAppointment
+                  )
+                }
+              >
+                Download PDF
+              </button>
+
+              <button
+                type="button"
+                className="patient-appointment-modal-cancel"
+                onClick={handleCloseView}
+              >
+                Close
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </div>
   );
