@@ -72,189 +72,219 @@ function DoctorDashboard() {
   }
 
   async function fetchDoctorAndAppointments() {
-    setError("");
+  setError("");
 
-    await Promise.all([
-      fetchDoctor(),
-      fetchAppointments(),
-    ]);
-  }
+  try {
+    setLoadingDoctor(true);
+    setLoadingAppointments(true);
 
-  async function fetchDoctor() {
-    try {
-      setLoadingDoctor(true);
+    const doctorsResponse =
+      await api.get("/doctors");
 
-      const response =
-        await api.get("/doctors");
+    console.log(
+      "Doctor Dashboard - Doctors API:",
+      doctorsResponse.data
+    );
 
-      console.log(
-        "Doctor Dashboard - Doctors API:",
-        response.data
-      );
+    let doctorList = [];
 
-      let doctorList = [];
-
-      if (Array.isArray(response.data)) {
-        doctorList = response.data;
-      } else if (
-        Array.isArray(
-          response.data?.doctors
-        )
-      ) {
-        doctorList =
-          response.data.doctors;
-      } else if (
-        Array.isArray(
-          response.data?.data
-        )
-      ) {
-        doctorList =
-          response.data.data;
-      }
-
-      if (!doctorList.length) {
-        setDoctor(null);
-
-        setError(
-          "No doctor records were found."
-        );
-
-        return;
-      }
-
-      const loggedInEmail =
-        String(user?.email || "")
-          .trim()
-          .toLowerCase();
-
-      const matchedDoctor =
-        doctorList.find(
-          (item) =>
-            String(
-              item?.email || ""
-            )
-              .trim()
-              .toLowerCase() ===
-            loggedInEmail
-        );
-
-      if (!matchedDoctor) {
-        setDoctor(null);
-
-        setError(
-          "Doctor profile could not be found for the logged-in email address."
-        );
-
-        return;
-      }
-
-      setDoctor(matchedDoctor);
-    } catch (error) {
-      console.error(
-        "Unable to load doctor:",
-        error
-      );
-
-      setDoctor(null);
-
-      setError(
-        error.response?.data?.message ||
-        "Unable to load doctor information."
-      );
-    } finally {
-      setLoadingDoctor(false);
+    if (Array.isArray(doctorsResponse.data)) {
+      doctorList = doctorsResponse.data;
+    } else if (
+      Array.isArray(
+        doctorsResponse.data?.doctors
+      )
+    ) {
+      doctorList =
+        doctorsResponse.data.doctors;
+    } else if (
+      Array.isArray(
+        doctorsResponse.data?.data
+      )
+    ) {
+      doctorList =
+        doctorsResponse.data.data;
     }
-  }
-  async function fetchAppointments() {
-    try {
-      setLoadingAppointments(true);
 
-      const response =
-        await api.get(
-          "/appointments"
-        );
+    console.log(
+      "Doctor Dashboard - Doctor List:",
+      doctorList
+    );
 
-      console.log(
-        "Doctor Dashboard - Appointments API:",
-        response.data
-      );
-
-      let appointmentList = [];
-
-      if (Array.isArray(response.data)) {
-        appointmentList =
-          response.data;
-      } else if (
-        Array.isArray(
-          response.data?.appointments
-        )
-      ) {
-        appointmentList =
-          response.data.appointments;
-      } else if (
-        Array.isArray(
-          response.data?.data
-        )
-      ) {
-        appointmentList =
-          response.data.data;
-      }
-
-
-      if (doctor?._id) {
-        const doctorId =
-          String(doctor._id);
-
-        appointmentList =
-          appointmentList.filter(
-            (appointment) => {
-              const appointmentDoctor =
-                appointment?.doctor;
-
-              if (
-                appointmentDoctor &&
-                typeof appointmentDoctor ===
-                "object"
-              ) {
-                return (
-                  String(
-                    appointmentDoctor._id
-                  ) === doctorId
-                );
-              }
-
-              return (
-                String(
-                  appointmentDoctor || ""
-                ) === doctorId ||
-                String(
-                  appointment?.doctorId ||
-                  ""
-                ) === doctorId
-              );
-            }
-          );
-      }
-
-      setAppointments(
-        appointmentList
-      );
-    } catch (error) {
-      console.error(
-        "Unable to load doctor appointments:",
-        error
-      );
-
+    if (!doctorList.length) {
+      setDoctor(null);
       setAppointments([]);
 
       setError(
-        error.response?.data?.message ||
-        "Unable to load appointment information."
+        "No doctor records were found."
       );
-    } finally {
-      setLoadingAppointments(false);
+
+      return;
     }
+
+    const loggedInEmail =
+      String(user?.email || "")
+        .trim()
+        .toLowerCase();
+
+    console.log(
+      "Doctor Dashboard - Logged-in User:",
+      user
+    );
+
+    console.log(
+      "Doctor Dashboard - Logged-in Email:",
+      loggedInEmail
+    );
+
+    if (!loggedInEmail) {
+      setDoctor(null);
+      setAppointments([]);
+
+      setError(
+        "Doctor login email was not found. Please login again."
+      );
+
+      return;
+    }
+
+    const matchedDoctor =
+      doctorList.find((item) => {
+        const doctorEmail =
+          String(item?.email || "")
+            .trim()
+            .toLowerCase();
+
+        return (
+          doctorEmail === loggedInEmail
+        );
+      });
+
+    console.log(
+      "Doctor Dashboard - Matched Doctor:",
+      matchedDoctor
+    );
+
+    if (!matchedDoctor) {
+      console.log(
+        "Doctor Dashboard - Available Doctor Emails:",
+        doctorList.map(
+          (item) => item?.email
+        )
+      );
+
+      setDoctor(null);
+      setAppointments([]);
+
+      setError(
+        "Doctor profile could not be found for the logged-in email address."
+      );
+
+      return;
+    }
+
+    setDoctor(matchedDoctor);
+
+    setLoadingDoctor(false);
+
+    const appointmentsResponse =
+      await api.get("/appointments");
+
+    console.log(
+      "Doctor Dashboard - Appointments API:",
+      appointmentsResponse.data
+    );
+
+    let appointmentList = [];
+
+    if (
+      Array.isArray(
+        appointmentsResponse.data
+      )
+    ) {
+      appointmentList =
+        appointmentsResponse.data;
+    } else if (
+      Array.isArray(
+        appointmentsResponse.data?.appointments
+      )
+    ) {
+      appointmentList =
+        appointmentsResponse.data.appointments;
+    } else if (
+      Array.isArray(
+        appointmentsResponse.data?.data
+      )
+    ) {
+      appointmentList =
+        appointmentsResponse.data.data;
+    }
+
+    const doctorId =
+      String(matchedDoctor._id || "");
+
+    console.log(
+      "Doctor Dashboard - Doctor ID:",
+      doctorId
+    );
+
+    const doctorAppointments =
+      appointmentList.filter(
+        (appointment) => {
+          const appointmentDoctor =
+            appointment?.doctor;
+
+          // Populated doctor object
+          if (
+            appointmentDoctor &&
+            typeof appointmentDoctor ===
+              "object"
+          ) {
+            return (
+              String(
+                appointmentDoctor._id || ""
+              ) === doctorId
+            );
+          }
+
+          // Doctor ObjectId string
+          return (
+            String(
+              appointmentDoctor || ""
+            ) === doctorId ||
+            String(
+              appointment?.doctorId || ""
+            ) === doctorId
+          );
+        }
+      );
+
+    console.log(
+      "Doctor Dashboard - Filtered Appointments:",
+      doctorAppointments
+    );
+
+    setAppointments(
+      doctorAppointments
+    );
+  } catch (error) {
+    console.error(
+      "Unable to load doctor dashboard:",
+      error
+    );
+
+    setDoctor(null);
+    setAppointments([]);
+
+    setError(
+      error.response?.data?.message ||
+        "Unable to load doctor dashboard information."
+    );
+  } finally {
+    setLoadingDoctor(false);
+    setLoadingAppointments(false);
   }
+}
 
   function getAppointmentDate(
     appointment
