@@ -5,6 +5,7 @@ const {
   getConversation,
   getChatUsers,
   markMessagesAsRead,
+  getChatPatients,
 } = require("../controllers/chatController");
 
 const {
@@ -26,6 +27,13 @@ router.get(
   protectRoute,
   allowRoles("doctor", "patient"),
   getConversation
+);
+
+router.get(
+  "/patients",
+  protectRoute,
+  allowRoles("doctor"),
+  getChatPatients
 );
 
 router.post(

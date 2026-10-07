@@ -270,9 +270,51 @@ const markMessagesAsRead = async (req, res) => {
   }
 };
 
+// GET PATIENTS FOR DOCTOR CHAT
+const getChatPatients = async (req, res) => {
+  try {
+    const userId =
+      req.user?.userId ||
+      req.user?.id ||
+      req.user?._id;
+
+    const userRole = req.user?.role;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "User authentication information not found",
+      });
+    }
+
+    if (userRole !== "doctor") {
+      return res.status(403).json({
+        message: "Only doctors can access chat patients",
+      });
+    }
+
+    const patients = await User.find({
+      role: "patient",
+    }).select(
+      "fullName name email role phone phoneNumber gender dateOfBirth"
+    );
+
+    return res.status(200).json({
+      patients,
+    });
+  } catch (error) {
+    console.error("Get chat patients error:", error);
+
+    return res.status(500).json({
+      message: "Failed to get chat patients",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendMessage,
   getConversation,
   getChatUsers,
   markMessagesAsRead,
+  getChatPatients,
 };
