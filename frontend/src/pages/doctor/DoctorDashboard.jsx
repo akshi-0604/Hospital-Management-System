@@ -36,20 +36,38 @@ function DoctorDashboard() {
     }
   }, [user]);
 
+  function normalizeEmail(email) {
+    return String(email || "")
+      .trim()
+      .toLowerCase();
+  }
+
   function loadLoggedInUser() {
     try {
       const storedUser = localStorage.getItem("user");
+
+      console.log(
+        "Doctor Dashboard - Stored User:",
+        storedUser
+      );
 
       if (!storedUser) {
         setError(
           "Doctor login information was not found. Please login again."
         );
+
         setLoadingDoctor(false);
         setLoadingAppointments(false);
+
         return;
       }
 
       const parsedUser = JSON.parse(storedUser);
+
+      console.log(
+        "Doctor Dashboard - Parsed User:",
+        parsedUser
+      );
 
       setUser(parsedUser);
     } catch (error) {
@@ -67,56 +85,32 @@ function DoctorDashboard() {
     }
   }
 
+  function getLoggedInEmail(currentUser) {
+    return normalizeEmail(
+      currentUser?.email ||
+        currentUser?.user?.email ||
+        currentUser?.data?.email ||
+        currentUser?.userData?.email ||
+        ""
+    );
+  }
+
   async function fetchDoctorAndAppointments() {
     setError("");
 
     let matchedDoctor = null;
 
+    /*
+     * ---------------------------------------------------------
+     * STEP 1: GET LOGGED-IN DOCTOR PROFILE
+     * ---------------------------------------------------------
+     */
+
     try {
       setLoadingDoctor(true);
 
-      const doctorsResponse = await api.get("/doctors");
-
-      console.log(
-        "Doctor Dashboard - Doctors API:",
-        doctorsResponse.data
-      );
-
-      let doctorList = [];
-
-      if (Array.isArray(doctorsResponse.data)) {
-        doctorList = doctorsResponse.data;
-      } else if (
-        Array.isArray(doctorsResponse.data?.doctors)
-      ) {
-        doctorList = doctorsResponse.data.doctors;
-      } else if (
-        Array.isArray(doctorsResponse.data?.data)
-      ) {
-        doctorList = doctorsResponse.data.data;
-      }
-
-      console.log(
-        "Doctor Dashboard - Doctor List:",
-        doctorList
-      );
-
-      if (!doctorList.length) {
-        setDoctor(null);
-        setAppointments([]);
-
-        setError(
-          "No doctor records were found."
-        );
-
-        setLoadingDoctor(false);
-        setLoadingAppointments(false);
-        return;
-      }
-
-      const loggedInEmail = String(user?.email || "")
-        .trim()
-        .toLowerCase();
+      const loggedInEmail =
+        getLoggedInEmail(user);
 
       console.log(
         "Doctor Dashboard - Logged-in User:",
@@ -130,7 +124,6 @@ function DoctorDashboard() {
 
       if (!loggedInEmail) {
         setDoctor(null);
-        setAppointments([]);
 
         setError(
           "Doctor login email was not found. Please login again."
@@ -138,175 +131,392 @@ function DoctorDashboard() {
 
         setLoadingDoctor(false);
         setLoadingAppointments(false);
+
         return;
       }
 
-      matchedDoctor = doctorList.find((item) => {
-        const doctorEmail = String(item?.email || "")
-          .trim()
-          .toLowerCase();
+      /*
+       * Get all doctor records.
+       */
+      const doctorsResponse =
+        await api.get("/doctors");
 
-        return doctorEmail === loggedInEmail;
-      });
+      console.log(
+        "Doctor Dashboard - Doctors API:",
+        doctorsResponse.data
+      );
+
+      /*
+       * Support different possible response structures.
+       */
+      let doctorList = [];
+
+      if (Array.isArray(doctorsResponse.data)) {
+        doctorList = doctorsResponse.data;
+      } else if (
+        Array.isArray(
+          doctorsResponse.data?.doctors
+        )
+      ) {
+        doctorList =
+          doctorsResponse.data.doctors;
+      } else if (
+        Array.isArray(
+          doctorsResponse.data?.data
+        )
+      ) {
+        doctorList =
+          doctorsResponse.data.data;
+      } else if (
+        Array.isArray(
+          doctorsResponse.data?.results
+        )
+      ) {
+        doctorList =
+          doctorsResponse.data.results;
+      }
+
+      console.log(
+        "Doctor Dashboard - Doctor List:",
+        doctorList
+      );
+
+      console.log(
+        "Doctor Dashboard - Doctor Count:",
+        doctorList.length
+      );
+
+      if (!doctorList.length) {
+        setDoctor(null);
+
+        setError(
+          "No doctor records were found."
+        );
+
+        setLoadingDoctor(false);
+        setLoadingAppointments(false);
+
+        return;
+      }
+
+      /*
+       * ---------------------------------------------------------
+       * STEP 2: MATCH LOGGED-IN USER WITH DOCTOR
+       * ---------------------------------------------------------
+       */
+
+      console.log(
+        "Doctor Dashboard - Available Doctor Emails:",
+        doctorList.map(
+          (item) => ({
+            id: item?._id,
+            doctorId: item?.doctorId,
+            fullName: item?.fullName,
+            email: item?.email,
+          })
+        )
+      );
+
+      matchedDoctor = doctorList.find(
+        (item) => {
+          const doctorEmail =
+            normalizeEmail(item?.email);
+
+          return (
+            doctorEmail ===
+            loggedInEmail
+          );
+        }
+      );
 
       console.log(
         "Doctor Dashboard - Matched Doctor:",
         matchedDoctor
       );
 
+      /*
+       * If exact email matching does not work,
+       * try matching using a few safe user identifiers.
+       *
+       * This does NOT replace email matching.
+       * It is only a fallback for cases where the
+       * login response stores the doctor information.
+       */
       if (!matchedDoctor) {
-        console.log(
-          "Doctor Dashboard - Available Doctor Emails:",
-          doctorList.map((item) => item?.email)
+        const possibleDoctorId =
+          user?._id ||
+          user?.id ||
+          user?.userId ||
+          user?.doctorId ||
+          user?.user?._id ||
+          user?.user?.id ||
+          user?.data?._id ||
+          user?.data?.id;
+
+        if (possibleDoctorId) {
+          matchedDoctor =
+            doctorList.find(
+              (item) => {
+                return (
+                  String(
+                    item?._id || ""
+                  ) ===
+                    String(
+                      possibleDoctorId
+                    ) ||
+                  String(
+                    item?.doctorId || ""
+                  ) ===
+                    String(
+                      possibleDoctorId
+                    )
+                );
+              }
+            );
+        }
+      }
+
+      /*
+       * Final doctor matching check.
+       */
+      if (!matchedDoctor) {
+        console.error(
+          "Doctor Dashboard - Doctor matching failed.",
+          {
+            loggedInEmail,
+            possibleUserId:
+              user?._id ||
+              user?.id ||
+              user?.userId,
+            availableDoctors:
+              doctorList.map(
+                (item) => ({
+                  id: item?._id,
+                  doctorId:
+                    item?.doctorId,
+                  email:
+                    item?.email,
+                  fullName:
+                    item?.fullName,
+                })
+              ),
+          }
         );
 
         setDoctor(null);
-        setAppointments([]);
 
         setError(
-          "Doctor profile could not be found for the logged-in email address."
+          `Doctor profile could not be found for ${loggedInEmail}. Please make sure your login email matches your doctor profile email.`
         );
 
         setLoadingDoctor(false);
         setLoadingAppointments(false);
+
         return;
       }
 
       /*
        * IMPORTANT:
-       * Keep the matched doctor object in a local variable.
-       * Do not depend on React state immediately after setDoctor().
+       * Save the matched doctor immediately.
        */
       setDoctor(matchedDoctor);
+
       setLoadingDoctor(false);
 
-      /*
-       * Load appointments separately.
-       *
-       * Even if appointments fail, the doctor profile should
-       * remain visible because the doctor was already found.
-       */
-      try {
-        setLoadingAppointments(true);
-
-        const appointmentsResponse =
-          await api.get("/appointments");
-
-        console.log(
-          "Doctor Dashboard - Appointments API:",
-          appointmentsResponse.data
-        );
-
-        let appointmentList = [];
-
-        if (Array.isArray(appointmentsResponse.data)) {
-          appointmentList = appointmentsResponse.data;
-        } else if (
-          Array.isArray(
-            appointmentsResponse.data?.appointments
-          )
-        ) {
-          appointmentList =
-            appointmentsResponse.data.appointments;
-        } else if (
-          Array.isArray(
-            appointmentsResponse.data?.data
-          )
-        ) {
-          appointmentList =
-            appointmentsResponse.data.data;
+      console.log(
+        "Doctor Dashboard - Doctor Successfully Loaded:",
+        {
+          id: matchedDoctor?._id,
+          doctorId:
+            matchedDoctor?.doctorId,
+          name:
+            matchedDoctor?.fullName,
+          email:
+            matchedDoctor?.email,
         }
-
-        const doctorId = String(
-          matchedDoctor._id || ""
-        );
-
-        console.log(
-          "Doctor Dashboard - Doctor ID:",
-          doctorId
-        );
-
-        const doctorAppointments =
-          appointmentList.filter(
-            (appointment) => {
-              const appointmentDoctor =
-                appointment?.doctor;
-
-              // Populated doctor object
-              if (
-                appointmentDoctor &&
-                typeof appointmentDoctor === "object"
-              ) {
-                return (
-                  String(
-                    appointmentDoctor._id || ""
-                  ) === doctorId
-                );
-              }
-
-              // Doctor ObjectId string
-              return (
-                String(
-                  appointmentDoctor || ""
-                ) === doctorId ||
-                String(
-                  appointment?.doctorId || ""
-                ) === doctorId
-              );
-            }
-          );
-
-        console.log(
-          "Doctor Dashboard - Filtered Appointments:",
-          doctorAppointments
-        );
-
-        setAppointments(
-          doctorAppointments
-        );
-      } catch (appointmentError) {
-        console.error(
-          "Unable to load doctor appointments:",
-          appointmentError
-        );
-
-        /*
-         * Do not remove the doctor profile if only
-         * the appointments API fails.
-         */
-        setAppointments([]);
-
-        setError(
-          appointmentError.response?.data?.message ||
-            "Doctor profile loaded, but appointments could not be loaded."
-        );
-      } finally {
-        setLoadingAppointments(false);
-      }
+      );
     } catch (error) {
       console.error(
-        "Unable to load doctor dashboard:",
+        "Unable to load doctor profile:",
         error
       );
 
       /*
-       * Only clear the doctor when the doctor API
-       * itself fails or the doctor cannot be matched.
+       * This error is specifically related to
+       * loading the doctor.
        */
       setDoctor(null);
-      setAppointments([]);
 
       setError(
         error.response?.data?.message ||
-          "Unable to load doctor dashboard information."
+          "Unable to load doctor profile information."
       );
 
       setLoadingDoctor(false);
       setLoadingAppointments(false);
+
+      return;
+    }
+
+    /*
+     * ---------------------------------------------------------
+     * STEP 3: LOAD APPOINTMENTS SEPARATELY
+     * ---------------------------------------------------------
+     *
+     * IMPORTANT:
+     * If appointments fail, DO NOT remove the doctor.
+     */
+
+    try {
+      setLoadingAppointments(true);
+
+      const appointmentsResponse =
+        await api.get("/appointments");
+
+      console.log(
+        "Doctor Dashboard - Appointments API:",
+        appointmentsResponse.data
+      );
+
+      let appointmentList = [];
+
+      if (
+        Array.isArray(
+          appointmentsResponse.data
+        )
+      ) {
+        appointmentList =
+          appointmentsResponse.data;
+      } else if (
+        Array.isArray(
+          appointmentsResponse.data
+            ?.appointments
+        )
+      ) {
+        appointmentList =
+          appointmentsResponse.data
+            .appointments;
+      } else if (
+        Array.isArray(
+          appointmentsResponse.data?.data
+        )
+      ) {
+        appointmentList =
+          appointmentsResponse.data.data;
+      } else if (
+        Array.isArray(
+          appointmentsResponse.data
+            ?.results
+        )
+      ) {
+        appointmentList =
+          appointmentsResponse.data
+            .results;
+      }
+
+      /*
+       * Use the local matchedDoctor variable.
+       *
+       * Do NOT use the React "doctor" state here because
+       * setDoctor() does not update the state immediately.
+       */
+      const doctorId = String(
+        matchedDoctor?._id || ""
+      );
+
+      console.log(
+        "Doctor Dashboard - Doctor ID:",
+        doctorId
+      );
+
+      const doctorAppointments =
+        appointmentList.filter(
+          (appointment) => {
+            const appointmentDoctor =
+              appointment?.doctor;
+
+            /*
+             * Case 1:
+             * appointment.doctor is a populated object.
+             */
+            if (
+              appointmentDoctor &&
+              typeof appointmentDoctor ===
+                "object"
+            ) {
+              return (
+                String(
+                  appointmentDoctor._id ||
+                    ""
+                ) === doctorId
+              );
+            }
+
+            /*
+             * Case 2:
+             * appointment.doctor is an ObjectId string.
+             */
+            if (
+              String(
+                appointmentDoctor || ""
+              ) === doctorId
+            ) {
+              return true;
+            }
+
+            /*
+             * Case 3:
+             * Some responses may contain doctorId.
+             */
+            if (
+              String(
+                appointment?.doctorId ||
+                  ""
+              ) === doctorId
+            ) {
+              return true;
+            }
+
+            return false;
+          }
+        );
+
+      console.log(
+        "Doctor Dashboard - Filtered Appointments:",
+        doctorAppointments
+      );
+
+      setAppointments(
+        doctorAppointments
+      );
+    } catch (appointmentError) {
+      console.error(
+        "Unable to load doctor appointments:",
+        appointmentError
+      );
+
+      /*
+       * Keep the doctor profile.
+       */
+      setAppointments([]);
+
+      /*
+       * Only show appointment-related error.
+       * Do NOT say doctor profile was not found.
+       */
+      setError(
+        appointmentError.response?.data
+          ?.message ||
+          "Doctor profile loaded successfully, but appointments could not be loaded."
+      );
+    } finally {
+      setLoadingAppointments(false);
     }
   }
 
-  function getAppointmentDate(appointment) {
+  function getAppointmentDate(
+    appointment
+  ) {
     return (
       appointment?.appointmentDate ||
       appointment?.date ||
@@ -315,7 +525,9 @@ function DoctorDashboard() {
     );
   }
 
-  function getAppointmentTime(appointment) {
+  function getAppointmentTime(
+    appointment
+  ) {
     return (
       appointment?.appointmentTime ||
       appointment?.time ||
@@ -329,17 +541,25 @@ function DoctorDashboard() {
       return "-";
     }
 
-    const date = new Date(value);
+    const date =
+      new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
       return "-";
     }
 
-    return date.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return date.toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
   }
 
   function formatTime(value) {
@@ -355,27 +575,40 @@ function DoctorDashboard() {
       return false;
     }
 
-    const date = new Date(value);
+    const date =
+      new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
       return false;
     }
 
-    const today = new Date();
+    const today =
+      new Date();
 
     return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
+      date.getDate() ===
+        today.getDate() &&
+      date.getMonth() ===
+        today.getMonth() &&
+      date.getFullYear() ===
+        today.getFullYear()
     );
   }
 
-  function getPatientName(appointment) {
-    const patient = appointment?.patient;
+  function getPatientName(
+    appointment
+  ) {
+    const patient =
+      appointment?.patient;
 
     if (
       patient &&
-      typeof patient === "object"
+      typeof patient ===
+        "object"
     ) {
       return (
         patient.fullName ||
@@ -391,7 +624,9 @@ function DoctorDashboard() {
     );
   }
 
-  function getAppointmentStatus(appointment) {
+  function getAppointmentStatus(
+    appointment
+  ) {
     return (
       appointment?.status ||
       appointment?.appointmentStatus ||
@@ -399,72 +634,94 @@ function DoctorDashboard() {
     );
   }
 
-  function getStatusClass(status) {
+  function getStatusClass(
+    status
+  ) {
     return String(status)
       .toLowerCase()
-      .replace(/\s+/g, "-");
+      .replace(
+        /\s+/g,
+        "-"
+      );
   }
 
-  const todaysAppointments = useMemo(() => {
-    return [...appointments]
-      .filter((appointment) =>
-        isToday(
-          getAppointmentDate(appointment)
+  const todaysAppointments =
+    useMemo(() => {
+      return [...appointments]
+        .filter((appointment) =>
+          isToday(
+            getAppointmentDate(
+              appointment
+            )
+          )
         )
-      )
-      .sort((a, b) => {
-        const timeA = String(
-          getAppointmentTime(a)
-        );
+        .sort((a, b) => {
+          const timeA =
+            String(
+              getAppointmentTime(a)
+            );
 
-        const timeB = String(
-          getAppointmentTime(b)
-        );
+          const timeB =
+            String(
+              getAppointmentTime(b)
+            );
 
-        return timeA.localeCompare(timeB);
-      });
-  }, [appointments]);
+          return timeA.localeCompare(
+            timeB
+          );
+        });
+    }, [appointments]);
 
-  const upcomingAppointments = useMemo(() => {
-    const now = new Date();
+  const upcomingAppointments =
+    useMemo(() => {
+      const now =
+        new Date();
 
-    return [...appointments]
-      .filter((appointment) => {
-        const appointmentDate =
-          getAppointmentDate(appointment);
+      return [...appointments]
+        .filter((appointment) => {
+          const appointmentDate =
+            getAppointmentDate(
+              appointment
+            );
 
-        if (!appointmentDate) {
-          return false;
-        }
+          if (!appointmentDate) {
+            return false;
+          }
 
-        const date = new Date(
-          appointmentDate
-        );
+          const date =
+            new Date(
+              appointmentDate
+            );
 
-        return (
-          !Number.isNaN(date.getTime()) &&
-          date >= now
-        );
-      })
-      .sort((a, b) => {
-        const dateA = new Date(
-          getAppointmentDate(a)
-        ).getTime();
+          return (
+            !Number.isNaN(
+              date.getTime()
+            ) &&
+            date >= now
+          );
+        })
+        .sort((a, b) => {
+          const dateA =
+            new Date(
+              getAppointmentDate(a)
+            ).getTime();
 
-        const dateB = new Date(
-          getAppointmentDate(b)
-        ).getTime();
+          const dateB =
+            new Date(
+              getAppointmentDate(b)
+            ).getTime();
 
-        return dateA - dateB;
-      });
-  }, [appointments]);
+          return dateA - dateB;
+        });
+    }, [appointments]);
 
   const confirmedAppointments =
     appointments.filter(
       (appointment) =>
         getAppointmentStatus(
           appointment
-        ).toLowerCase() === "confirmed"
+        ).toLowerCase() ===
+        "confirmed"
     ).length;
 
   const pendingAppointments =
@@ -472,7 +729,8 @@ function DoctorDashboard() {
       (appointment) =>
         getAppointmentStatus(
           appointment
-        ).toLowerCase() === "pending"
+        ).toLowerCase() ===
+        "pending"
     ).length;
 
   const completedAppointments =
@@ -480,20 +738,27 @@ function DoctorDashboard() {
       (appointment) =>
         getAppointmentStatus(
           appointment
-        ).toLowerCase() === "completed"
+        ).toLowerCase() ===
+        "completed"
     ).length;
 
   const doctorStatus =
-    doctor?.status || "Unavailable";
+    doctor?.status ||
+    "Unavailable";
 
-  const doctorStatusClass = String(
-    doctorStatus
-  )
-    .toLowerCase()
-    .replace(/\s+/g, "-");
+  const doctorStatusClass =
+    String(
+      doctorStatus
+    )
+      .toLowerCase()
+      .replace(
+        /\s+/g,
+        "-"
+      );
 
   const nextAppointment =
-    upcomingAppointments.length > 0
+    upcomingAppointments.length >
+      0
       ? upcomingAppointments[0]
       : null;
 
@@ -554,7 +819,8 @@ function DoctorDashboard() {
             className="doctor-theme-button"
             onClick={() =>
               setDarkMode(
-                (previous) => !previous
+                (previous) =>
+                  !previous
               )
             }
             title={
@@ -568,7 +834,9 @@ function DoctorDashboard() {
                 : "Switch to dark mode"
             }
           >
-            {darkMode ? "☀️" : "🌙"}
+            {darkMode
+              ? "☀️"
+              : "🌙"}
           </button>
 
           <NotificationBell />
@@ -576,7 +844,9 @@ function DoctorDashboard() {
           <button
             type="button"
             className="doctor-refresh-button"
-            onClick={handleRefresh}
+            onClick={
+              handleRefresh
+            }
           >
             ↻ Refresh
           </button>
@@ -593,7 +863,8 @@ function DoctorDashboard() {
         <div className="doctor-profile-avatar">
           {doctor?.fullName
             ?.charAt(0)
-            .toUpperCase() || "D"}
+            .toUpperCase() ||
+            "D"}
         </div>
 
         <div className="doctor-profile-main">
@@ -645,7 +916,8 @@ function DoctorDashboard() {
             </label>
 
             <strong>
-              {doctor?.doctorId || "-"}
+              {doctor?.doctorId ||
+                "-"}
             </strong>
           </div>
 
@@ -667,7 +939,8 @@ function DoctorDashboard() {
             </label>
 
             <strong>
-              {doctor?.phone || "-"}
+              {doctor?.phone ||
+                "-"}
             </strong>
           </div>
 
@@ -677,7 +950,8 @@ function DoctorDashboard() {
             </label>
 
             <strong>
-              {doctor?.department || "-"}
+              {doctor?.department ||
+                "-"}
             </strong>
           </div>
 
@@ -687,7 +961,8 @@ function DoctorDashboard() {
             </label>
 
             <strong>
-              {doctor?.specialization || "-"}
+              {doctor?.specialization ||
+                "-"}
             </strong>
           </div>
 
@@ -697,7 +972,8 @@ function DoctorDashboard() {
             </label>
 
             <strong>
-              {doctor?.qualification || "-"}
+              {doctor?.qualification ||
+                "-"}
             </strong>
           </div>
 
@@ -707,7 +983,8 @@ function DoctorDashboard() {
             </label>
 
             <strong>
-              {doctor?.experience !== undefined
+              {doctor?.experience !==
+              undefined
                 ? `${doctor.experience} years`
                 : "-"}
             </strong>
@@ -732,7 +1009,8 @@ function DoctorDashboard() {
             </label>
 
             <strong>
-              {doctor?.gender || "-"}
+              {doctor?.gender ||
+                "-"}
             </strong>
           </div>
 
@@ -742,7 +1020,9 @@ function DoctorDashboard() {
             </label>
 
             <strong>
-              {formatDate(doctor?.dob)}
+              {formatDate(
+                doctor?.dob
+              )}
             </strong>
           </div>
 
@@ -921,7 +1201,8 @@ function DoctorDashboard() {
           </div>
         </div>
 
-        {todaysAppointments.length === 0 ? (
+        {todaysAppointments.length ===
+        0 ? (
           <div className="doctor-empty-state">
             <h4>
               No appointments today
@@ -956,7 +1237,9 @@ function DoctorDashboard() {
               (appointment) => (
                 <div
                   className="doctor-table-row"
-                  key={appointment._id}
+                  key={
+                    appointment._id
+                  }
                 >
                   <span>
                     {getAppointmentTime(
@@ -1018,7 +1301,8 @@ function DoctorDashboard() {
           </div>
         </div>
 
-        {upcomingAppointments.length === 0 ? (
+        {upcomingAppointments.length ===
+        0 ? (
           <div className="doctor-empty-state">
             <h4>
               No upcoming appointments
@@ -1033,61 +1317,65 @@ function DoctorDashboard() {
           <div className="doctor-upcoming-grid">
             {upcomingAppointments
               .slice(0, 6)
-              .map((appointment) => (
-                <div
-                  className="doctor-upcoming-card"
-                  key={appointment._id}
-                >
-                  <div className="upcoming-card-top">
-                    <div className="small-patient-avatar">
-                      {getPatientName(
-                        appointment
-                      )
-                        .charAt(0)
-                        .toUpperCase()}
+              .map(
+                (appointment) => (
+                  <div
+                    className="doctor-upcoming-card"
+                    key={
+                      appointment._id
+                    }
+                  >
+                    <div className="upcoming-card-top">
+                      <div className="small-patient-avatar">
+                        {getPatientName(
+                          appointment
+                        )
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+
+                      <span
+                        className={`doctor-status-badge ${getStatusClass(
+                          getAppointmentStatus(
+                            appointment
+                          )
+                        )}`}
+                      >
+                        {getAppointmentStatus(
+                          appointment
+                        )}
+                      </span>
                     </div>
 
-                    <span
-                      className={`doctor-status-badge ${getStatusClass(
-                        getAppointmentStatus(
-                          appointment
-                        )
-                      )}`}
-                    >
-                      {getAppointmentStatus(
+                    <h4>
+                      {getPatientName(
                         appointment
                       )}
-                    </span>
-                  </div>
+                    </h4>
 
-                  <h4>
-                    {getPatientName(
-                      appointment
-                    )}
-                  </h4>
+                    <p>
+                      {appointment?.reason ||
+                        "Consultation"}
+                    </p>
 
-                  <p>
-                    {appointment?.reason ||
-                      "Consultation"}
-                  </p>
+                    <div className="upcoming-card-date">
+                      <span>
+                        {formatDate(
+                          getAppointmentDate(
+                            appointment
+                          )
+                        )}
+                      </span>
 
-                  <div className="upcoming-card-date">
-                    <span>
-                      {formatDate(
-                        getAppointmentDate(
+                      <span>
+                        {getAppointmentTime(
                           appointment
-                        )
-                      )}
-                    </span>
-
-                    <span>
-                      {getAppointmentTime(
-                        appointment
-                      )}
-                    </span>
+                        )}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
           </div>
         )}
       </div>
