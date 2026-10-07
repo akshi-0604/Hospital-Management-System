@@ -90,12 +90,13 @@ function PatientLayout() {
                         MAIN MENU
                     </p>
 
-
                     <nav className="patient-sidebar-menu">
+
                         <NavLink
                             to="/patient/dashboard"
                             className={({ isActive }) =>
-                                `patient-menu-item ${isActive ? "active" : ""
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
                                 }`
                             }
                         >
@@ -111,7 +112,8 @@ function PatientLayout() {
                         <NavLink
                             to="/patient/appointments"
                             className={({ isActive }) =>
-                                `patient-menu-item ${isActive ? "active" : ""
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
                                 }`
                             }
                         >
@@ -123,10 +125,12 @@ function PatientLayout() {
                                 Appointments
                             </span>
                         </NavLink>
+
                         <NavLink
                             to="/patient/medical-records"
                             className={({ isActive }) =>
-                                `patient-menu-item ${isActive ? "active" : ""
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
                                 }`
                             }
                         >
@@ -142,7 +146,8 @@ function PatientLayout() {
                         <NavLink
                             to="/patient/prescriptions"
                             className={({ isActive }) =>
-                                `patient-menu-item ${isActive ? "active" : ""
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
                                 }`
                             }
                         >
@@ -158,7 +163,8 @@ function PatientLayout() {
                         <NavLink
                             to="/patient/laboratory"
                             className={({ isActive }) =>
-                                `patient-menu-item ${isActive ? "active" : ""
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
                                 }`
                             }
                         >
@@ -174,7 +180,8 @@ function PatientLayout() {
                         <NavLink
                             to="/patient/billing"
                             className={({ isActive }) =>
-                                `patient-menu-item ${isActive ? "active" : ""
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
                                 }`
                             }
                         >
@@ -187,19 +194,37 @@ function PatientLayout() {
                             </span>
                         </NavLink>
 
+                        {/* CHAT */}
+                        <NavLink
+                            to="/patient/chat"
+                            className={({ isActive }) =>
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
+                                }`
+                            }
+                        >
+                            <span className="patient-menu-icon">
+                                💬
+                            </span>
+
+                            <span>
+                                Chat
+                            </span>
+                        </NavLink>
+
                     </nav>
 
                     <p className="patient-menu-title patient-account-title">
                         ACCOUNT
                     </p>
 
-
                     <nav className="patient-sidebar-menu">
 
                         <NavLink
                             to="/patient/profile"
                             className={({ isActive }) =>
-                                `patient-menu-item ${isActive ? "active" : ""
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
                                 }`
                             }
                         >
@@ -212,11 +237,11 @@ function PatientLayout() {
                             </span>
                         </NavLink>
 
-
                         <NavLink
                             to="/patient/notifications"
                             className={({ isActive }) =>
-                                `patient-menu-item ${isActive ? "active" : ""
+                                `patient-menu-item ${
+                                    isActive ? "active" : ""
                                 }`
                             }
                         >
@@ -268,7 +293,6 @@ function PatientLayout() {
                         </p>
 
                     </div>
-
 
                     <div className="patient-top-actions">
 

@@ -1,5 +1,7 @@
 const Message = require("../models/Message");
 const User = require("../models/User");
+const Appointment = require("../models/Appointment");
+const Doctor = require("../models/Doctor");
 
 const sendMessage = async (req, res) => {
   try {
@@ -311,10 +313,137 @@ const getChatPatients = async (req, res) => {
   }
 };
 
+const getChatDoctors = async (req, res) => {
+  try {
+    const patientUserId =
+      req.user?.userId ||
+      req.user?.id ||
+      req.user?._id;
+
+    const userRole = String(req.user?.role || "")
+      .trim()
+      .toLowerCase();
+
+    if (!patientUserId) {
+      return res.status(401).json({
+        message: "User authentication information not found",
+      });
+    }
+
+    if (userRole !== "patient") {
+      return res.status(403).json({
+        message: "Only patients can access chat doctors",
+      });
+    }
+
+    // Get all appointments of the logged-in patient.
+    // We intentionally do NOT filter by appointment status.
+    // Pending, Confirmed, Completed and Rescheduled appointments
+    // can all be used for chat.
+    const appointments = await Appointment.find({
+      patient: patientUserId,
+    }).populate(
+      "doctor",
+      "fullName doctorId email phone specialization department status"
+    );
+
+    // Get unique doctors from the patient's appointments.
+    const doctorMap = new Map();
+
+    appointments.forEach((appointment) => {
+      if (appointment.doctor) {
+        doctorMap.set(
+          String(appointment.doctor._id),
+          appointment.doctor
+        );
+      }
+    });
+
+    const appointmentDoctors = Array.from(
+      doctorMap.values()
+    );
+
+    // Chat messages use User IDs, while appointments use Doctor IDs.
+    // Match doctors to their User accounts using email.
+    const doctorEmails = appointmentDoctors
+      .map((doctor) => doctor.email)
+      .filter(Boolean)
+      .map((email) => email.toLowerCase().trim());
+
+    const doctorUsers = await User.find({
+      email: {
+        $in: doctorEmails,
+      },
+      role: "doctor",
+    }).select(
+      "fullName name email role phone phoneNumber"
+    );
+
+    // Create email → User mapping.
+    const userMap = new Map();
+
+    doctorUsers.forEach((user) => {
+      if (user.email) {
+        userMap.set(
+          user.email.toLowerCase().trim(),
+          user
+        );
+      }
+    });
+
+    // Return doctors with their corresponding User ID.
+    const doctors = appointmentDoctors
+      .map((doctor) => {
+        const doctorUser = userMap.get(
+          doctor.email.toLowerCase().trim()
+        );
+
+        if (!doctorUser) {
+          return null;
+        }
+
+        return {
+          _id: doctorUser._id,
+          doctorId: doctor.doctorId,
+          fullName:
+            doctor.fullName ||
+            doctorUser.fullName ||
+            doctorUser.name ||
+            "Doctor",
+          email: doctor.email,
+          phone:
+            doctor.phone ||
+            doctorUser.phone ||
+            doctorUser.phoneNumber ||
+            "",
+          specialization:
+            doctor.specialization || "",
+          department:
+            doctor.department || "",
+          status:
+            doctor.status || "Available",
+        };
+      })
+      .filter(Boolean);
+
+    return res.status(200).json({
+      doctors,
+    });
+  } catch (error) {
+    console.error("Get chat doctors error:", error);
+
+    return res.status(500).json({
+      message: "Failed to get chat doctors",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendMessage,
   getConversation,
   getChatUsers,
   markMessagesAsRead,
   getChatPatients,
+  getChatDoctors,
 };

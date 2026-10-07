@@ -33,6 +33,7 @@ import PatientPrescriptions from "../pages/patient/PatientPrescriptions";
 import PatientLaboratory from "../pages/patient/PatientLaboratory";
 import PatientBilling from "../pages/patient/PatientBilling";
 import PatientProfile from "../pages/patient/PatientProfile";
+import PatientChat from "../pages/patient/PatientChat";
 
 import DoctorLayout from "../pages/doctor/DoctorLayout";
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
@@ -200,6 +201,11 @@ function AppRoutes() {
             <Route
               path="billing"
               element={<PatientBilling />}
+            />
+
+            <Route
+              path="chat"
+              element={<PatientChat />}
             />
 
             <Route
