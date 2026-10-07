@@ -19,15 +19,11 @@ const router = express.Router();
 router.get(
   "/conversations",
   protectRoute,
-  allowRoles("doctor", "patient"),
+  allowRoles(
+    "doctor",
+    "patient"
+  ),
   getChatUsers
-);
-
-router.get(
-  "/conversation/:userId",
-  protectRoute,
-  allowRoles("doctor", "patient"),
-  getConversation
 );
 
 router.get(
@@ -44,18 +40,35 @@ router.get(
   getChatDoctors
 );
 
+router.get(
+  "/conversation/:userId",
+  protectRoute,
+  allowRoles(
+    "doctor",
+    "patient"
+  ),
+  getConversation
+);
+
 router.post(
   "/send",
   protectRoute,
-  allowRoles("doctor", "patient"),
+  allowRoles(
+    "doctor",
+    "patient"
+  ),
   sendMessage
 );
 
 router.patch(
   "/read/:userId",
   protectRoute,
-  allowRoles("doctor", "patient"),
+  allowRoles(
+    "doctor",
+    "patient"
+  ),
   markMessagesAsRead
 );
+
 
 module.exports = router;
