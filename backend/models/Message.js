@@ -28,8 +28,33 @@ const messageSchema = new mongoose.Schema(
 
     message: {
       type: String,
-      required: true,
       trim: true,
+      default: "",
+    },
+
+    attachmentUrl: {
+      type: String,
+      default: null,
+    },
+
+    attachmentPublicId: {
+      type: String,
+      default: null,
+    },
+
+    attachmentName: {
+      type: String,
+      default: null,
+    },
+
+    attachmentType: {
+      type: String,
+      default: null,
+    },
+
+    attachmentSize: {
+      type: Number,
+      default: null,
     },
 
     isRead: {
@@ -42,6 +67,8 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-const Message = mongoose.model("Message", messageSchema);
+const Message =
+  mongoose.models.Message ||
+  mongoose.model("Message", messageSchema);
 
 module.exports = Message;

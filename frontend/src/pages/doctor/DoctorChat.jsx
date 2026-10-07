@@ -1,33 +1,44 @@
 import React, {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
 import api from "../../api/axios";
 import "./DoctorChat.css";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+const ALLOWED_FILE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/plain",
+  "text/csv",
+];
+
 const DoctorChat = () => {
   const [user, setUser] = useState(null);
 
-  const [conversations, setConversations] =
-    useState([]);
-
+  const [conversations, setConversations] = useState([]);
   const [patients, setPatients] = useState([]);
 
-  const [selectedUser, setSelectedUser] =
-    useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [messages, setMessages] = useState([]);
 
-  const [messages, setMessages] =
-    useState([]);
+  const [messageText, setMessageText] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const [messageText, setMessageText] =
-    useState("");
-
-  const [
-    loadingConversations,
-    setLoadingConversations,
-  ] = useState(true);
+  const [loadingConversations, setLoadingConversations] =
+    useState(true);
 
   const [loadingPatients, setLoadingPatients] =
     useState(true);
@@ -35,28 +46,24 @@ const DoctorChat = () => {
   const [loadingMessages, setLoadingMessages] =
     useState(false);
 
-  const [sending, setSending] =
-    useState(false);
+  const [sending, setSending] = useState(false);
 
-  const [searchText, setSearchText] =
-    useState("");
+  const [searchText, setSearchText] = useState("");
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
+
+  const fileInputRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     try {
-      const storedUser =
-        localStorage.getItem("user");
+      const storedUser = localStorage.getItem("user");
 
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error(
-        "Failed to read user:",
-        error
-      );
+      console.error("Failed to read user:", error);
     }
   }, []);
 
@@ -64,7 +71,6 @@ const DoctorChat = () => {
     user?._id ||
     user?.id ||
     user?.userId;
-
   const getUserName = (chatUser) => {
     if (!chatUser) {
       return "User";
@@ -79,8 +85,7 @@ const DoctorChat = () => {
   };
 
   const getInitials = (chatUser) => {
-    const name =
-      getUserName(chatUser);
+    const name = getUserName(chatUser);
 
     const parts = name
       .trim()
@@ -99,22 +104,18 @@ const DoctorChat = () => {
       .toUpperCase();
   };
 
-  const getUserId = (chatUser) => {
-    return (
-      chatUser?._id ||
-      chatUser?.id ||
-      chatUser?.userId
-    );
-  };
+  const getUserId = (chatUser) =>
+    chatUser?._id ||
+    chatUser?.id ||
+    chatUser?.userId;
 
   const loadConversations = async () => {
     try {
       setLoadingConversations(true);
       setError("");
 
-      const response = await api.get(
-        "/chat/conversations"
-      );
+      const response =
+        await api.get("/chat/conversations");
 
       const data =
         response.data?.conversations ||
@@ -122,9 +123,7 @@ const DoctorChat = () => {
         [];
 
       setConversations(
-        Array.isArray(data)
-          ? data
-          : []
+        Array.isArray(data) ? data : []
       );
     } catch (error) {
       console.error(
@@ -140,15 +139,13 @@ const DoctorChat = () => {
       setLoadingConversations(false);
     }
   };
-
   const loadPatients = async () => {
     try {
       setLoadingPatients(true);
       setError("");
 
-      const response = await api.get(
-        "/chat/patients"
-      );
+      const response =
+        await api.get("/chat/patients");
 
       const data =
         response.data?.patients ||
@@ -156,9 +153,7 @@ const DoctorChat = () => {
         [];
 
       setPatients(
-        Array.isArray(data)
-          ? data
-          : []
+        Array.isArray(data) ? data : []
       );
     } catch (error) {
       console.error(
@@ -188,13 +183,10 @@ const DoctorChat = () => {
 
   const getConversationUser = (
     conversation
-  ) => {
-    return (
-      conversation?.user ||
-      conversation?.otherUser ||
-      null
-    );
-  };
+  ) =>
+    conversation?.user ||
+    conversation?.otherUser ||
+    null;
 
   const conversationMap = useMemo(() => {
     const map = new Map();
@@ -210,8 +202,7 @@ const DoctorChat = () => {
           return;
         }
 
-        const id =
-          getUserId(chatUser);
+        const id = getUserId(chatUser);
 
         if (id) {
           map.set(
@@ -227,9 +218,7 @@ const DoctorChat = () => {
 
   const filteredPatients = useMemo(() => {
     const search =
-      searchText
-        .trim()
-        .toLowerCase();
+      searchText.trim().toLowerCase();
 
     if (!search) {
       return patients;
@@ -262,6 +251,20 @@ const DoctorChat = () => {
     );
   }, [patients, searchText]);
 
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }, 50);
+  };
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages]);
+
   const loadConversation = async (
     chatUser
   ) => {
@@ -281,12 +284,15 @@ const DoctorChat = () => {
 
     try {
       setSelectedUser(chatUser);
+
       setLoadingMessages(true);
+
       setError("");
 
-      const response = await api.get(
-        `/chat/conversation/${chatUserId}`
-      );
+      const response =
+        await api.get(
+          `/chat/conversation/${chatUserId}`
+        );
 
       const data =
         response.data?.messages ||
@@ -294,12 +300,9 @@ const DoctorChat = () => {
         [];
 
       setMessages(
-        Array.isArray(data)
-          ? data
-          : []
+        Array.isArray(data) ? data : []
       );
 
-      // Mark received messages as read
       try {
         await api.patch(
           `/chat/read/${chatUserId}`
@@ -358,6 +361,55 @@ const DoctorChat = () => {
     }
   };
 
+  const handleFileSelect = (event) => {
+    const file =
+      event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setError("");
+
+    if (
+      file.size > MAX_FILE_SIZE
+    ) {
+      setError(
+        "File size must be 10 MB or less."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (
+      !ALLOWED_FILE_TYPES.includes(
+        file.type
+      )
+    ) {
+      setError(
+        "This file type is not supported. Please upload an image, PDF, Word, Excel, TXT, or CSV file."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSendMessage = async (
     event
   ) => {
@@ -370,7 +422,10 @@ const DoctorChat = () => {
     const trimmedMessage =
       messageText.trim();
 
-    if (!trimmedMessage) {
+    if (
+      !trimmedMessage &&
+      !selectedFile
+    ) {
       return;
     }
 
@@ -386,15 +441,35 @@ const DoctorChat = () => {
 
     try {
       setSending(true);
+
       setError("");
+
+      const formData =
+        new FormData();
+
+      formData.append(
+        "receiverId",
+        receiverId
+      );
+
+      if (trimmedMessage) {
+        formData.append(
+          "message",
+          trimmedMessage
+        );
+      }
+
+      if (selectedFile) {
+        formData.append(
+          "file",
+          selectedFile
+        );
+      }
 
       const response =
         await api.post(
           "/chat/send",
-          {
-            receiverId,
-            message: trimmedMessage,
-          }
+          formData
         );
 
       const newMessage =
@@ -412,9 +487,11 @@ const DoctorChat = () => {
 
       setMessageText("");
 
-      // Refresh conversations so the
-      // new conversation appears in the list
+      removeSelectedFile();
+
       await loadConversations();
+
+      scrollToBottom();
     } catch (error) {
       console.error(
         "Send message error:",
@@ -442,7 +519,6 @@ const DoctorChat = () => {
       handleSendMessage(event);
     }
   };
-
   const formatMessageTime = (
     date
   ) => {
@@ -470,6 +546,81 @@ const DoctorChat = () => {
     );
   };
 
+  const isImageAttachment = (
+    message
+  ) => {
+    const type =
+      message?.attachmentType || "";
+
+    return type.startsWith(
+      "image/"
+    );
+  };
+
+  const getFileIcon = (
+    message
+  ) => {
+    const type =
+      message?.attachmentType || "";
+
+    if (
+      type === "application/pdf"
+    ) {
+      return "📕";
+    }
+
+    if (
+      type.includes("word")
+    ) {
+      return "📘";
+    }
+
+    if (
+      type.includes("excel") ||
+      type.includes("spreadsheet")
+    ) {
+      return "📗";
+    }
+
+    if (
+      type === "text/plain" ||
+      type === "text/csv"
+    ) {
+      return "📄";
+    }
+
+    if (
+      type.startsWith("image/")
+    ) {
+      return "🖼️";
+    }
+
+    return "📎";
+  };
+
+  const formatFileSize = (
+    size
+  ) => {
+    if (!size) {
+      return "";
+    }
+
+    if (size < 1024) {
+      return `${size} B`;
+    }
+
+    if (size < 1024 * 1024) {
+      return `${(
+        size / 1024
+      ).toFixed(1)} KB`;
+    }
+
+    return `${(
+      size /
+      (1024 * 1024)
+    ).toFixed(1)} MB`;
+  };
+
   const getLastMessage = (
     conversation
   ) => {
@@ -480,10 +631,19 @@ const DoctorChat = () => {
       return "No messages yet";
     }
 
-    return (
-      lastMessage.message ||
-      "No messages yet"
-    );
+    if (
+      lastMessage.message
+    ) {
+      return lastMessage.message;
+    }
+
+    if (
+      lastMessage.attachmentName
+    ) {
+      return `📎 ${lastMessage.attachmentName}`;
+    }
+
+    return "Attachment";
   };
 
   const totalUnreadCount =
@@ -501,7 +661,6 @@ const DoctorChat = () => {
         0
       );
     }, [conversations]);
-
   const handleRefresh = async () => {
     await Promise.all([
       loadConversations(),
@@ -518,14 +677,16 @@ const DoctorChat = () => {
   return (
     <div className="doctor-chat-page">
 
-      {/* PAGE HEADER */}
       <div className="doctor-chat-header">
+
         <div>
-          <h1>Patient Chat</h1>
+          <h1>
+            Patient Chat
+          </h1>
 
           <p>
-            Communicate securely with
-            your patients.
+            Communicate securely
+            with your patients.
           </p>
         </div>
 
@@ -541,6 +702,10 @@ const DoctorChat = () => {
             type="button"
             className="doctor-chat-refresh-button"
             onClick={handleRefresh}
+            disabled={
+              loadingConversations ||
+              loadingPatients
+            }
           >
             ↻ Refresh
           </button>
@@ -548,7 +713,6 @@ const DoctorChat = () => {
         </div>
       </div>
 
-      {/* ERROR */}
       {error && (
         <div className="doctor-chat-error">
           {error}
@@ -557,24 +721,29 @@ const DoctorChat = () => {
 
       <div className="doctor-chat-container">
 
-        {/* LEFT SIDEBAR */}
         <div className="doctor-chat-sidebar">
 
           <div className="doctor-chat-sidebar-header">
+
             <div>
-              <h2>Patients</h2>
+              <h2>
+                Patients
+              </h2>
 
               <span>
-                {patients.length} patient
-                {patients.length !== 1
+                {patients.length}{" "}
+                patient
+                {patients.length !==
+                1
                   ? "s"
                   : ""}
               </span>
             </div>
+
           </div>
 
-          {/* SEARCH */}
           <div className="doctor-chat-search">
+
             <input
               type="text"
               placeholder="Search patient name or email..."
@@ -585,9 +754,9 @@ const DoctorChat = () => {
                 )
               }
             />
+
           </div>
 
-          {/* PATIENT LIST */}
           <div className="doctor-chat-conversation-list">
 
             {loadingPatients ? (
@@ -607,8 +776,10 @@ const DoctorChat = () => {
                 </h3>
 
                 <p>
-                  Try searching with a
-                  different name or email.
+                  {patients.length ===
+                  0
+                    ? "Patients with appointments will appear here."
+                    : "Try searching with a different name or email."}
                 </p>
 
               </div>
@@ -627,7 +798,9 @@ const DoctorChat = () => {
 
                   const conversation =
                     conversationMap.get(
-                      String(patientId)
+                      String(
+                        patientId
+                      )
                     );
 
                   const isSelected =
@@ -700,7 +873,6 @@ const DoctorChat = () => {
           </div>
         </div>
 
-        {/* MAIN CHAT */}
         <div className="doctor-chat-main">
 
           {!selectedUser ? (
@@ -715,7 +887,7 @@ const DoctorChat = () => {
               </h2>
 
               <p>
-                Search for a patient from
+                Select a patient from
                 the left side to start
                 chatting.
               </p>
@@ -723,7 +895,7 @@ const DoctorChat = () => {
             </div>
           ) : (
             <>
-              {/* CHAT HEADER */}
+
               <div className="doctor-chat-main-header">
 
                 <div className="doctor-chat-main-user">
@@ -735,7 +907,6 @@ const DoctorChat = () => {
                   </div>
 
                   <div>
-
                     <h2>
                       {getUserName(
                         selectedUser
@@ -745,14 +916,12 @@ const DoctorChat = () => {
                     <span>
                       Patient
                     </span>
-
                   </div>
 
                 </div>
 
               </div>
 
-              {/* MESSAGES */}
               <div className="doctor-chat-messages">
 
                 {loadingMessages ? (
@@ -818,11 +987,87 @@ const DoctorChat = () => {
                             }`}
                           >
 
-                            <div className="doctor-chat-message-text">
-                              {
-                                message.message
-                              }
-                            </div>
+                            {/* TEXT */}
+
+                            {message.message && (
+                              <div className="doctor-chat-message-text">
+                                {message.message}
+                              </div>
+                            )}
+
+                            {/* IMAGE */}
+
+                            {message.attachmentUrl &&
+                              isImageAttachment(
+                                message
+                              ) && (
+                                <a
+                                  href={
+                                    message.attachmentUrl
+                                  }
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="doctor-chat-image-link"
+                                >
+                                  <img
+                                    src={
+                                      message.attachmentUrl
+                                    }
+                                    alt={
+                                      message.attachmentName ||
+                                      "Attachment"
+                                    }
+                                    className="doctor-chat-image"
+                                  />
+                                </a>
+                              )}
+
+                            {/* OTHER FILE */}
+
+                            {message.attachmentUrl &&
+                              !isImageAttachment(
+                                message
+                              ) && (
+                                <a
+                                  href={
+                                    message.attachmentUrl
+                                  }
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="doctor-chat-file"
+                                >
+
+                                  <span className="doctor-chat-file-icon">
+                                    {getFileIcon(
+                                      message
+                                    )}
+                                  </span>
+
+                                  <span className="doctor-chat-file-info">
+
+                                    <strong>
+                                      {message.attachmentName ||
+                                        "Attachment"}
+                                    </strong>
+
+                                    {message.attachmentSize && (
+                                      <small>
+                                        {formatFileSize(
+                                          message.attachmentSize
+                                        )}
+                                      </small>
+                                    )}
+
+                                  </span>
+
+                                  <span className="doctor-chat-file-open">
+                                    ↗
+                                  </span>
+
+                                </a>
+                              )}
+
+                            {/* TIME */}
 
                             <div className="doctor-chat-message-time">
                               {formatMessageTime(
@@ -838,9 +1083,55 @@ const DoctorChat = () => {
                   )
                 )}
 
+                <div
+                  ref={
+                    messagesEndRef
+                  }
+                />
+
               </div>
 
-              {/* MESSAGE INPUT */}
+
+              {selectedFile && (
+                <div className="doctor-chat-selected-file">
+
+                  <div className="doctor-chat-selected-file-icon">
+                    {selectedFile.type.startsWith(
+                      "image/"
+                    )
+                      ? "🖼️"
+                      : "📎"}
+                  </div>
+
+                  <div className="doctor-chat-selected-file-info">
+
+                    <strong>
+                      {selectedFile.name}
+                    </strong>
+
+                    <span>
+                      {formatFileSize(
+                        selectedFile.size
+                      )}
+                    </span>
+
+                  </div>
+
+                  <button
+                    type="button"
+                    className="doctor-chat-remove-file"
+                    onClick={
+                      removeSelectedFile
+                    }
+                    title="Remove file"
+                  >
+                    ×
+                  </button>
+
+                </div>
+              )}
+
+
               <form
                 className="doctor-chat-input-area"
                 onSubmit={
@@ -848,29 +1139,62 @@ const DoctorChat = () => {
                 }
               >
 
+                <input
+                  ref={
+                    fileInputRef
+                  }
+                  type="file"
+                  className="doctor-chat-hidden-file-input"
+                  accept={ALLOWED_FILE_TYPES.join(
+                    ","
+                  )}
+                  onChange={
+                    handleFileSelect
+                  }
+                />
+
+                <button
+                  type="button"
+                  className="doctor-chat-attach-button"
+                  onClick={
+                    handleAttachClick
+                  }
+                  disabled={sending}
+                  title="Attach file"
+                >
+                  📎
+                </button>
+
                 <textarea
-                  value={messageText}
-                  onChange={(
-                    event
-                  ) =>
+                  value={
+                    messageText
+                  }
+                  onChange={(event) =>
                     setMessageText(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   onKeyDown={
                     handleMessageKeyDown
                   }
-                  placeholder="Type your message..."
+                  placeholder={
+                    selectedFile
+                      ? "Add a message or send the file..."
+                      : "Type your message..."
+                  }
                   rows={1}
                   disabled={sending}
                 />
 
                 <button
                   type="submit"
+                  className="doctor-chat-send-button"
                   disabled={
                     sending ||
-                    !messageText.trim()
+                    (
+                      !messageText.trim() &&
+                      !selectedFile
+                    )
                   }
                 >
                   {sending
@@ -879,10 +1203,12 @@ const DoctorChat = () => {
                 </button>
 
               </form>
+
             </>
           )}
 
         </div>
+
       </div>
     </div>
   );

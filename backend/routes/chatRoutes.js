@@ -14,15 +14,14 @@ const {
   allowRoles,
 } = require("../middleware/authMiddleware");
 
+const upload = require("../middleware/upload");
+
 const router = express.Router();
 
 router.get(
   "/conversations",
   protectRoute,
-  allowRoles(
-    "doctor",
-    "patient"
-  ),
+  allowRoles("doctor", "patient"),
   getChatUsers
 );
 
@@ -43,32 +42,38 @@ router.get(
 router.get(
   "/conversation/:userId",
   protectRoute,
-  allowRoles(
-    "doctor",
-    "patient"
-  ),
+  allowRoles("doctor", "patient"),
   getConversation
 );
 
 router.post(
   "/send",
   protectRoute,
-  allowRoles(
-    "doctor",
-    "patient"
-  ),
+  allowRoles("doctor", "patient"),
+  (req, res, next) => {
+    upload.single("file")(req, res, (error) => {
+      if (error) {
+        console.error("CHAT FILE UPLOAD ERROR:", error);
+
+        return res.status(400).json({
+          success: false,
+          message:
+            error.message ||
+            "Failed to upload the attachment.",
+        });
+      }
+
+      next();
+    });
+  },
   sendMessage
 );
 
 router.patch(
   "/read/:userId",
   protectRoute,
-  allowRoles(
-    "doctor",
-    "patient"
-  ),
+  allowRoles("doctor", "patient"),
   markMessagesAsRead
 );
-
 
 module.exports = router;
