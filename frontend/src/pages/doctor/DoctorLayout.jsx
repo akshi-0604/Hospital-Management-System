@@ -67,11 +67,12 @@ const DoctorLayout = () => {
       <aside className="doctor-sidebar">
 
         <div className="doctor-sidebar-header">
-          
+
           <div className="doctor-logo-text">
             <h2>Hospital HMS</h2>
             <span>Doctor Portal</span>
           </div>
+
         </div>
 
         <nav className="doctor-sidebar-nav">
@@ -111,6 +112,17 @@ const DoctorLayout = () => {
             }
           >
             <span>Patients</span>
+          </NavLink>
+
+          <NavLink
+            to="/doctor/chat"
+            className={({ isActive }) =>
+              `doctor-nav-link ${
+                isActive ? "doctor-nav-link-active" : ""
+              }`
+            }
+          >
+            <span>Chat</span>
           </NavLink>
 
           <NavLink
@@ -171,6 +183,7 @@ const DoctorLayout = () => {
         </nav>
 
         <div className="doctor-sidebar-footer">
+
           <button
             type="button"
             className="doctor-logout-button"
@@ -178,6 +191,7 @@ const DoctorLayout = () => {
           >
             <span>Logout</span>
           </button>
+
         </div>
 
       </aside>
@@ -187,6 +201,7 @@ const DoctorLayout = () => {
         <header className="doctor-topbar">
 
           <div className="doctor-topbar-left">
+
             <div>
               <span className="doctor-topbar-label">
                 Doctor Portal
@@ -196,6 +211,7 @@ const DoctorLayout = () => {
                 Hospital Management System
               </h3>
             </div>
+
           </div>
 
           <div className="doctor-topbar-right">
@@ -203,6 +219,7 @@ const DoctorLayout = () => {
             <NotificationBell />
 
             <div className="doctor-user-info">
+
               <div className="doctor-user-avatar">
                 {getInitials()}
               </div>
@@ -211,6 +228,7 @@ const DoctorLayout = () => {
                 <strong>{getDisplayName()}</strong>
                 <span>Doctor</span>
               </div>
+
             </div>
 
           </div>

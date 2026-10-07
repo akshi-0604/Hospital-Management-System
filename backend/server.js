@@ -15,6 +15,7 @@ const laboratoryRoutes = require("./routes/laboratoryRoutes");
 const billingRoutes = require("./routes/billingRoutes");
 
 const notificationRoutes = require("./routes/notificationRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
 
@@ -118,6 +119,7 @@ app.use(
 );
 
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

@@ -43,6 +43,7 @@ import DoctorPrescriptions from "../pages/doctor/DoctorPrescriptions";
 import DoctorLaboratory from "../pages/doctor/DoctorLaboratory";
 import DoctorProfile from "../pages/doctor/DoctorProfile";
 import DoctorQuickActions from "../pages/doctor/DoctorQuickActions";
+import DoctorChat from "../pages/doctor/DoctorChat";
 
 import ReceptionistDashboard from "../pages/receptionist/ReceptionistDashboard";
 
@@ -247,6 +248,11 @@ function AppRoutes() {
             <Route
               path="patients"
               element={<DoctorPatients />}
+            />
+
+            <Route
+              path="chat"
+              element={<DoctorChat />}
             />
 
             <Route
